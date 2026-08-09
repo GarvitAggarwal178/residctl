@@ -1,0 +1,248 @@
+=== machine exclusivity check (before) ===
+ 13:19:07 up  1:18,  1 user,  load average: 0.02, 0.03, 0.00
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           7  0.2  0.0   3576  2492 hvc0     Sl+  12:00   0:09 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root        5856  0.0  0.1  35428 12424 ?        Ss   12:11   0:01 /usr/lib/systemd/systemd-udevd
+root       11292  0.0  0.1 1857908 15068 ?       Ssl  13:13   0:00 /usr/libexec/wsl-pro-service
+root           1  0.0  0.1  24248 15376 ?        Ss   12:00   0:00 /sbin/init
+root        5814  0.0  0.1  33988 13132 ?        S<s  12:11   0:00 /usr/lib/systemd/systemd-journald
+root        5944  0.0  0.3  44192 29876 ?        Ss   12:11   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root        5989  0.0  0.4 123464 32716 ?        Ssl  12:11   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+
+############################################################
+# ratio=0.25 budget_bytes=4194304 memory.max=8388608
+############################################################
+--- ratio=0.25 arm=A detail=mmap_normal_off rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=40 wall_ns=100593353 (0.101s) touches/sec=397.6
+  majflt_delta=30
+  io_read_bytes_delta=133709824
+  pgscan_delta=1114058 pgsteal_delta=32423 workingset_refault_file_delta=28550
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=100593353,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=30,pgscan_delta=1114058,pgsteal_delta=32423
+PASS
+--- ratio=0.25 arm=A detail=mmap_random_off rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=40 wall_ns=1900824 (0.002s) touches/sec=21043.5
+  majflt_delta=8
+  io_read_bytes_delta=32768
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=0
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=1900824,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=8,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.25 arm=A detail=mmap_sequential_off rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=40 wall_ns=85564858 (0.086s) touches/sec=467.5
+  majflt_delta=35
+  io_read_bytes_delta=135299072
+  pgscan_delta=727114 pgsteal_delta=32797 workingset_refault_file_delta=28936
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=85564858,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=35,pgscan_delta=727114,pgsteal_delta=32797
+PASS
+arm A best mode: random (21043.5 touches/sec)
+--- ratio=0.25 arm=B detail=mmap_random_on rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=random hints=on passes=5 touches=40 wall_ns=4434101 (0.004s) touches/sec=9021.0
+  majflt_delta=33
+  io_read_bytes_delta=135168
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=0
+ARM_CSV,policy=mmap_random_on,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=4434101,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=33,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.25 arm=C detail=lru_off rc=0 ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=4194304 (2.0 chunks) policy=lru prefetch=off
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=67726380 (0.068s) touches/sec=590.6
+  resident_bytes=4194304 budget_bytes=4194304
+  fault_missing=40 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=40 evictions=38 bytes_punched=79691776 infeasible=0
+  handler_latency: count=40 min_ns=1448362 p50_ns=2097151 p99_ns=4194303 max_ns=3384347
+  queue_depth_high_water=1
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=4194304,touches=40,wall_ns=67726380,absent_handled=40,evictions=38,infeasible=0,prefetches=0
+PASS
+--- ratio=0.25 arm=D detail=layer_order_off rc=0 ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=4194304 (2.0 chunks) policy=layer_order prefetch=off
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=59203513 (0.059s) touches/sec=675.6
+  resident_bytes=4194304 budget_bytes=4194304
+  fault_missing=36 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=36 evictions=34 bytes_punched=71303168 infeasible=0
+  handler_latency: count=36 min_ns=1350453 p50_ns=2097151 p99_ns=4194303 max_ns=3209185
+  queue_depth_high_water=1
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=4194304,touches=40,wall_ns=59203513,absent_handled=36,evictions=34,infeasible=0,prefetches=0
+PASS
+--- ratio=0.25 arm=E detail=layer_order_on rc=0 ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=4194304 (2.0 chunks) policy=layer_order prefetch=on
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=79438702 (0.079s) touches/sec=503.5
+  resident_bytes=4194304 budget_bytes=4194304
+  fault_missing=28 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=28 evictions=44 bytes_punched=92274688 infeasible=0
+  handler_latency: count=28 min_ns=1509832 p50_ns=4194303 p99_ns=4194303 max_ns=3866027
+  queue_depth_high_water=8
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=4194304,touches=40,wall_ns=79438702,absent_handled=28,evictions=44,infeasible=0,prefetches=18
+PASS
+--- ratio=0.25 arm=OPT ---
+loaded 36 genuine-fault references from /root/residctl/scratch/harness_arm_d_ratio_0.25.trace (skipped 0 prefetched)
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_arm_d_ratio_0.25.trace chunk_size=2097152 budget_bytes=4194304 capacity=2 chunks
+  total_refs=36 minimum_misses=31 minimum_bytes_fetched=65011712 hit_rate=0.1389
+
+############################################################
+# ratio=0.5 budget_bytes=8388608 memory.max=12582912
+############################################################
+--- ratio=0.5 arm=A detail=mmap_normal_off rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=40 wall_ns=8575942 (0.009s) touches/sec=4664.2
+  majflt_delta=1
+  io_read_bytes_delta=16777216
+  pgscan_delta=2975 pgsteal_delta=2860 workingset_refault_file_delta=0
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=8575942,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=1,pgscan_delta=2975,pgsteal_delta=2860
+PASS
+--- ratio=0.5 arm=A detail=mmap_random_off rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=40 wall_ns=1465552 (0.001s) touches/sec=27293.5
+  majflt_delta=8
+  io_read_bytes_delta=32768
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=0
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=1465552,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=8,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.5 arm=A detail=mmap_sequential_off rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=40 wall_ns=36303251 (0.036s) touches/sec=1101.8
+  majflt_delta=10
+  io_read_bytes_delta=84152320
+  pgscan_delta=36778 pgsteal_delta=19295 workingset_refault_file_delta=16449
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=36303251,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=10,pgscan_delta=36778,pgsteal_delta=19295
+PASS
+arm A best mode: random (27293.5 touches/sec)
+--- ratio=0.5 arm=B detail=mmap_random_on rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=random hints=on passes=5 touches=40 wall_ns=9810023 (0.010s) touches/sec=4077.5
+  majflt_delta=32
+  io_read_bytes_delta=131072
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=0
+ARM_CSV,policy=mmap_random_on,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=9810023,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=32,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.5 arm=C detail=lru_off rc=0 ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=8388608 (4.0 chunks) policy=lru prefetch=off
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=67436431 (0.067s) touches/sec=593.2
+  resident_bytes=8388608 budget_bytes=8388608
+  fault_missing=40 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=40 evictions=36 bytes_punched=75497472 infeasible=0
+  handler_latency: count=40 min_ns=1335415 p50_ns=2097151 p99_ns=2097151 max_ns=2091762
+  queue_depth_high_water=1
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=8388608,touches=40,wall_ns=67436431,absent_handled=40,evictions=36,infeasible=0,prefetches=0
+PASS
+--- ratio=0.5 arm=D detail=layer_order_off rc=0 ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=8388608 (4.0 chunks) policy=layer_order prefetch=off
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=45283039 (0.045s) touches/sec=883.3
+  resident_bytes=8388608 budget_bytes=8388608
+  fault_missing=29 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=29 evictions=25 bytes_punched=52428800 infeasible=0
+  handler_latency: count=29 min_ns=1280462 p50_ns=2097151 p99_ns=2097151 max_ns=2263744
+  queue_depth_high_water=2
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=8388608,touches=40,wall_ns=45283039,absent_handled=29,evictions=25,infeasible=0,prefetches=0
+PASS
+--- ratio=0.5 arm=E detail=layer_order_on rc=0 ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=8388608 (4.0 chunks) policy=layer_order prefetch=on
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=50953175 (0.051s) touches/sec=785.0
+  resident_bytes=8388608 budget_bytes=8388608
+  fault_missing=23 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=23 evictions=28 bytes_punched=58720256 infeasible=0
+  handler_latency: count=23 min_ns=1340431 p50_ns=2097151 p99_ns=4194303 max_ns=3256609
+  queue_depth_high_water=3
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=8388608,touches=40,wall_ns=50953175,absent_handled=23,evictions=28,infeasible=0,prefetches=9
+PASS
+--- ratio=0.5 arm=OPT ---
+loaded 29 genuine-fault references from /root/residctl/scratch/harness_arm_d_ratio_0.5.trace (skipped 0 prefetched)
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_arm_d_ratio_0.5.trace chunk_size=2097152 budget_bytes=8388608 capacity=4 chunks
+  total_refs=29 minimum_misses=17 minimum_bytes_fetched=35651584 hit_rate=0.4138
+
+############################################################
+# ratio=0.75 budget_bytes=12582912 memory.max=16777216
+############################################################
+--- ratio=0.75 arm=A detail=mmap_normal_off rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=40 wall_ns=7629523 (0.008s) touches/sec=5242.8
+  majflt_delta=1
+  io_read_bytes_delta=16777216
+  pgscan_delta=477 pgsteal_delta=457 workingset_refault_file_delta=0
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=7629523,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=1,pgscan_delta=477,pgsteal_delta=457
+PASS
+--- ratio=0.75 arm=A detail=mmap_random_off rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=40 wall_ns=1312417 (0.001s) touches/sec=30478.1
+  majflt_delta=8
+  io_read_bytes_delta=32768
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=0
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=1312417,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=8,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.75 arm=A detail=mmap_sequential_off rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=40 wall_ns=34940344 (0.035s) touches/sec=1144.8
+  majflt_delta=6
+  io_read_bytes_delta=83918848
+  pgscan_delta=16911 pgsteal_delta=16901 workingset_refault_file_delta=16392
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=34940344,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=6,pgscan_delta=16911,pgsteal_delta=16901
+PASS
+arm A best mode: random (30478.1 touches/sec)
+--- ratio=0.75 arm=B detail=mmap_random_on rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=random hints=on passes=5 touches=40 wall_ns=8179910 (0.008s) touches/sec=4890.0
+  majflt_delta=32
+  io_read_bytes_delta=131072
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=0
+ARM_CSV,policy=mmap_random_on,prefetch=n/a,budget_bytes=n/a,touches=40,wall_ns=8179910,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,majflt_delta=32,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.75 arm=C detail=lru_off rc=0 ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=12582912 (6.0 chunks) policy=lru prefetch=off
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=64777292 (0.065s) touches/sec=617.5
+  resident_bytes=12582912 budget_bytes=12582912
+  fault_missing=40 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=40 evictions=34 bytes_punched=71303168 infeasible=0
+  handler_latency: count=40 min_ns=1323278 p50_ns=2097151 p99_ns=2097151 max_ns=3122985
+  queue_depth_high_water=1
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=12582912,touches=40,wall_ns=64777292,absent_handled=40,evictions=34,infeasible=0,prefetches=0
+PASS
+--- ratio=0.75 arm=D detail=layer_order_off rc=0 ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=12582912 (6.0 chunks) policy=layer_order prefetch=off
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=35523267 (0.036s) touches/sec=1126.0
+  resident_bytes=12582912 budget_bytes=12582912
+  fault_missing=21 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=21 evictions=15 bytes_punched=31457280 infeasible=0
+  handler_latency: count=21 min_ns=1348411 p50_ns=2097151 p99_ns=4194303 max_ns=2588588
+  queue_depth_high_water=2
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=12582912,touches=40,wall_ns=35523267,absent_handled=21,evictions=15,infeasible=0,prefetches=0
+PASS
+--- ratio=0.75 arm=E detail=layer_order_on rc=0 ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=12582912 (6.0 chunks) policy=layer_order prefetch=on
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=38281624 (0.038s) touches/sec=1044.9
+  resident_bytes=12582912 budget_bytes=12582912
+  fault_missing=19 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=19 evictions=20 bytes_punched=41943040 infeasible=0
+  handler_latency: count=19 min_ns=1334314 p50_ns=2097151 p99_ns=4194303 max_ns=3091090
+  queue_depth_high_water=1
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=12582912,touches=40,wall_ns=38281624,absent_handled=19,evictions=20,infeasible=0,prefetches=7
+PASS
+--- ratio=0.75 arm=OPT ---
+loaded 21 genuine-fault references from /root/residctl/scratch/harness_arm_d_ratio_0.75.trace (skipped 0 prefetched)
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_arm_d_ratio_0.75.trace chunk_size=2097152 budget_bytes=12582912 capacity=6 chunks
+  total_refs=21 minimum_misses=9 minimum_bytes_fetched=18874368 hit_rate=0.5714
+
+=== machine exclusivity check (after) ===
+ 13:19:12 up  1:18,  1 user,  load average: 0.02, 0.03, 0.00
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       13068  1.4  0.0   5080  3844 pts/0    S    13:19   0:00 bash /root/residctl/src/run_item10_harness.sh
+root           7  0.2  0.0   3576  2492 hvc0     Sl+  12:00   0:09 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root        5856  0.0  0.1  35428 12424 ?        Ss   12:11   0:01 /usr/lib/systemd/systemd-udevd
+root       11292  0.0  0.1 1857908 14444 ?       Ssl  13:13   0:00 /usr/libexec/wsl-pro-service
+root           1  0.0  0.1  24248 15376 ?        Ss   12:00   0:00 /sbin/init
+root        5814  0.0  0.1  33988 13136 ?        S<s  12:11   0:00 /usr/lib/systemd/systemd-journald
+root        5944  0.0  0.3  44192 29876 ?        Ss   12:11   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+
+=== sweep complete, results in /root/residctl/results/harness_sweep.csv ===

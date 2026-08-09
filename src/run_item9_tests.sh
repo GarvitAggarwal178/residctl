@@ -32,7 +32,7 @@ echo 0 > "$CGROUP/memory.swap.max"
 rm -f "$TRACE"
 
 bash -c 'echo $BASHPID > "'"$CGROUP"'/cgroup.procs"; exec "$@"' -- \
-  "$REPLAY" "$CGROUP" "$MODEL" 16777216 2097152 6291456 5 layer_order "$TRACE" 2>&1 | tee -a "$OUT"
+  "$REPLAY" "$CGROUP" "$MODEL" 16777216 2097152 6291456 5 layer_order on "$TRACE" 2>&1 | tee -a "$OUT"
 replay_rc=${PIPESTATUS[0]}
 
 procs=$(cat "$CGROUP/cgroup.procs" 2>/dev/null)

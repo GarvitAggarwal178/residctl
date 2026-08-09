@@ -8,14 +8,15 @@
 SELFTEST PASS
 selftest exit: 0
 --- generate a real trace via replay_main (layer_order, same scenario as items 6-8) ---
-region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=6291456 (3.0 chunks) policy=layer_order
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=6291456 (3.0 chunks) policy=layer_order prefetch=on
 REPLAY SUMMARY
-  passes=5 touches=40 wall_ns=78218785 (0.078s) touches/sec=511.4
+  passes=5 touches=40 wall_ns=71504413 (0.072s) touches/sec=559.4
   resident_bytes=6291456 budget_bytes=6291456
   fault_missing=28 fault_minor=0 dedup_resident=0 dedup_fetching=0
   absent_handled=28 evictions=38 bytes_punched=79691776 infeasible=0
-  handler_latency: count=28 min_ns=1447866 p50_ns=4194303 p99_ns=4194303 max_ns=4138200
+  handler_latency: count=28 min_ns=1486648 p50_ns=2097151 p99_ns=4194303 max_ns=3830076
   queue_depth_high_water=6
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=6291456,touches=40,wall_ns=71504413,absent_handled=28,evictions=38,infeasible=0,prefetches=13
 PASS
 --- run belady_main against that trace (chunk_size=2097152, budget=6291456) ---
 loaded 28 genuine-fault references from /root/residctl/scratch/item9_trace.bin (skipped 13 prefetched)

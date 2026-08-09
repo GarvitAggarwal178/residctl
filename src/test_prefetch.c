@@ -53,6 +53,11 @@ static int run_scenario(const char *cgroup_path, const char *model_path, policy_
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
     g_r.policy = policy;
+    // Enabled explicitly in both scenarios (not just the layer_order one):
+    // this makes the lru case a stronger test too -- it proves
+    // prefetch_enabled=true alone doesn't force prefetching without a
+    // policy that actually predicts something (predict_next==-1 for lru).
+    g_r.prefetch_enabled = true;
 
     volatile sig_atomic_t stop = 0;
     pthread_t pager_thread;

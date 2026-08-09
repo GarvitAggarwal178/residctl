@@ -5,9 +5,14 @@
 // integration runs long").
 //
 // Usage: replay_main <cgroup_path> <model_path> <region_len> <chunk_size>
-//                     <budget_bytes> <n_passes> [policy] [trace_out_path]
+//                     <budget_bytes> <n_passes> [policy] [prefetch] [trace_out_path]
 //   policy: "default" (no policy set -- lowest-index fallback, budget.c),
 //           "lru", or "layer_order". Defaults to "default".
+//   prefetch: "on" or "off" (item 8's prefetch_enabled). Defaults to "off".
+//             Distinguishes §11 arm D (layer_order, prefetch off) from
+//             arm E (layer_order, prefetch on) -- before this flag existed,
+//             prefetch fired unconditionally whenever a policy was set, so
+//             D and E were the same run. See CLAUDE.md item 10.
 #define _GNU_SOURCE
 #include "region.h"
 #include "pager.h"
@@ -32,10 +37,10 @@ static void *pager_trampoline(void *argp) {
 }
 
 int main(int argc, char **argv) {
-    if (argc < 7 || argc > 9) {
+    if (argc < 7 || argc > 10) {
         fprintf(stderr,
                 "usage: %s <cgroup_path> <model_path> <region_len> <chunk_size> "
-                "<budget_bytes> <n_passes> [policy] [trace_out_path]\n", argv[0]);
+                "<budget_bytes> <n_passes> [policy] [prefetch] [trace_out_path]\n", argv[0]);
         return 2;
     }
     const char *cgroup_path = argv[1];
@@ -45,7 +50,13 @@ int main(int argc, char **argv) {
     uint64_t budget_bytes = strtoull(argv[5], NULL, 10);
     uint32_t n_passes = (uint32_t)strtoul(argv[6], NULL, 10);
     const char *policy_name = (argc >= 8) ? argv[7] : "default";
-    const char *trace_path = (argc == 9) ? argv[8] : NULL;
+    const char *prefetch_arg = (argc >= 9) ? argv[8] : "off";
+    const char *trace_path = (argc == 10) ? argv[9] : NULL;
+
+    bool prefetch_on;
+    if (strcmp(prefetch_arg, "on") == 0) prefetch_on = true;
+    else if (strcmp(prefetch_arg, "off") == 0) prefetch_on = false;
+    else { fprintf(stderr, "prefetch must be 'on' or 'off', got '%s'\n", prefetch_arg); return 2; }
 
     region_config_t cfg = {
         .region_len = region_len,
@@ -67,6 +78,7 @@ int main(int argc, char **argv) {
         return 2;
     }
     g_r.policy = policy;
+    g_r.prefetch_enabled = prefetch_on;
 
     trace_t *trace = NULL;
     if (trace_path) {
@@ -77,10 +89,10 @@ int main(int argc, char **argv) {
     metrics_init(&metrics);
     g_r.metrics = &metrics;
 
-    printf("region_startup OK: n_chunks=%u chunk_size=%llu budget_bytes=%llu (%.1f chunks) policy=%s\n",
+    printf("region_startup OK: n_chunks=%u chunk_size=%llu budget_bytes=%llu (%.1f chunks) policy=%s prefetch=%s\n",
            g_r.n_chunks, (unsigned long long)g_r.chunks[0].len,
            (unsigned long long)g_r.budget_bytes,
-           (double)g_r.budget_bytes / (double)g_r.chunks[0].len, policy_name);
+           (double)g_r.budget_bytes / (double)g_r.chunks[0].len, policy_name, prefetch_arg);
 
     volatile sig_atomic_t stop = 0;
     pthread_t pager_thread;
@@ -113,6 +125,14 @@ int main(int argc, char **argv) {
            (unsigned long long)latency_hist_percentile_ns(&metrics.handler_latency, 0.99),
            (unsigned long long)metrics.handler_latency.max_ns);
     printf("  queue_depth_high_water=%u\n", metrics.queue_depth_high_water);
+
+    // Machine-parseable line for the item 10 harness's sensitivity table.
+    printf("ARM_CSV,policy=%s,prefetch=%s,budget_bytes=%llu,touches=%u,wall_ns=%llu,"
+           "absent_handled=%llu,evictions=%llu,infeasible=%llu,prefetches=%llu\n",
+           policy_name, prefetch_arg, (unsigned long long)budget_bytes, res.n_touches,
+           (unsigned long long)res.wall_ns, (unsigned long long)g_r.stat_absent_handled,
+           (unsigned long long)g_r.stat_evictions, (unsigned long long)g_r.stat_infeasible,
+           (unsigned long long)g_r.stat_prefetches);
 
     if (g_r.resident_bytes > g_r.budget_bytes) {
         fprintf(stderr, "FAIL: resident_bytes exceeded budget_bytes -- I-4/§7 violated\n");

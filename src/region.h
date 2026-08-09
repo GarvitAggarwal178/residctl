@@ -45,6 +45,7 @@ typedef struct {
     uint64_t fault_seq;        // monotonic, for LRU and trace ordering
     uint64_t known_overhead_bytes; // pager-owned shmem charges outside chunk data (§7 note)
     policy_t *policy;   // NULL until item 7
+    bool prefetch_enabled; // item 8's maybe_prefetch() only runs when this is true; default false
     trace_t *trace;     // NULL unless the caller opens one (trace_open()) and assigns it
     metrics_t *metrics; // NULL unless the caller inits one (metrics_init()) and assigns it
     char cgroup_path[256];

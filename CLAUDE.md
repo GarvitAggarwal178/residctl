@@ -44,7 +44,7 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 | 7 | `lru` and `layer_order` policies (§8) | 2h | done |
 | 8 | Prefetch (§6.3) | 1h | done (inline, not a separate thread -- see note) |
 | 9 | Belady solver (§10) | 2h | done (spec's own sanity formula turned out wrong -- see note) |
-| 10 | Harness, arms, sweep (§11) | 3h | not started |
+| 10 | Harness, arms, sweep (§11) | 3h | done -- see results/HARNESS_REPORT.md |
 | 11 | llama.cpp integration (separate spec, stretch) | 7h | out of scope for now |
 
 The replay driver (item 6) comes before any engine integration so there is
@@ -66,6 +66,53 @@ reported, not silently fixed by adding a test-only delay hook into
 production fetch code. §13's T-3 (sustained concurrent storm with real
 eviction cycling, once item 4 exists) is the right place to actually confirm
 this path fires.
+
+**§13 correctness harness (T-1..T-5) -- run and PASSED before item 10's
+performance numbers were trusted, per the spec's own ordering.** T-1 (full
+16 MiB region read through mapping A under a 25% budget, every 4096-byte
+sample checked, all three policies): 0 mismatches. T-2 (1000-iteration
+ping-pong punch-refetch cycle): 0 mismatches, 999 evictions as expected.
+T-3 (8 threads, tight 2-chunk budget, 60 real seconds, `layer_order` +
+prefetch under contention): 104,314 touches, 0 mismatches, resident_bytes
+never exceeded budget, no hang, no abort -- ran under `timeout` deliberately
+so a real hang fails loud. T-4 (arbitrary 15-touch non-monotonic sequence):
+`memory.stat[shmem]` matched `resident_bytes + known_overhead` EXACTLY (not
+just within reconcile()'s one-chunk operational tolerance). T-5 is item 9's
+`belady_main --selftest`. **Notable non-finding:** even T-3's 60s of heavy
+8-thread contention produced `dedup_resident=0, dedup_fetching=0` -- the
+same gap items 2 and 6 already disclosed (the RESIDENT/FETCHING dedup
+branches in `handle_fault()` have still never been observed to fire) is now
+backed by much stronger negative evidence and is being accepted as a known,
+understood limitation for v1 rather than chased further.
+
+**Item 10 note -- full report in `results/HARNESS_REPORT.md`.** Two real
+methodology bugs were caught and fixed while building the harness, not
+during a later review:
+1. Arms A/B (mmap baseline) initially showed microsecond wall-times and
+   zero `pgscan`/`pgsteal` at every budget ratio, including the tightest.
+   Cause: `pattern_16m.bin` had been touched repeatedly by items 1-9's
+   tests all session and sat warm in the kernel's shared page cache, so
+   arm A/B were measuring page-cache-hit speed regardless of `memory.max`
+   -- defeating the entire point of a baseline arm. Fixed by
+   `sync; echo 3 > /proc/sys/vm/drop_caches` before every A/B run.
+2. OPT (item 9's solver) is computed over arm D's trace specifically.
+   Comparing OPT numerically against arm E (which uses prefetch) is
+   invalid -- prefetch changes what counts as "demand" by satisfying some
+   references before they'd fault, so E can legitimately beat OPT-for-D
+   without contradiction. The only relationship that must hold is
+   OPT <= D, verified at all three ratios (31<=36, 17<=29, 9<=21).
+
+**Read `results/HARNESS_REPORT.md` before drawing any conclusion from this
+data, especially the "what NOT to conclude" section** -- the wall-clock
+comparison at this test's scale (16 MiB region, 2 MiB chunks, chosen for
+fast iteration all session, not for realistic LLM weight sizes) makes the
+kernel's native mmap path look faster than the pager, which would be the
+wrong takeaway: per-fetch fixed overhead (uffd syscalls, an `ensure_budget`
+memory.stat read on every fetch, ioctls) dominates at 2 MiB chunks and is
+exactly what §2's real spike measurements (150 MiB chunks) showed becomes
+negligible at realistic scale. The residency-CONTROL result (fault-count
+ordering E<D<C, OPT<=D holding at every ratio, LRU thrashing at 100% miss
+matching item 7) is what this harness run actually demonstrates.
 
 **Item 9 note -- the spec's own required sanity check turned out to be
 wrong, investigated rather than silently loosened or silently trusted.**
