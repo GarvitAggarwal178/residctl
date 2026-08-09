@@ -1,0 +1,7 @@
+region_startup OK: n_chunks=8
+stat_absent_handled=8 trace records_written(before close, not re-readable)=n/a
+metrics: handler_latency count=8 min_ns=1839524 max_ns=3946766 p50_ns=4194303 p99_ns=4194303 queue_depth_high_water=1
+trace file: 8 records read back
+PASS
+exit code: 0
+RESULT: PASS

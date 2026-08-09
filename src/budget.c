@@ -1,6 +1,7 @@
 // budget.c -- MECHANISM_SPEC.md §7.
 #define _GNU_SOURCE
 #include "budget.h"
+#include "cgroup_stat.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,27 +20,18 @@ static void budget_fail(const char *step, const char *fmt, ...) {
     abort();
 }
 
+// Single-buffer read (§9's lesson: separate fopen()s per field can race
+// live counters -- see SPIKE_ADDENDUM2.md Step 1). reconcile() only needs
+// one field today, but goes through the shared snapshot reader so there is
+// exactly one implementation of "read memory.stat safely" in this codebase.
 static uint64_t read_memory_stat_shmem(const char *cgroup_path) {
-    char path[300];
-    snprintf(path, sizeof path, "%s/memory.stat", cgroup_path);
-    FILE *f = fopen(path, "r");
-    if (!f)
-        budget_fail("reconcile", "cannot open %s: %s", path, strerror(errno));
-
-    char line[512];
-    long long val = -1;
-    while (fgets(line, sizeof line, f)) {
-        char key[128];
-        unsigned long long v;
-        if (sscanf(line, "%127s %llu", key, &v) == 2 && strcmp(key, "shmem") == 0) {
-            val = (long long)v;
-            break;
-        }
-    }
-    fclose(f);
-    if (val < 0)
-        budget_fail("reconcile", "'shmem' field not found in %s", path);
-    return (uint64_t)val;
+    cgroup_stat_snapshot_t snap;
+    if (cgroup_stat_snapshot_read(cgroup_path, "memory.stat", &snap) != 0)
+        budget_fail("reconcile", "cannot read %s/memory.stat: %s", cgroup_path, strerror(errno));
+    uint64_t val;
+    if (!cgroup_stat_snapshot_field(&snap, "shmem", &val))
+        budget_fail("reconcile", "'shmem' field not found in %s/memory.stat", cgroup_path);
+    return val;
 }
 
 void reconcile(region_t *r) {

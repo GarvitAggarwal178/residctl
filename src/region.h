@@ -22,10 +22,13 @@ typedef struct {
     pthread_cond_t cv;        // for waiters on FETCHING (item 2)
 } chunk_t;
 
-// Forward-declared; defined by later build-order items. NULL until then.
-typedef struct policy policy_t;
-typedef struct trace trace_t;
-typedef struct metrics metrics_t;
+// Forward-declared; concrete definitions live in trace.h / metrics.h / a
+// future policy.h, kept out of this header to avoid a circular include -- a
+// .c file that needs the concrete types includes those headers directly
+// alongside this one (pager.c does, for trace_t and metrics_t).
+typedef struct policy policy_t;   // NULL until item 7
+typedef struct trace trace_t;     // caller-assigned after region_startup(); NULL if untraced
+typedef struct metrics metrics_t; // caller-assigned after region_startup(); NULL if unmeasured
 
 typedef struct {
     int memfd;
@@ -42,14 +45,16 @@ typedef struct {
     uint64_t fault_seq;        // monotonic, for LRU and trace ordering
     uint64_t known_overhead_bytes; // pager-owned shmem charges outside chunk data (§7 note)
     policy_t *policy;   // NULL until item 7
-    trace_t *trace;     // NULL until item 5
-    metrics_t *metrics; // NULL until item 5
+    trace_t *trace;     // NULL unless the caller opens one (trace_open()) and assigns it
+    metrics_t *metrics; // NULL unless the caller inits one (metrics_init()) and assigns it
     char cgroup_path[256];
 
-    // Bare counters standing in for item 5's real metrics_t. Recorded per
-    // I-8 ("record type as a metric; do not branch on it") so the handler
-    // loop is honestly testable before item 5 exists. Item 5 replaces these
-    // with the real metrics_t and this block goes away.
+    // Bare fault/dedup/eviction counters. These satisfy §9's "treatment-arm
+    // only" list directly (fault count by type, dedup hit count, eviction
+    // count + bytes punched); item 5 added the pieces these didn't cover
+    // (trace_t, metrics_t's latency histogram + queue depth). Kept as plain
+    // fields rather than folded into metrics_t because they're needed even
+    // when metrics is NULL (items 2-4's own tests read them directly).
     uint64_t stat_fault_missing;
     uint64_t stat_fault_minor;
     uint64_t stat_dedup_resident;

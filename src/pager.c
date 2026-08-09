@@ -3,11 +3,14 @@
 #include "pager.h"
 #include "fetch.h"
 #include "budget.h"
+#include "trace.h"
+#include "metrics.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 #include <poll.h>
 #include <sys/ioctl.h>
 #include <linux/userfaultfd.h>
@@ -29,10 +32,19 @@ chunk_t *pager_lookup(region_t *r, uint64_t rel_off) {
     return NULL;
 }
 
-static void handle_absent(region_t *r, chunk_t *c) {
+static uint64_t now_ns(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
+}
+
+static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
+    uint64_t t_start = now_ns();
+
     c->state = CHUNK_FETCHING;
     c->last_fault_seq = ++r->fault_seq;
-    // trace.record(...) -- item 5, trace is NULL for now
+    if (r->trace)
+        trace_record(r->trace, r->fault_seq, (uint32_t)(c - r->chunks), trace_fault_type, 0 /* was_prefetched, item 8 */);
     // policy->on_fault(...) -- item 7, policy is NULL for now
     if (ensure_budget(r, c->len) != 0) {
         // Infeasible at this budget (§7/§11's censoring rule, not a bug --
@@ -51,6 +63,9 @@ static void handle_absent(region_t *r, chunk_t *c) {
     // policy->on_resident(...) -- item 7
     // maybe_prefetch(...) -- item 8
     r->stat_absent_handled++;
+
+    if (r->metrics)
+        latency_hist_record(&r->metrics->handler_latency, now_ns() - t_start);
 }
 
 static void wake_range(region_t *r, chunk_t *c) {
@@ -69,6 +84,7 @@ static void wake_range(region_t *r, chunk_t *c) {
 // handle() from §5's pseudocode. Dispatches on chunk STATE, never on fault
 // type (I-8) -- the fault type is only ever recorded as a metric.
 static void handle_fault(region_t *r, uint64_t fault_addr, bool was_minor) {
+    uint8_t trace_fault_type = was_minor ? TRACE_FAULT_MINOR : TRACE_FAULT_MISSING;
     if (was_minor) r->stat_fault_minor++;
     else r->stat_fault_missing++;
 
@@ -92,7 +108,7 @@ static void handle_fault(region_t *r, uint64_t fault_addr, bool was_minor) {
             r->stat_dedup_fetching++;
             break;
         case CHUNK_ABSENT:
-            handle_absent(r, c);
+            handle_absent(r, c, trace_fault_type);
             break;
     }
     pthread_mutex_unlock(&c->lock);
@@ -110,6 +126,7 @@ void pager_run(region_t *r, volatile sig_atomic_t *stop, int poll_timeout_ms) {
         }
         if (pr == 0) continue; // timeout, re-check *stop
 
+        uint32_t drained_this_batch = 0;
         for (;;) {
             struct uffd_msg msg;
             ssize_t n = read(r->uffd, &msg, sizeof msg);
@@ -129,6 +146,9 @@ void pager_run(region_t *r, volatile sig_atomic_t *stop, int poll_timeout_ms) {
             }
             bool was_minor = (msg.arg.pagefault.flags & UFFD_PAGEFAULT_FLAG_MINOR) != 0;
             handle_fault(r, msg.arg.pagefault.address, was_minor);
+            drained_this_batch++;
         }
+        if (r->metrics && drained_this_batch > r->metrics->queue_depth_high_water)
+            r->metrics->queue_depth_high_water = drained_this_batch;
     }
 }

@@ -39,7 +39,7 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 | 2 | Handler loop + chunk table + state machine (§3, §5) | 4h | done (see note) |
 | 3 | Fetch path with alignment (§6.1–6.2) | 3h | done, built together with item 2 |
 | 4 | Eviction + budget + reconcile (§7) | 2h | done (temporary victim selector, see note) |
-| 5 | Trace recorder + metrics (§9) | 2h | not started |
+| 5 | Trace recorder + metrics (§9) | 2h | done |
 | 6 | Trace-replay driver | 2h | not started |
 | 7 | `lru` and `layer_order` policies (§8) | 2h | not started |
 | 8 | Prefetch (§6.3) | 1h | not started |
@@ -66,6 +66,19 @@ reported, not silently fixed by adding a test-only delay hook into
 production fetch code. §13's T-3 (sustained concurrent storm with real
 eviction cycling, once item 4 exists) is the right place to actually confirm
 this path fires.
+
+**Item 5 note:** the region_t bare counters from items 2-4 (fault/dedup/
+eviction) were kept as-is rather than folded into `metrics_t` -- they're
+needed by items 2-4's own tests even when `metrics` is NULL. `metrics_t`
+(`metrics.c`) adds what those didn't cover: a handler-latency histogram
+(plain log2-bucketed, explicitly NOT a real HDR histogram library -- see the
+comment in `metrics.h`) and queue-depth high-water. `trace.c` implements
+the binary trace writer; `cgroup_stat.c` is the shared single-buffer
+cgroup-file reader §9 asks for, and `reconcile()` (item 4) was refactored
+onto it so there's exactly one "read a cgroup stat file safely"
+implementation. `test_trace.c`: 3/3 clean runs, trace records read back
+independently of process state with correct monotonic seq, chunk_id, and
+fault type.
 
 **Item 4's victim selector is a placeholder, disclosed not hidden.**
 `ensure_budget()` (`budget.c`) needs `policy->select_victim()`, which is
