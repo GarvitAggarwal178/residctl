@@ -1,0 +1,5 @@
+lru: absent_handled=40 prefetches=0
+layer_order+prefetch: absent_handled=28 prefetches=13 (no-prefetch baseline was 32)
+PASS
+exit code: 0
+RESULT: PASS

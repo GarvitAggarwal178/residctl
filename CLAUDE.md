@@ -42,7 +42,7 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 | 5 | Trace recorder + metrics (§9) | 2h | done |
 | 6 | Trace-replay driver | 2h | done |
 | 7 | `lru` and `layer_order` policies (§8) | 2h | done |
-| 8 | Prefetch (§6.3) | 1h | not started |
+| 8 | Prefetch (§6.3) | 1h | done (inline, not a separate thread -- see note) |
 | 9 | Belady solver (§10) | 2h | not started |
 | 10 | Harness, arms, sweep (§11) | 3h | not started |
 | 11 | llama.cpp integration (separate spec, stretch) | 7h | out of scope for now |
@@ -66,6 +66,44 @@ reported, not silently fixed by adding a test-only delay hook into
 production fetch code. §13's T-3 (sustained concurrent storm with real
 eviction cycling, once item 4 exists) is the right place to actually confirm
 this path fires.
+
+**Item 8 note -- a design deviation disclosed up front, and a real bug
+caught before it shipped.**
+§6.3 says "enqueue chunk N+1 for asynchronous fetch," which could mean a
+dedicated prefetch OS thread. `prefetch.c` does NOT add one: §4 step 10 is
+explicit that multi-threading "must be justified by measured handler queue
+depth, not assumed," and no such measurement exists, and a real second
+thread would need a new region-wide accounting lock (`resident_bytes`/
+`ensure_budget`/`evict_chunk` currently assume a single caller). Instead,
+prefetch runs INLINE in the single handler thread immediately after the
+triggering fetch completes -- still satisfies §6.3's observable requirement
+(a correctly predicted chunk generates zero fault later) without new SMP
+surface, and "one outstanding prefetch maximum" holds trivially since it's
+synchronous by construction. Full reasoning in `prefetch.h`'s header
+comment.
+
+While building this, found a real deadlock risk before it ever ran: inside
+`maybe_prefetch()`, calling `ensure_budget()` for the prefetch target lets
+the policy's `select_victim()` legitimately choose the chunk that JUST
+became resident (`just_resident`) as its own victim -- under `layer_order`
+specifically, a chunk is "unreachable from itself" in the successor walk,
+i.e. it looks infinitely far away, exactly the profile `select_victim`
+prefers to evict. `just_resident`'s lock is already held by the calling
+`handle_absent()` (I-6), so `evict_chunk()` locking it again would deadlock
+the single handler thread against itself. Fixed by pinning `just_resident`
+(the existing I-4 mechanism) for the duration of the prefetch's
+`ensure_budget()` call. `test_prefetch.c` is deliberately wrapped in
+`timeout` so a regression here hangs and fails loud, not silent. 3/3 clean
+runs: `lru` (whose `predict_next` is always -1) never prefetches (0/0);
+`layer_order` + prefetch measurably beats the item 7 no-prefetch baseline
+on the identical scenario (28 real faults vs. 32, 13 successful prefetches).
+
+**Known measurement gap, disclosed:** a touch on an already-resident chunk
+(prefetched or not) generates no uffd event at all, so "prefetch hits
+(faults avoided)" can't be directly counted -- `stat_prefetches` (successful
+prefetch completions) is the honest proxy actually available, not a true
+hit count. Whether each prefetch was later touched (a real hit) or evicted
+unused (wasted) isn't tracked in v1.
 
 **Item 7 note -- an unplanned but genuinely useful observation.**
 `policy.c` implements `lru` (evict min `last_fault_seq` among RESIDENT+
