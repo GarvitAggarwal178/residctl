@@ -5,6 +5,7 @@
 #define RESIDCTL_METRICS_H
 
 #include <stdint.h>
+#include <pthread.h>
 
 // Log2(nanoseconds)-bucketed latency histogram. NOT a real HDR histogram
 // library -- no sub-bucket linear interpolation, no configurable
@@ -20,10 +21,16 @@ typedef struct {
     uint64_t sum_ns;
     uint64_t min_ns;
     uint64_t max_ns;
+    // item 10c: latency_hist_record() can now be called concurrently by
+    // multiple fetch-pool workers (was always single-threaded before --
+    // the sync handler is the only caller in the old design). Internal
+    // lock, same reasoning as fetch_trace_t's (item 10b Task A): callers
+    // shouldn't have to know or care that this became concurrent.
+    pthread_mutex_t lock;
 } latency_hist_t;
 
 void latency_hist_init(latency_hist_t *h);
-void latency_hist_record(latency_hist_t *h, uint64_t ns);
+void latency_hist_record(latency_hist_t *h, uint64_t ns); // internally thread-safe (item 10c)
 // Approximate: returns the upper edge of the bucket containing the p-th
 // percentile (0.0 < p <= 1.0), not a true interpolated value.
 uint64_t latency_hist_percentile_ns(const latency_hist_t *h, double p);

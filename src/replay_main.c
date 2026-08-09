@@ -22,6 +22,13 @@
 //     arg as its value). Item 10b Task A: emits one fetch_trace_record_t
 //     per real fetch AND per successful prefetch to <path> (raw binary
 //     array, no header), written once at process exit -- see fetch_trace.h.
+//   --sync-handler: item 10c. Restores the original fully-synchronous
+//     handler (items 2-10b) exactly, for A/B comparison against the new
+//     default async dispatch-only handler (A-5).
+//   --fetch-workers N: item 10c. Shared fetch-pool worker count for the
+//     async handler (demand + prefetch). Default 4. Ignored with
+//     --sync-handler (which uses --prefetch-depth workers for its own
+//     prefetch-only pool, exactly as item 10b did).
 #define _GNU_SOURCE
 #include "region.h"
 #include "pager.h"
@@ -70,6 +77,8 @@ int main(int argc, char **argv) {
     int eager_reconcile = 0;
     const char *fetch_trace_path = NULL;
     uint32_t prefetch_depth = 0; // 0 => region_startup's default (1)
+    int sync_handler = 0;        // item 10c
+    uint32_t fetch_workers = 0;  // item 10c: 0 => region_startup's default (4)
     int nargs = 0;
     char *args[16];
     for (int i = 1; i < argc && nargs < 16; i++) {
@@ -82,6 +91,12 @@ int main(int argc, char **argv) {
         if (strcmp(argv[i], "--prefetch-depth") == 0) {
             if (i + 1 >= argc) { fprintf(stderr, "--prefetch-depth requires a number\n"); return 2; }
             prefetch_depth = (uint32_t)strtoul(argv[++i], NULL, 10);
+            continue;
+        }
+        if (strcmp(argv[i], "--sync-handler") == 0) { sync_handler = 1; continue; }
+        if (strcmp(argv[i], "--fetch-workers") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--fetch-workers requires a number\n"); return 2; }
+            fetch_workers = (uint32_t)strtoul(argv[++i], NULL, 10);
             continue;
         }
         args[nargs++] = argv[i];
@@ -118,6 +133,8 @@ int main(int argc, char **argv) {
         .budget_bytes = budget_bytes,
         .reconcile_interval = eager_reconcile ? 1 : 0, // 0 => region_startup's default (16)
         .prefetch_depth = prefetch_depth,               // 0 => region_startup's default (1)
+        .sync_handler = sync_handler,                    // item 10c
+        .fetch_workers = fetch_workers,                  // item 10c: 0 => region_startup's default (4)
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
@@ -134,9 +151,15 @@ int main(int argc, char **argv) {
     g_r.policy = policy;
     g_r.prefetch_enabled = prefetch_on;
 
+    // item 10c: under the async handler (the default), pager_run() owns the
+    // shared fetch pool's entire lifecycle itself (demand fetches need it
+    // unconditionally, not just when prefetch is on) -- this driver must
+    // NOT also start one, or there would be two. Only under --sync-handler
+    // does this driver still own it, exactly as item 10b did: a
+    // prefetch-only pool, only when prefetch_on && depth>1.
     prefetch_pool_t *pool = NULL;
-    if (prefetch_on && g_r.prefetch_depth > 1) {
-        pool = prefetch_pool_start(&g_r); // Task B: fixed worker pool, only when depth>1
+    if (sync_handler && prefetch_on && g_r.prefetch_depth > 1) {
+        pool = prefetch_pool_start(&g_r, g_r.prefetch_depth); // Task B: one worker per unit of depth
     }
 
     trace_t *fault_trace = NULL;
@@ -159,11 +182,13 @@ int main(int argc, char **argv) {
     }
 
     printf("region_startup OK: n_chunks=%u chunk_size=%llu budget_bytes=%llu (%.1f chunks) "
-           "policy=%s prefetch=%s reconcile_interval=%u prefetch_depth=%u\n",
+           "policy=%s prefetch=%s reconcile_interval=%u prefetch_depth=%u "
+           "handler=%s fetch_workers=%u\n",
            g_r.n_chunks, (unsigned long long)g_r.chunks[0].len,
            (unsigned long long)g_r.budget_bytes,
            (double)g_r.budget_bytes / (double)g_r.chunks[0].len, policy_name, prefetch_arg,
-           g_r.reconcile_interval, g_r.prefetch_depth);
+           g_r.reconcile_interval, g_r.prefetch_depth,
+           g_r.async_handler ? "async" : "sync", g_r.fetch_workers);
 
     uint64_t io_before = read_io_read_bytes();
 
@@ -244,12 +269,15 @@ int main(int argc, char **argv) {
     // Machine-parseable line for the item 10 harness's sensitivity table.
     printf("ARM_CSV,policy=%s,prefetch=%s,budget_bytes=%llu,touches=%u,bytes_touched=%llu,wall_ns=%llu,"
            "absent_handled=%llu,evictions=%llu,infeasible=%llu,prefetches=%llu,"
-           "pager_bytes_fetched=%llu,io_read_bytes_delta=%llu\n",
+           "pager_bytes_fetched=%llu,io_read_bytes_delta=%llu,dedup_resident=%llu,dedup_fetching=%llu,"
+           "handler=%s,fetch_workers=%u\n",
            policy_name, prefetch_arg, (unsigned long long)budget_bytes, res.n_touches,
            (unsigned long long)res.bytes_touched, (unsigned long long)res.wall_ns,
            (unsigned long long)g_r.stat_absent_handled, (unsigned long long)g_r.stat_evictions,
            (unsigned long long)g_r.stat_infeasible, (unsigned long long)g_r.stat_prefetches,
-           (unsigned long long)g_r.stat_bytes_fetched, io_delta == UINT64_MAX ? 0 : (unsigned long long)io_delta);
+           (unsigned long long)g_r.stat_bytes_fetched, io_delta == UINT64_MAX ? 0 : (unsigned long long)io_delta,
+           (unsigned long long)g_r.stat_dedup_resident, (unsigned long long)g_r.stat_dedup_fetching,
+           g_r.async_handler ? "async" : "sync", g_r.fetch_workers);
 
     if (g_r.resident_bytes > g_r.budget_bytes) {
         fprintf(stderr, "FAIL: resident_bytes exceeded budget_bytes -- I-4/§7 violated\n");

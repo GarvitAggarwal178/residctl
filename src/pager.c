@@ -147,6 +147,39 @@ static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
     }
 }
 
+// item 10c (A-5): the ASYNC handler's ABSENT case. Does the minimum work
+// needed to make the chunk's state correct and observable -- mark
+// CHUNK_FETCHING, stamp the fault sequence, record the fault trace, run the
+// policy's on_fault hook (a bookkeeping write, not I/O) -- then enqueues the
+// actual fetch on the shared pool and returns immediately. NO ensure_budget,
+// NO fetch_chunk, NO ioctl: nothing in this function can block on I/O. This
+// is what makes CHUNK_FETCHING actually observable by concurrent faulters
+// (item 10b Task C proved it was NOT observable under the old synchronous
+// design) and lets pager_run() read the next uffd message immediately
+// instead of sitting behind one blocking pread.
+static void handle_absent_dispatch(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
+    c->state = CHUNK_FETCHING;
+    uint64_t seq = __sync_add_and_fetch(&r->fault_seq, 1); // shared with fetch-pool workers; see budget.c note
+    c->last_fault_seq = seq;
+    if (r->trace)
+        trace_record(r->trace, seq, (uint32_t)(c - r->chunks), trace_fault_type, 0 /* was_prefetched */);
+    if (r->policy && r->policy->on_fault) {
+        // on_fault is the only WRITER into a policy's internal state (e.g.
+        // layer_order's successor table); predict_next is a reader that
+        // fetch-pool workers call concurrently. budget_lock serializes all
+        // policy access uniformly (same reasoning as item 10b's Task B
+        // note, now the common case rather than the depth>1-only case).
+        pthread_mutex_lock(&r->budget_lock);
+        r->policy->on_fault(r, c);
+        pthread_mutex_unlock(&r->budget_lock);
+    }
+    // Enqueue and return -- do NOT wait for the fetch. The faulting
+    // thread(s) stay blocked in the kernel on this address until whichever
+    // worker picks this job up issues UFFDIO_CONTINUE; that's the kernel's
+    // job, not this dispatcher's.
+    prefetch_pool_enqueue_demand(r->prefetch_pool_handle, (uint32_t)(c - r->chunks));
+}
+
 static void wake_range(region_t *r, chunk_t *c) {
     struct uffdio_range range;
     range.start = (unsigned long)(r->map_a + c->region_off);
@@ -187,7 +220,12 @@ static void handle_fault(region_t *r, uint64_t fault_addr, bool was_minor) {
             r->stat_dedup_fetching++;
             break;
         case CHUNK_ABSENT:
-            handle_absent(r, c, trace_fault_type);
+            // item 10c (A-5): async_handler (the default) dispatches only
+            // and never blocks on I/O here; --sync-handler keeps calling
+            // handle_absent() inline, exactly as items 2-10b always did,
+            // for A/B comparison.
+            if (r->async_handler) handle_absent_dispatch(r, c, trace_fault_type);
+            else handle_absent(r, c, trace_fault_type);
             break;
     }
     pthread_mutex_unlock(&c->lock);
@@ -195,6 +233,17 @@ static void handle_fault(region_t *r, uint64_t fault_addr, bool was_minor) {
 
 void pager_run(region_t *r, volatile sig_atomic_t *stop, int poll_timeout_ms) {
     struct pollfd pfd = { .fd = r->uffd, .events = POLLIN };
+
+    // item 10c (A-5/A-7): the async handler's shared fetch pool is owned by
+    // this function's lifetime -- demand fetches need it unconditionally
+    // (not just when prefetch is enabled), so "run the handler" now means
+    // "run the dispatcher loop plus its worker pool," started/stopped
+    // together. The --sync-handler path (async_handler==false) leaves
+    // r->prefetch_pool_handle exactly as item 10b left it: NULL unless the
+    // caller (e.g. replay_main.c) started one itself for prefetch_depth>1,
+    // and this function never touches its lifecycle.
+    if (r->async_handler)
+        prefetch_pool_start(r, r->fetch_workers);
 
     while (!*stop) {
         int pr = poll(&pfd, 1, poll_timeout_ms); // advisory only (I-2)
@@ -229,5 +278,15 @@ void pager_run(region_t *r, volatile sig_atomic_t *stop, int poll_timeout_ms) {
         }
         if (r->metrics && drained_this_batch > r->metrics->queue_depth_high_water)
             r->metrics->queue_depth_high_water = drained_this_batch;
+    }
+
+    if (r->async_handler) {
+        // Stop AFTER the dispatch loop exits (no more callers will enqueue
+        // anything), and BEFORE this function returns -- callers (e.g.
+        // replay_main.c) join this thread and then flush the fetch trace,
+        // assuming every worker that could call fetch_trace_reserve() has
+        // already been joined by the time pager_run() returns.
+        prefetch_pool_stop(r->prefetch_pool_handle);
+        r->prefetch_pool_handle = NULL;
     }
 }

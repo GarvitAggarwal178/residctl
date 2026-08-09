@@ -189,8 +189,27 @@ Order matters. Each step has an assertion.
    is the measured non-weight footprint from a pilot run and
    `margin = max(128 MiB, 0.2 × N_peak)`. Pre-allocate all handler scratch and
    metadata *now* so the pager's own footprint cannot spike later.
-10. **Start the handler thread.** One thread. Multi-threading it is a cut item
-    (§12) and must be justified by measured handler queue depth, not assumed.
+10. **Start the handler.** **Amendment A-7 (item 10c)** replaces the original
+    text here, which read: "One thread. Multi-threading it is a cut item
+    (§12) and must be justified by measured handler queue depth, not
+    assumed." That measurement now exists and says the opposite: item 10b
+    Task C proved, at the source level, that keeping the handler
+    single-threaded and synchronous made `CHUNK_FETCHING` structurally
+    unobservable (§9's dedup metric) and serialized every concurrent fault
+    behind one blocking fetch; item 10c Task A measured the cost (device-busy
+    capped around 0.82-0.86, dedup counters permanently zero). The handler is
+    now a **dispatcher thread plus a shared fetch-worker pool** (§5
+    Amendment A-5): one thread still drains the uffd queue and makes state
+    decisions, but it never performs I/O itself. This is not "multi-threading
+    the handler" in the sense the original cut-ladder item meant (there is
+    still exactly one thread reading uffd messages and one code path making
+    state-machine decisions); it is moving the *fetch* -- always the
+    expensive, blocking part -- off that thread and onto a worker pool sized
+    by `--fetch-workers` (default 4), independent of prefetch depth. A
+    `--sync-handler` flag restores the original single-threaded-and-blocking
+    behavior exactly, for direct A/B comparison; the async dispatch/worker
+    design is the default, since the measurement now justifies it
+    unconditionally.
 11. **Write the run manifest**: kernel version, `shmem_enabled`, `memory.max`,
     `swap.max`, chunk size, policy name, `O_DIRECT` yes/no, model hash, git SHA.
     Every run. No exceptions — this is how the WSL2-vs-bare-metal comparison stays
@@ -213,7 +232,8 @@ loop:
     handle(chunk)
 ```
 
-`handle(chunk)`:
+`handle(chunk)` (original, item 2-10b, superseded as the *default* by
+Amendment A-5 below but still selectable via `--sync-handler`):
 
 ```
 lock(chunk)
@@ -243,6 +263,72 @@ unlock(chunk)
 **Note on the `RESIDENT` case:** it is reachable and normal. It is the S2
 finding's other face — many threads fault into one chunk, one `CONTINUE` resolves
 all, but their messages were already queued. `UFFDIO_WAKE` is harmless and cheap.
+
+**Amendment A-5 (item 10c) — the handler thread must never block on I/O.**
+The text above puts the entire fetch — including the blocking `pread`,
+measured at 55-60ms per chunk at realistic scale (§2) — inside `handle()`,
+called synchronously to completion by the single handler thread before it
+reads the next uffd message. Item 10b Task C proved this had a consequence
+nobody had checked for: it made the `FETCHING` case above **structurally
+unreachable**. A pager only ever processes one message fully before reading
+the next, so no execution context could ever observe a chunk mid-fetch from
+inside `handle()` — `dedup_fetching` stayed at exactly zero across every
+measurement from item 2 onward, not because contention was rare, but because
+the code path that would increment it could never run concurrently with
+itself. Item 10c Task A measured the further cost directly: with only one
+fetch ever in flight, device-busy fraction capped at 0.82-0.86 regardless of
+prefetch depth, and every other thread faulting during that window sat with
+an unread uffd message — not deduplicated, just serialized behind one inline
+`pread`.
+
+The fix is a dispatch/worker split. The handler thread (still exactly one)
+only ever does the fast, non-blocking part; a shared pool of fetch workers
+does the I/O:
+
+```
+handler loop:
+  read message (O_NONBLOCK, EAGAIN = empty, per I-2 -- unchanged)
+  chunk = lookup(address)
+  lock(chunk)
+  switch (chunk->state):
+    RESIDENT:  UFFDIO_WAKE over chunk range; stat_dedup_resident++
+    FETCHING:  stat_dedup_fetching++   # drop; the in-flight CONTINUE will wake it
+    ABSENT:    chunk->state = FETCHING
+               chunk->last_fault_seq = atomic_incr(region->fault_seq)
+               fault_trace.record(...)             # METRICS ONLY (A-1)
+               policy->on_fault(chunk)              # bookkeeping write, not I/O
+               enqueue(chunk) to fetch worker pool  # NO wait
+  unlock(chunk)
+  loop immediately          # NO blocking I/O anywhere in this path
+```
+
+Fetch workers dequeue a job, lock the chunk, run `ensure_budget()` (§7),
+`fetch(chunk)` (§6.1-6.2, I-6 — the lock is held across this entire
+worker-side critical section: read, `CONTINUE`, and the state update to
+`RESIDENT`), commit the budget reservation and mark `RESIDENT` in that
+order (not the reverse — item 10b Task B found a real deadlock from marking
+`RESIDENT` before the reservation commits, since that makes the chunk look
+evictable to a concurrent `ensure_budget()` while this thread still holds
+the chunk lock and is about to need the budget lock; see `budget.c`'s
+`commit_reserved_and_pin()`), then `policy->on_resident(chunk)` and
+`maybe_prefetch`-equivalent top-up (§6.3, §8), and finally unlock.
+
+**Demand fetches and prefetches share one pool** (`--fetch-workers N`,
+default 4, independent of `--prefetch-depth`) rather than two separate
+mechanisms — demand fetches take **strict priority**: a worker always
+drains the demand queue before ever looking at the prefetch queue, so a
+speculative fetch can never delay a real one. `--sync-handler` restores the
+original `handle()` above byte-for-byte, for direct A/B comparison; it is
+no longer the default (§4 step 10, Amendment A-7).
+
+I-6's letter ("the lock is held across the entire fetch") is satisfied by
+construction: "the fetch" (read + `CONTINUE` + state update to `RESIDENT`)
+is one continuous critical section on the worker side, exactly as before —
+only the *dispatch* (the separate `ABSENT`→`FETCHING` transition) is now a
+distinct, already-closed critical section that happens earlier, on the
+handler thread. Each state transition individually still happens only
+under that chunk's lock, which is I-6's first clause; nothing about this
+split allows two transitions to race.
 
 **Amendment A-1 (item 10 correction) — the handler's trace is NOT the
 reference string.** The original text here called `trace.record()` inside

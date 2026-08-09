@@ -250,6 +250,8 @@ static void compute_budget(region_t *r, const region_config_t *cfg, const run_ma
     r->fetches_since_reconcile = 0;
     r->prefetch_depth = cfg->prefetch_depth ? cfg->prefetch_depth : 1; // Task B
     r->reserved_bytes = 0;
+    r->async_handler = !cfg->sync_handler; // item 10c: async is the default
+    r->fetch_workers = cfg->fetch_workers ? cfg->fetch_workers : 4; // item 10c
     if (pthread_mutex_init(&r->budget_lock, NULL) != 0)
         fail("compute_budget", "pthread_mutex_init(budget_lock) failed");
 }

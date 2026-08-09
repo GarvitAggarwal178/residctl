@@ -14,14 +14,17 @@ static int bucket_for(uint64_t ns) {
 void latency_hist_init(latency_hist_t *h) {
     memset(h, 0, sizeof *h);
     h->min_ns = UINT64_MAX;
+    pthread_mutex_init(&h->lock, NULL); // after the memset, not before (item 10c)
 }
 
 void latency_hist_record(latency_hist_t *h, uint64_t ns) {
+    pthread_mutex_lock(&h->lock); // item 10c: multiple fetch-pool workers may call this concurrently
     h->bucket_counts[bucket_for(ns)]++;
     h->count++;
     h->sum_ns += ns;
     if (ns < h->min_ns) h->min_ns = ns;
     if (ns > h->max_ns) h->max_ns = ns;
+    pthread_mutex_unlock(&h->lock);
 }
 
 uint64_t latency_hist_percentile_ns(const latency_hist_t *h, double p) {

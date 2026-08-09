@@ -85,6 +85,74 @@ branches in `handle_fault()` have still never been observed to fire) is now
 backed by much stronger negative evidence and is being accepted as a known,
 understood limitation for v1 rather than chased further.
 
+**ITEM 10c Task A — async dispatch-only handler (in progress; Task B/C and
+`results/ASYNC_REPORT.md` not yet done as of this entry).** Direct
+consequence of item 10b Task C's finding: `dedup_fetching` wasn't just
+empirically zero, it was *structurally* unreachable under the synchronous
+handler, which is a spec defect, not a coverage gap. Spec amendments A-5
+(§5, `docs/MECHANISM_SPEC.md`) and A-7 (§4 step 10) applied: the handler
+thread now only dispatches (lookup, lock, state-machine decision, enqueue);
+`prefetch_pool.c` (item 10b Task B's prefetch-only pool) is generalized into
+a single shared fetch pool for BOTH demand and speculative fetches, with
+demand strictly prioritized in the queue (a worker always drains the demand
+queue before the prefetch queue). `pager_run()` owns the pool's lifecycle
+itself when `async_handler` is true (the new default) — it starts
+`fetch_workers` (default 4, `--fetch-workers N`) workers at the top and
+stops them at the bottom, so every existing test/driver that calls
+`pager_run()` gets the async path for free without needing its own changes.
+`--sync-handler` restores the pre-10c synchronous path byte-for-byte
+(verified: `test_pager`, `test_eviction`, `test_prefetch` etc. did not need
+any changes and still pass under either path).
+
+Two bugs found and fixed while wiring this up, not discovered by test
+failure but by inspection before anything ran:
+1. **`latency_hist_record()` was never thread-safe.** Under the old design
+   only the single synchronous handler thread ever called it. Once fetch
+   workers call it concurrently (item 10c: every demand fetch, from
+   potentially `fetch_workers` threads at once), the un-locked
+   bucket/count/sum/min/max updates would race. Fixed by adding an internal
+   mutex to `latency_hist_t` (`metrics.h`/`.c`) — callers don't need to know
+   it became concurrent.
+2. **Several `region_t` stat counters (`stat_bytes_fetched`,
+   `stat_absent_handled`, `stat_prefetches`, `stat_prefetch_infeasible`)
+   were incremented with plain `++`/`+=` inside `prefetch_pool.c`'s worker
+   functions.** This was already a latent race in item 10b's
+   prefetch-only pool at `--prefetch-depth > 1` (never caught — small
+   counters losing an occasional increment doesn't crash or fail an
+   assertion, it just silently under-reports, exactly the "silently wrong
+   result" class of bug this project's rules exist to catch), and item
+   10c's much higher fetch concurrency (`fetch_workers` demand workers, not
+   just `prefetch_depth` prefetch workers) makes it far more likely to
+   actually corrupt a count. Fixed with `__sync_fetch_and_add`, matching
+   the pattern already used for `fault_seq`.
+
+**Correctness gate, run before Task B per the spec's explicit instruction:**
+§13 T-1..T-5 re-run via `run_correctness_harness.sh` (unmodified from item
+10b) — all still PASS under the new async default (test binaries don't set
+`--sync-handler`, so they now exercise the async path; T-1/T-2/T-4 exact,
+T-3 no hangs/mismatches, T-5 unaffected). Notably, T-3's own (unmodified,
+per instructions) counters now read `dedup_resident=21644 dedup_fetching=13793`
+on a 60s run — a direct, incidental confirmation that the dedup branches
+fire routinely under the new architecture, where they were 0/0 every single
+time under the old one (item 2 through item 10b, 6+ independent
+confirmations of the old zero). Two NEW tests per the item 10c spec:
+- **T-6** (`test_t6.c`): same load shape as T-3, explicit gate
+  `stat_dedup_fetching > 0`. PASS: `dedup_resident=22498 dedup_fetching=13808`
+  on a clean 60s run, 0 mismatches, resident_bytes never exceeded budget.
+- **T-7** (`test_t7.c`): same storm, plus a 120s internal watchdog thread
+  that dumps `/proc/PID/task/*/wchan` and `/status` for every thread and
+  hard-exits nonzero if joining the storm threads after stop doesn't
+  complete in time (the same live-hang diagnostic technique used to
+  originally find item 10b's two deadlocks, now built into the test itself
+  rather than applied by hand). PASS: all 8 threads joined well within the
+  watchdog, 0 mismatches, `dedup_fetching=13987`.
+
+Both scripts run via `run_t6_t7.sh`, same `fresh_cgroup`/`cleanup` pattern as
+the rest of the correctness harness. Full log: `results/t6_t7_log.txt`.
+
+Task B (prefetch admission rule, A-6) and Task C (the three re-run sweeps)
+are next; `results/ASYNC_REPORT.md` will be written once both are done.
+
 **ITEM 10b — I/O pipelining diagnostic, prefetch depth, dedup instrumentation
 (diagnosis on top of accepted V2, not a correction).** Full report:
 `results/DIAGNOSTIC_REPORT.md`.

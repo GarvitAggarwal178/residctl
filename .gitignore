@@ -17,6 +17,8 @@ src/test_policy
 src/test_prefetch
 src/test_correctness
 src/test_storm
+src/test_t6
+src/test_t7
 src/replay_main
 src/belady_main
 src/baseline_main

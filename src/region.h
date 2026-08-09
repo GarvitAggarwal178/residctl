@@ -85,24 +85,42 @@ typedef struct {
     uint32_t reconcile_interval; // set by region_startup from cfg; default 16
     uint64_t fetches_since_reconcile;
 
-    // Item 10b Task B: prefetch depth. depth==1 (default) is the ORIGINAL
-    // item-8 inline-synchronous path (prefetch.c's maybe_prefetch()),
-    // completely unchanged -- budget_lock/reserved_bytes exist below but
-    // are only exercised by more than one thread when depth>1, since
-    // that's the only case with a worker pool. See prefetch_pool.h.
+    // Item 10b Task B: prefetch depth. Caps how many prefetch requests may
+    // be outstanding (queued+in-flight) at once -- see prefetch_pool.h.
+    // Independent of worker-pool size since item 10c (fetch_workers, below):
+    // depth used to imply "one worker per unit of depth" when the pool
+    // existed only for prefetching; now the pool is shared with demand
+    // fetches (item 10c Task A) and its size is fetch_workers, not depth.
     uint32_t prefetch_depth; // set by region_startup from cfg; default 1
     pthread_mutex_t budget_lock;  // serializes ensure_budget/evict_chunk/reserve
-                                   // across the handler thread and any prefetch
-                                   // workers (depth>1 only introduces real
-                                   // contention on this; at depth==1 it's
-                                   // uncontended and costs one uncontended
-                                   // lock/unlock per fetch)
+                                   // across the handler thread and any fetch/
+                                   // prefetch workers
     uint64_t reserved_bytes; // bytes "spoken for" by in-flight FETCHING chunks
                               // (real fetch or prefetch), not yet actually
                               // resident. NOT included in reconcile()'s
                               // comparison against memory.stat[shmem] -- only
                               // resident_bytes represents real, populated pages.
-    prefetch_pool_t *prefetch_pool_handle; // NULL unless prefetch_depth>1 (Task B)
+    prefetch_pool_t *prefetch_pool_handle; // NULL unless a fetch pool is running
+                                            // (item 10c: whenever async_handler is
+                                            // true, owned/started/stopped by
+                                            // pager_run itself; item 10b's old
+                                            // sync-handler + depth>1 case still
+                                            // has the CALLER start/stop it)
+
+    // Item 10c (A-5, A-7): the handler thread must never block on I/O (§5
+    // amendment). async_handler=true (the default) makes handle_fault()'s
+    // ABSENT branch dispatch-only: it marks the chunk FETCHING and enqueues
+    // it on the shared fetch pool (prefetch_pool_handle), then returns
+    // immediately without ever calling fetch_chunk() itself. Actual fetches
+    // (both real demand faults and speculative prefetches) run on
+    // fetch_workers pool threads, with demand strictly prioritized over
+    // prefetch in the queue. async_handler=false (--sync-handler) restores
+    // the original item 2-10b behavior byte-for-byte, for A/B comparison --
+    // see pager.c's handle_absent() (unchanged) vs handle_absent_dispatch()
+    // (new).
+    bool async_handler;      // !cfg->sync_handler; default true (async)
+    uint32_t fetch_workers;  // set by region_startup from cfg; default 4.
+                              // Only meaningful when async_handler is true.
 } region_t;
 
 // Startup configuration. Everything the caller must supply to region_startup().
@@ -122,6 +140,12 @@ typedef struct {
     uint64_t budget_bytes;      // must be nonzero; auto-compute (§4 step 9 formula) is not yet implemented
     uint32_t reconcile_interval; // 0 => default (16); 1 => eager, every fetch (A-3, --eager-reconcile)
     uint32_t prefetch_depth;     // 0 => default (1, item 8's original inline behavior). Task B: --prefetch-depth N
+    bool sync_handler;           // item 10c (A-5/A-7): false (default) => async dispatch-only
+                                  // handler; true (--sync-handler) => restores the original
+                                  // fully-synchronous handler exactly, for A/B comparison.
+    uint32_t fetch_workers;      // item 10c: 0 => default (4). Shared fetch-pool worker count
+                                  // for the async handler (demand + prefetch). Independent of
+                                  // prefetch_depth. Ignored when sync_handler is true.
 } region_config_t;
 
 // Run manifest, written once per run per §4 step 11.
