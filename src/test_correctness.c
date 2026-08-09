@@ -46,6 +46,7 @@ static int run_t1(const char *cgroup_path, const char *model_path) {
             .region_len = REGION_LEN, .chunk_size = CHUNK_SIZE,
             .model_path = model_path, .cgroup_path = cgroup_path,
             .budget_bytes = BUDGET_25PCT,
+            .reconcile_interval = 1, // A-3: §13 correctness runs use eager reconcile
         };
         run_manifest_t m;
         region_startup(&g_r, &cfg, &m);
@@ -96,6 +97,7 @@ static int run_t2(const char *cgroup_path, const char *model_path) {
         .region_len = 4ULL * 1024 * 1024, .chunk_size = 2ULL * 1024 * 1024, // 2 chunks
         .model_path = model_path, .cgroup_path = cgroup_path,
         .budget_bytes = 2ULL * 1024 * 1024, // 1 chunk
+        .reconcile_interval = 1, // A-3
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
@@ -143,6 +145,7 @@ static int run_t4(const char *cgroup_path, const char *model_path) {
         .region_len = REGION_LEN, .chunk_size = CHUNK_SIZE,
         .model_path = model_path, .cgroup_path = cgroup_path,
         .budget_bytes = 3ULL * CHUNK_SIZE,
+        .reconcile_interval = 1, // A-3
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);

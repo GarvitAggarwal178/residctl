@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
 
-    trace_t *trace = trace_open(trace_path);
+    trace_t *trace = trace_open(trace_path, TRACE_TYPE_FAULT); // pager's own trace: metrics-only, never solver input
     metrics_t metrics;
     metrics_init(&metrics);
     g_r.trace = trace;
@@ -82,6 +82,10 @@ int main(int argc, char **argv) {
     // Read the trace file back and check it independently of in-process state.
     int fd = open(trace_path, O_RDONLY);
     if (fd < 0) { fprintf(stderr, "FAIL: cannot reopen trace file %s\n", trace_path); return 1; }
+
+    uint8_t hdr_type;
+    if (trace_read_header(fd, &hdr_type) != 0) { fprintf(stderr, "FAIL: bad trace header\n"); return 1; }
+    if (hdr_type != TRACE_TYPE_FAULT) { fprintf(stderr, "FAIL: expected TRACE_TYPE_FAULT header\n"); return 1; }
 
     int fail = 0;
     trace_record_t rec;

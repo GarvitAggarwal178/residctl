@@ -13,6 +13,16 @@
 // decision under memory pressure, not this program's; that's the point of
 // a baseline arm.
 //
+// ITEM 10 CORRECTION, DEFECT 2: this used to touch one byte per chunk.
+// Fixed: every reference now reads every 4096-byte page of the chunk
+// (full consumption, matching what a real consumer -- e.g. a transformer
+// reading a layer's weights -- actually does), identically to
+// replay_cyclic()'s fix. The original one-byte-per-chunk version made arm
+// A read ~250x less data than the pager arms for the "same" 40 touches,
+// which invalidated both the wall-clock comparison and the MADV_RANDOM
+// finding (RANDOM only wins because sparse, not because it's actually
+// better under real consumption -- see HARNESS_REPORT_V2.md).
+//
 // Usage: baseline_main <cgroup_path> <model_path> <region_len> <chunk_size>
 //                       <n_passes> <madvise_mode: normal|random|sequential>
 //                       <hints: on|off>
@@ -60,6 +70,10 @@ static uint64_t read_majflt(void) {
     }
     return (uint64_t)majflt;
 }
+
+// Elision guard for the full-chunk read loop -- same idiom as replay.c's
+// g_replay_sink. volatile forces every read to actually execute.
+static volatile uint64_t g_sink = 0;
 
 static uint64_t read_io_read_bytes(void) {
     FILE *f = fopen("/proc/self/io", "r");
@@ -130,10 +144,16 @@ int main(int argc, char **argv) {
 
     uint64_t t_start = now_ns();
     uint32_t touches = 0;
+    uint64_t bytes_touched = 0;
     for (uint32_t pass = 0; pass < n_passes; pass++) {
         for (uint32_t i = 0; i < n_chunks; i++) {
-            volatile uint8_t x = map[(uint64_t)i * chunk_size];
-            (void)x;
+            // Defect 2: full-chunk consumption, 4096-byte stride, matching
+            // replay_cyclic() exactly so all arms move comparable bytes.
+            uint8_t *chunk_base = map + (uint64_t)i * chunk_size;
+            for (uint64_t off = 0; off < chunk_size; off += 4096) {
+                g_sink += chunk_base[off];
+            }
+            bytes_touched += chunk_size;
             touches++;
             if (hints_on && i >= 1) {
                 // Lagging PAGEOUT hint: the chunk immediately behind the
@@ -161,9 +181,11 @@ int main(int argc, char **argv) {
 
     double seconds = (double)(t_end - t_start) / 1e9;
     printf("BASELINE SUMMARY (arm %s)\n", hints_on ? "B" : "A");
-    printf("  madvise_mode=%s hints=%s passes=%u touches=%u wall_ns=%llu (%.3fs) touches/sec=%.1f\n",
-           madvise_mode, hints_on ? "on" : "off", n_passes, touches,
+    printf("  madvise_mode=%s hints=%s passes=%u touches=%u bytes_touched=%llu wall_ns=%llu (%.3fs) touches/sec=%.1f\n",
+           madvise_mode, hints_on ? "on" : "off", n_passes, touches, (unsigned long long)bytes_touched,
            (unsigned long long)(t_end - t_start), seconds, seconds > 0 ? (double)touches / seconds : 0.0);
+    printf("  elision_guard_sink=%llu (nonzero, run-dependent -- evidence the full-chunk read loop executed)\n",
+           (unsigned long long)g_sink);
     printf("  majflt_delta=%llu\n", (unsigned long long)(majflt_after - majflt_before));
     if (io_before != UINT64_MAX && io_after != UINT64_MAX)
         printf("  io_read_bytes_delta=%llu\n", (unsigned long long)(io_after - io_before));
@@ -177,10 +199,13 @@ int main(int argc, char **argv) {
     else
         printf("  memory.stat fields NOT_AVAILABLE (cgroup read failed)\n");
 
-    printf("ARM_CSV,policy=mmap_%s_%s,prefetch=n/a,budget_bytes=n/a,touches=%u,wall_ns=%llu,"
+    printf("ARM_CSV,policy=mmap_%s_%s,prefetch=n/a,budget_bytes=n/a,touches=%u,bytes_touched=%llu,wall_ns=%llu,"
            "absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,"
+           "pager_bytes_fetched=n/a,io_read_bytes_delta=%llu,"
            "majflt_delta=%llu,pgscan_delta=%llu,pgsteal_delta=%llu\n",
-           madvise_mode, hints_on ? "on" : "off", touches, (unsigned long long)(t_end - t_start),
+           madvise_mode, hints_on ? "on" : "off", touches, (unsigned long long)bytes_touched,
+           (unsigned long long)(t_end - t_start),
+           io_before != UINT64_MAX && io_after != UINT64_MAX ? (unsigned long long)(io_after - io_before) : 0,
            (unsigned long long)(majflt_after - majflt_before),
            have_before && have_after ? (unsigned long long)(pgscan_after - pgscan_before) : 0,
            have_before && have_after ? (unsigned long long)(pgsteal_after - pgsteal_before) : 0);

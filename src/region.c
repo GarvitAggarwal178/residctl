@@ -246,6 +246,8 @@ static void compute_budget(region_t *r, const region_config_t *cfg, const run_ma
     r->budget_bytes = cfg->budget_bytes;
     r->resident_bytes = 0;
     r->known_overhead_bytes = 0; // no pager-owned shmem allocations yet at item 1
+    r->reconcile_interval = cfg->reconcile_interval ? cfg->reconcile_interval : 16; // A-3
+    r->fetches_since_reconcile = 0;
 }
 
 static void read_shmem_enabled(char *out, size_t outsz) {

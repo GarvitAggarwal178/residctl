@@ -63,6 +63,7 @@ void maybe_prefetch(region_t *r, chunk_t *just_resident) {
     fetch_chunk(r, target);
     target->state = CHUNK_RESIDENT;
     r->resident_bytes += target->len;
+    r->stat_bytes_fetched += target->len; // Defect 3: pager's own byte accounting
     target->pin--;
     r->stat_prefetches++;
     if (r->policy->on_resident) r->policy->on_resident(r, target);

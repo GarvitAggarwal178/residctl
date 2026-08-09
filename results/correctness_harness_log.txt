@@ -12,17 +12,20 @@ exit code: 0
 
 === T-3 (test_storm, 60s, timeout-guarded at 90s) ===
 storm running for 60s with 8 threads, budget=4194304 (2 chunks of 2097152)...
-storm done: total_touches=104314 mismatches=0 resident_bytes=4194304 budget_bytes=4194304 evictions=36115 absent_handled=20585 dedup_resident=0 dedup_fetching=0 prefetches=15532 infeasible=0
+storm done: total_touches=112562 mismatches=0 resident_bytes=4194304 budget_bytes=4194304 evictions=39753 absent_handled=22596 dedup_resident=0 dedup_fetching=0 prefetches=17159 infeasible=0
 PASS
 exit code: 0
 
 === T-5 (belady_main --selftest, item 9) ===
-=== belady self-test 1/2: random cross-check vs naive O(n^2) reference ===
+=== belady self-test 1/3: random cross-check vs naive O(n^2) reference ===
 300/300 trials matched -- OK
-=== belady self-test 2/2: pure cyclic reference string (informational) ===
-  W=20 P=10 K=5 (r=0.25): steady-state misses/pass=15.56 (naive (1-r)*W=15.00 -- NOT a pass/fail bound, see CLAUDE.md item 9)
-  W=20 P=10 K=10 (r=0.50): steady-state misses/pass=10.00 (naive (1-r)*W=10.00 -- NOT a pass/fail bound, see CLAUDE.md item 9)
-  W=20 P=10 K=15 (r=0.75): steady-state misses/pass=5.00 (naive (1-r)*W=5.00 -- NOT a pass/fail bound, see CLAUDE.md item 9)
+=== belady self-test 2/3: exact cyclic floor (A-2), replaces the old weak check ===
+cyclic-scan floor check: n=20 passes=10 capacity=5 floor=155 actual_misses=160 -- OK
+cyclic-scan floor check: n=20 passes=10 capacity=10 floor=110 actual_misses=110 -- OK
+cyclic-scan floor check: n=20 passes=10 capacity=15 floor=65 actual_misses=65 -- OK
+=== belady self-test 3/3: reference-vs-fault trace header enforcement ===
+  reference file correctly identified: OK
+  fault file correctly identified: OK
 SELFTEST PASS
 exit code: 0
 

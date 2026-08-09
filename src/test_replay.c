@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
 
-    trace_t *trace = trace_open(trace_path);
+    trace_t *trace = trace_open(trace_path, TRACE_TYPE_FAULT); // this test exercises the pager's own fault trace, per item 6
     g_r.trace = trace;
     metrics_t metrics;
     metrics_init(&metrics);
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
     pager_args_t pager_args = { &g_r, &stop };
     pthread_create(&pager_thread, NULL, pager_trampoline, &pager_args);
 
-    replay_result_t res = replay_cyclic(&g_r, N_PASSES);
+    replay_result_t res = replay_cyclic(&g_r, N_PASSES, NULL); // no ground-truth reference trace needed for this test
 
     stop = 1;
     pthread_join(pager_thread, NULL);
@@ -143,6 +143,10 @@ int main(int argc, char **argv) {
     // evictions read back as MISSING per S3b/I-8), was_prefetched==0.
     int fd = open(trace_path, O_RDONLY);
     if (fd < 0) { fprintf(stderr, "FAIL: cannot reopen trace %s\n", trace_path); return 1; }
+    uint8_t hdr_type;
+    if (trace_read_header(fd, &hdr_type) != 0 || hdr_type != TRACE_TYPE_FAULT) {
+        fprintf(stderr, "FAIL: bad or wrong-type trace header\n"); return 1;
+    }
     trace_record_t rec;
     uint64_t n_records = 0, expect_seq = 1;
     while (read(fd, &rec, sizeof rec) == (ssize_t)sizeof rec) {

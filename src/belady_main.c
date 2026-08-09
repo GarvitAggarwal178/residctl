@@ -1,38 +1,36 @@
 // belady_main.c -- build-order item 9: standalone offline optimal solver
-// binary (§10). Reads a trace file (item 5's format) and reports the
-// minimum achievable fetch count/bytes for a given budget.
+// binary (§10). Reads a GROUND-TRUTH REFERENCE trace (item 5's format,
+// amended by item 10's correction, A-1) and reports the minimum achievable
+// fetch count/bytes for a given budget.
 //
-// The reference string fed to belady_simulate() excludes was_prefetched
-// records: trace.h is explicit that the trace is "derived from actual
-// faults, never from declared access order," and a prefetch is OUR OWN
-// speculative activity, not consumer demand -- feeding it back in would be
-// circular (computing an "optimal" bound partly informed by our own guesses
-// about the future).
+// ITEM 10 CORRECTION, DEFECT 1: this binary used to load a pager-authored
+// FAULT trace and run Belady over it. That is circular: a pager only ever
+// observes misses (a hit generates no uffd event at all), so a fault trace
+// is a function of whichever policy produced it, not the workload's true
+// reference string. Running Belady over "the misses one particular policy
+// happened to produce" computes "the best you could do given those misses,"
+// which is not a valid lower bound on anything. Proof this was happening:
+// V1's reported OPT values were BELOW the mathematically provable cyclic
+// floor (see detect_cyclic_scan_floor() below) at every single budget
+// ratio tested -- an impossible result, meaning the solver's INPUT was
+// wrong, not (necessarily) the algorithm.
 //
-// Per §10: "Sanity check that must pass before any result is reported: on
-// a strictly cyclic reference string at budget ratio r, the solver must
-// return approximately (1-r) x W bytes per pass. If it doesn't, the solver
-// is wrong, not the theory."
+// Fix: this binary now REQUIRES a TRACE_TYPE_REFERENCE file (written by the
+// WORKLOAD -- replay_cyclic(), see replay.c -- which knows the true access
+// sequence regardless of hit/miss) and ABORTS if handed a TRACE_TYPE_FAULT
+// file. Fault traces remain useful (metrics, dedup/prefetch accounting)
+// but are never solver input; see trace.h.
 //
-// That check is implemented (see the "cyclic pattern" section of
-// run_selftest() below) but its own naive "(1-r)*W" expectation turned out
-// to be WRONG, not the algorithm: a hand-derived "pin K items forever"
-// argument ignores that demand paging forces a cache slot open for every
-// miss, which necessarily disturbs whichever set you'd hoped to keep
-// pinned. Measured steady-state converges to a stable value ABOVE (1-r)*W,
-// not equal to it (see CLAUDE.md item 9 for the numbers and a small
-// hand-traced example proving the naive bound isn't achievable). Per the
-// spec's own instruction ("the solver is wrong, not the theory") this was
-// investigated rather than silently accepted or the test silently loosened.
+// A second, independent gate: if the loaded reference string is a strict
+// cyclic scan (the same permutation of chunk ids repeated verbatim), the
+// result is checked against a provable lower bound (Defect 1's floor
+// formula) and this binary ABORTS if the solver reports fewer misses than
+// that floor -- an exact, provable check, replacing §10's original "must
+// return approximately (1-r)*W" sanity check, which item 9 already found
+// to rest on a flawed derivation (see CLAUDE.md item 9's note) and was too
+// weak to catch this defect in the first place.
 //
-// The actual correctness gate is a random cross-check against a
-// deliberately naive O(n^2) reference implementation (linear forward scan
-// for true next-occurrence at every eviction -- directly implements the
-// textbook definition, nothing clever to get wrong). 300/300 random trials
-// match exactly. Run `belady_main --selftest` and confirm SELFTEST PASS
-// before trusting any real-trace output.
-//
-// Usage: belady_main <trace_path> <chunk_size_bytes> <budget_bytes>
+// Usage: belady_main <reference_trace_path> <chunk_size_bytes> <budget_bytes>
 //        belady_main --selftest
 #define _GNU_SOURCE
 #include "belady.h"
@@ -44,24 +42,46 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+// Loads a TRACE_TYPE_REFERENCE file. Aborts (not just returns an error) if
+// the header is missing/malformed, or -- the critical check -- if the file
+// is a TRACE_TYPE_FAULT trace. This must be impossible to get wrong by
+// accident, per the correction's explicit instruction.
 static uint32_t *load_reference_string(const char *trace_path, uint64_t *out_n) {
     int fd = open(trace_path, O_RDONLY);
     if (fd < 0) { fprintf(stderr, "cannot open %s\n", trace_path); exit(1); }
 
+    uint8_t trace_type;
+    if (trace_read_header(fd, &trace_type) != 0) {
+        fprintf(stderr, "SOLVER FAILED: %s has no valid trace header (bad magic/version) -- "
+                        "refusing to guess the format\n", trace_path);
+        abort();
+    }
+    if (trace_type == TRACE_TYPE_FAULT) {
+        fprintf(stderr,
+                "SOLVER FAILED: %s is a TRACE_TYPE_FAULT trace (pager-authored, misses only). "
+                "This is Defect 1 from the item 10 correction: a fault trace is a function of "
+                "whichever policy produced it, not the workload's true reference string, and "
+                "feeding it to Belady computes a circular, invalid bound. This solver requires "
+                "a TRACE_TYPE_REFERENCE trace, written by the WORKLOAD (replay_cyclic with a "
+                "ref_trace argument), not the pager. Aborting.\n", trace_path);
+        abort();
+    }
+    if (trace_type != TRACE_TYPE_REFERENCE) {
+        fprintf(stderr, "SOLVER FAILED: %s has unrecognized trace_type=%u\n", trace_path, trace_type);
+        abort();
+    }
+
     uint64_t cap = 1024, n = 0;
     uint32_t *ref = malloc(cap * sizeof(uint32_t));
-    uint64_t n_prefetched_skipped = 0;
-
     trace_record_t rec;
     while (read(fd, &rec, sizeof rec) == (ssize_t)sizeof rec) {
-        if (rec.was_prefetched) { n_prefetched_skipped++; continue; }
         if (n == cap) { cap *= 2; ref = realloc(ref, cap * sizeof(uint32_t)); }
         ref[n++] = rec.chunk_id;
     }
     close(fd);
 
-    fprintf(stderr, "loaded %llu genuine-fault references from %s (skipped %llu prefetched)\n",
-            (unsigned long long)n, trace_path, (unsigned long long)n_prefetched_skipped);
+    fprintf(stderr, "loaded %llu ground-truth references from %s (TRACE_TYPE_REFERENCE)\n",
+            (unsigned long long)n, trace_path);
     *out_n = n;
     return ref;
 }
@@ -104,10 +124,78 @@ static uint64_t naive_belady(const uint32_t *ref, uint64_t n, uint32_t capacity)
     return misses;
 }
 
+// Detects whether ref[] is a strict cyclic scan: the same permutation of
+// n_candidate distinct chunk ids, repeated verbatim for the whole length.
+// Returns 1 and sets *out_n/*out_passes if so, 0 otherwise (not periodic,
+// not a clean permutation, or n_refs isn't an exact multiple of the
+// period).
+static int detect_cyclic_scan(const uint32_t *ref, uint64_t n_refs, uint32_t *out_n, uint32_t *out_passes) {
+    if (n_refs == 0) return 0;
+    uint32_t max_id = 0;
+    for (uint64_t i = 0; i < n_refs; i++) if (ref[i] > max_id) max_id = ref[i];
+    uint32_t n_candidate = max_id + 1;
+    if (n_candidate == 0 || n_refs % n_candidate != 0) return 0;
+    uint32_t passes = (uint32_t)(n_refs / n_candidate);
+    if (passes < 1) return 0;
+
+    for (uint64_t i = 0; i < n_refs; i++)
+        if (ref[i] != ref[i % n_candidate]) return 0;
+
+    uint8_t *seen = calloc(n_candidate, 1);
+    int ok = 1;
+    for (uint32_t i = 0; i < n_candidate; i++) {
+        if (ref[i] >= n_candidate || seen[ref[i]]) { ok = 0; break; }
+        seen[ref[i]] = 1;
+    }
+    free(seen);
+    if (!ok) return 0;
+
+    *out_n = n_candidate;
+    *out_passes = passes;
+    return 1;
+}
+
+// Exact, provable lower bound for a strict cyclic scan of n distinct items
+// visited `passes` times with cache capacity k: the first pass is n
+// compulsory misses (nothing is cached yet); after that, going into any
+// subsequent pass at most k items can possibly be resident, so at least
+// (n-k) of that pass's n references must miss. This is a LOWER BOUND, not
+// necessarily tight -- item 9's own measurements found the true optimum can
+// exceed it (see CLAUDE.md) -- but any result below it is a mathematical
+// impossibility and proves the solver (or, as in V1, its input) is wrong.
+static uint64_t cyclic_floor(uint32_t n, uint32_t passes, uint32_t k) {
+    uint64_t extra_per_pass = (k < n) ? (uint64_t)(n - k) : 0;
+    return (uint64_t)n + (uint64_t)(passes - 1) * extra_per_pass;
+}
+
+// Runs the exact-floor check unconditionally, aborting on failure. Returns
+// 1 if the cyclic-scan case applied (and passed), 0 if the trace wasn't a
+// detectable cyclic scan (no check performed, not a failure).
+static int check_cyclic_floor_or_abort(const uint32_t *ref, uint64_t n_refs, uint32_t capacity, uint64_t misses) {
+    uint32_t n, passes;
+    if (!detect_cyclic_scan(ref, n_refs, &n, &passes)) return 0;
+    uint64_t floor = cyclic_floor(n, passes, capacity);
+    printf("cyclic-scan floor check: n=%u passes=%u capacity=%u floor=%llu actual_misses=%llu -- %s\n",
+           n, passes, capacity, (unsigned long long)floor, (unsigned long long)misses,
+           misses >= floor ? "OK" : "BELOW FLOOR, IMPOSSIBLE");
+    if (misses < floor) {
+        fprintf(stderr,
+                "SOLVER FAILED (A-2 exact floor check): detected a strict cyclic scan "
+                "(n=%u distinct chunks, %u passes, capacity=%u), computed provable floor=%llu "
+                "misses, but the solver reported %llu misses, which is BELOW the floor -- "
+                "mathematically impossible. Per the spec's own instruction, this means the "
+                "solver is wrong (or was fed a corrupted/inconsistent input) -- aborting rather "
+                "than reporting an impossible number.\n",
+                n, passes, capacity, (unsigned long long)floor, (unsigned long long)misses);
+        abort();
+    }
+    return 1;
+}
+
 static int run_selftest(void) {
     int all_ok = 1;
 
-    printf("=== belady self-test 1/2: random cross-check vs naive O(n^2) reference ===\n");
+    printf("=== belady self-test 1/3: random cross-check vs naive O(n^2) reference ===\n");
     srand(12345); // fixed seed: deterministic, reproducible selftest
     int trials = 300, mismatches = 0;
     for (int t = 0; t < trials; t++) {
@@ -130,7 +218,7 @@ static int run_selftest(void) {
     printf("%d/%d trials matched -- %s\n", trials - mismatches, trials, mismatches == 0 ? "OK" : "MISMATCH");
     if (mismatches != 0) all_ok = 0;
 
-    printf("=== belady self-test 2/2: pure cyclic reference string (informational) ===\n");
+    printf("=== belady self-test 2/3: exact cyclic floor (A-2), replaces the old weak check ===\n");
     uint32_t W = 20, P = 10;
     double ratios[] = { 0.25, 0.5, 0.75 };
     for (size_t ri = 0; ri < sizeof(ratios) / sizeof(ratios[0]); ri++) {
@@ -139,13 +227,39 @@ static int run_selftest(void) {
         uint32_t *ref = malloc(n_refs * sizeof(uint32_t));
         for (uint64_t i = 0; i < n_refs; i++) ref[i] = (uint32_t)(i % W);
         belady_result_t res = belady_simulate(ref, n_refs, K);
-        double r = (double)K / (double)W;
-        double naive_expected = (1.0 - r) * (double)W;
-        double actual_per_pass = (double)(res.misses - W) / (double)(P - 1);
-        printf("  W=%u P=%u K=%u (r=%.2f): steady-state misses/pass=%.2f "
-               "(naive (1-r)*W=%.2f -- NOT a pass/fail bound, see CLAUDE.md item 9)\n",
-               W, P, K, r, actual_per_pass, naive_expected);
+        int checked = check_cyclic_floor_or_abort(ref, n_refs, K, res.misses);
+        if (!checked) { fprintf(stderr, "  FAIL: expected a detectable cyclic scan\n"); all_ok = 0; }
         free(ref);
+    }
+
+    printf("=== belady self-test 3/3: reference-vs-fault trace header enforcement ===\n");
+    {
+        const char *ref_path = "/tmp/belady_selftest_ref.trace";
+        const char *fault_path = "/tmp/belady_selftest_fault.trace";
+        trace_t *rt = trace_open(ref_path, TRACE_TYPE_REFERENCE);
+        for (int i = 0; i < 8; i++) trace_record(rt, (uint64_t)i + 1, (uint32_t)i, TRACE_NA, TRACE_NA);
+        trace_close(rt);
+        trace_t *ft = trace_open(fault_path, TRACE_TYPE_FAULT);
+        for (int i = 0; i < 8; i++) trace_record(ft, (uint64_t)i + 1, (uint32_t)i, TRACE_FAULT_MISSING, 0);
+        trace_close(ft);
+
+        int rfd = open(ref_path, O_RDONLY);
+        uint8_t t1;
+        int ok1 = (trace_read_header(rfd, &t1) == 0 && t1 == TRACE_TYPE_REFERENCE);
+        close(rfd);
+        int ffd = open(fault_path, O_RDONLY);
+        uint8_t t2;
+        int ok2 = (trace_read_header(ffd, &t2) == 0 && t2 == TRACE_TYPE_FAULT);
+        close(ffd);
+
+        printf("  reference file correctly identified: %s\n", ok1 ? "OK" : "FAIL");
+        printf("  fault file correctly identified: %s\n", ok2 ? "OK" : "FAIL");
+        if (!ok1 || !ok2) all_ok = 0;
+        unlink(ref_path);
+        unlink(fault_path);
+        // load_reference_string() aborting on a FAULT file is exercised by
+        // run_correctness_harness.sh's negative test (a subprocess whose
+        // expected exit is SIGABRT), not here -- self-test must not abort.
     }
 
     printf(all_ok ? "SELFTEST PASS\n" : "SELFTEST FAIL\n");
@@ -157,7 +271,7 @@ int main(int argc, char **argv) {
         return run_selftest();
     }
     if (argc != 4) {
-        fprintf(stderr, "usage: %s <trace_path> <chunk_size_bytes> <budget_bytes>\n"
+        fprintf(stderr, "usage: %s <reference_trace_path> <chunk_size_bytes> <budget_bytes>\n"
                         "       %s --selftest\n", argv[0], argv[0]);
         return 2;
     }
@@ -168,13 +282,16 @@ int main(int argc, char **argv) {
     uint32_t capacity = (uint32_t)(budget_bytes / chunk_size);
 
     uint64_t n_refs;
-    uint32_t *ref = load_reference_string(trace_path, &n_refs);
+    uint32_t *ref = load_reference_string(trace_path, &n_refs); // aborts on TRACE_TYPE_FAULT
     if (n_refs == 0) {
-        fprintf(stderr, "no genuine-fault references found in trace -- nothing to solve\n");
+        fprintf(stderr, "no references found in trace -- nothing to solve\n");
         return 1;
     }
 
     belady_result_t res = belady_simulate(ref, n_refs, capacity);
+
+    // A-2: unconditional exact floor check on every real run, not just selftest.
+    check_cyclic_floor_or_abort(ref, n_refs, capacity, res.misses);
     free(ref);
 
     printf("OPT (Belady) result\n");

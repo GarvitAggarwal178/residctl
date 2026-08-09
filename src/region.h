@@ -66,6 +66,21 @@ typedef struct {
     uint64_t stat_infeasible;
     uint64_t stat_prefetches;            // successful prefetch completions (item 8)
     uint64_t stat_prefetch_infeasible;   // prefetch abandoned, budget couldn't fit it
+    uint64_t stat_bytes_fetched;         // pager's own byte accounting (item 10 Defect 3):
+                                          // sum of c->len over every successful fetch_chunk()
+                                          // call (real faults + successful prefetches). Cross-
+                                          // checked against /proc/PID/io read_bytes by callers.
+
+    // Spec amendment A-3 (item 10 correction): reconcile() used to run on
+    // every single fetch, paying a fresh open/read/close of memory.stat
+    // each time -- a real, measured, un-amortized cost at small chunk
+    // sizes. Now it runs on every eviction (unconditionally -- I-7's core
+    // safety property is unchanged) and otherwise only every
+    // reconcile_interval fetches. reconcile_interval==1 reproduces the old
+    // eager behaviour exactly; the §13 correctness harness uses that via
+    // region_config_t.reconcile_interval / an --eager-reconcile flag.
+    uint32_t reconcile_interval; // set by region_startup from cfg; default 16
+    uint64_t fetches_since_reconcile;
 } region_t;
 
 // Startup configuration. Everything the caller must supply to region_startup().
@@ -83,6 +98,7 @@ typedef struct {
     const char *model_path;     // source file for fetches (O_RDONLY, O_DIRECT preferred)
     const char *cgroup_path;    // e.g. "/sys/fs/cgroup/spike"
     uint64_t budget_bytes;      // must be nonzero; auto-compute (§4 step 9 formula) is not yet implemented
+    uint32_t reconcile_interval; // 0 => default (16); 1 => eager, every fetch (A-3, --eager-reconcile)
 } region_config_t;
 
 // Run manifest, written once per run per §4 step 11.

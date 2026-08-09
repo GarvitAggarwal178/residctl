@@ -68,9 +68,22 @@ then check `uffdio_continue.mapped == chunk_len` and abort on mismatch.
 lock is held across the entire fetch (read + `CONTINUE` + state update).**
 
 **I-7 — Our resident-bytes accounting is reconciled against
-`memory.stat[shmem]` at every policy decision point.**
+`memory.stat[shmem]` on every eviction, and otherwise at least every
+`reconcile_interval` fetches (default 16; `reconcile_interval=1` reproduces
+checking on every single fetch).**
 If they diverge by more than one chunk, abort. This is the only defence against
-an eviction that silently didn't happen.
+an eviction that silently didn't happen. **Amendment A-3 (item 10
+correction):** the original rule — reconcile on *every* fetch — was
+measured to cost a fresh `open`/`read`/`close` of `memory.stat` per fetch,
+a real, un-amortized architectural cost that dominates at small chunk
+sizes. The invariant itself (divergence beyond one chunk aborts) is
+unchanged; only its check frequency is amortized away from eviction-free
+fetches. Reconcile still runs unconditionally on every eviction, so a
+silently-failed eviction is still caught immediately. Implementations MUST
+expose a way to force `reconcile_interval=1` (an `--eager-reconcile` flag
+or equivalent), and the §13 correctness harness MUST run with it forced —
+amortization is a performance concession for the harness/production path,
+not for the tests that exist to catch exactly this class of bug.
 
 **I-8 — Fault handling dispatches on chunk *state*, never on fault *type*.**
 Both `MISSING` and `MINOR` occur in normal operation: `MISSING` for an absent or
@@ -216,7 +229,7 @@ switch (chunk->state):
   ABSENT:
       chunk->state = FETCHING
       chunk->last_fault_seq = ++region->fault_seq
-      trace.record(chunk->id, region->fault_seq)
+      fault_trace.record(chunk->id, region->fault_seq)   # METRICS ONLY -- see Amendment A-1
       policy->on_fault(chunk)                    # may request evictions
       ensure_budget(chunk->len)                  # §7
       fetch(chunk)                               # §6, lock held (I-6)
@@ -230,6 +243,36 @@ unlock(chunk)
 **Note on the `RESIDENT` case:** it is reachable and normal. It is the S2
 finding's other face — many threads fault into one chunk, one `CONTINUE` resolves
 all, but their messages were already queued. `UFFDIO_WAKE` is harmless and cheap.
+
+**Amendment A-1 (item 10 correction) — the handler's trace is NOT the
+reference string.** The original text here called `trace.record()` inside
+`ABSENT` "the reference string" (see the old §9 text this amendment
+replaces). That is wrong: a pager only ever observes *misses* — a hit
+generates no uffd event at all, so `handle()` is never even invoked for it.
+A trace built exclusively from this handler's `ABSENT` branch is therefore
+a record of *which references this particular policy happened to miss on*,
+not of the workload's true access sequence. Feeding that trace to the
+offline solver (§10) computes "the best you could do given the misses this
+policy already made," which is circular and not a valid bound on anything.
+Proof this was happening in practice: V1's harness reported OPT values
+below the provable cyclic-scan floor (§10, Amendment A-2) at every budget
+ratio tested — a mathematical impossibility, meaning the solver's *input*
+was wrong.
+
+The fix: there are now two distinct trace kinds, and they are not
+interchangeable.
+- **Reference trace** (`TRACE_TYPE_REFERENCE`): the ground truth. Written
+  by the **workload** (the replay driver, or a future engine integration),
+  which knows the true access sequence regardless of hit/miss, because it's
+  the one doing the accessing. This is the *only* legitimate input to §10's
+  solver.
+- **Fault trace** (`TRACE_TYPE_FAULT`): what `handle()`'s `ABSENT` branch
+  above still writes. Useful for metrics, dedup accounting, and prefetch
+  accounting (§9) — never for the solver.
+
+Every trace file carries a header naming which kind it is. The solver
+(§10) MUST read this header and ABORT if handed a `TRACE_TYPE_FAULT` file —
+this must be impossible to get wrong by accident, not just documented.
 
 ---
 
@@ -353,16 +396,31 @@ pattern turns out to be less regular than assumed.
 
 ## 9. TRACE AND METRICS
 
-**Trace record** (binary, append-only, one per fault, written from the handler):
+**Trace record** (binary, append-only, same layout for both trace kinds):
 
 ```
 { uint64 seq; uint64 timestamp_ns; uint32 chunk_id; uint8 fault_type;
   uint8 was_prefetched; uint16 _pad; }
 ```
 
-This is the reference string. It feeds the Belady solver and it is the only
-legitimate source for it — derived from actual faults, never from declared access
-order, or the bound becomes circular.
+Preceded by a small header naming the trace kind (Amendment A-1, §5):
+
+```
+{ char magic[4]; uint8 trace_type; uint8 version; uint16 _pad; }
+```
+
+**`TRACE_TYPE_REFERENCE`** — written by the **workload** (the replay
+driver), one record per access, hit or miss, in order. `fault_type` and
+`was_prefetched` are `TRACE_NA` (a reference isn't a fault; the workload
+doesn't know or care whether the pager missed on it). **This is the
+reference string. It is the only legitimate input to the Belady solver
+(§10)** — derived from the workload's true access sequence, never from the
+handler's fault-only view, or the bound becomes circular (Amendment A-1).
+
+**`TRACE_TYPE_FAULT`** — written by the **handler**, one record per genuine
+`ABSENT`→`FETCHING` transition (i.e. once per real fault-driven fetch,
+never per dedup hit, never per prefetch-satisfied reference). This is
+metrics/dedup/prefetch-accounting data. **Never solver input.**
 
 **Cross-arm metrics** (identical collection in both arms):
 
@@ -389,8 +447,10 @@ zero regardless of performance.
 
 ## 10. OFFLINE OPTIMAL SOLVER
 
-Separate binary. Input: trace file + budget. Output: minimum achievable fault
-count and bytes.
+Separate binary. Input: a `TRACE_TYPE_REFERENCE` trace (Amendment A-1, §5/§9)
++ budget. **MUST abort if handed a `TRACE_TYPE_FAULT` trace** — read the
+trace header and check before doing anything else. Output: minimum
+achievable fault count and bytes.
 
 Standard Belady: build a next-use index over the reference string (single reverse
 pass), then simulate with a max-heap keyed on next-use distance. O(n log k).
@@ -398,9 +458,37 @@ pass), then simulate with a max-heap keyed on next-use distance. O(n log k).
 Must accept the same budget parameter as the live runs so the bound is computed
 against the identical capacity.
 
-Sanity check that must pass before any result is reported: on a strictly cyclic
-reference string at budget ratio *r*, the solver must return approximately
-`(1−r) × W` bytes per pass. If it doesn't, the solver is wrong, not the theory.
+**Amendment A-2 (item 10 correction) — replaces the original sanity
+check.** The original text here required: "on a strictly cyclic reference
+string at budget ratio *r*, the solver must return approximately `(1−r) ×
+W` bytes per pass." That check is too weak and its implied derivation is
+wrong: for `n` distinct chunks visited cyclically with cache capacity `k`,
+naively assuming `k` items can be permanently pinned ignores that demand
+paging forces a cache slot open for *every* miss, disturbing whatever set
+you'd hoped to keep resident. The true optimum measurably exceeds
+`(1−r) × W` (see `CLAUDE.md`'s item 9 note for the worked example).
+
+Required check instead — exact and provable, not approximate:
+
+```
+floor(n, k, passes) = n + (passes - 1) * max(n - k, 0)
+```
+
+This is a true lower bound: pass 1 is `n` compulsory misses (cache starts
+empty), and going into any subsequent pass at most `k` items can possibly
+be resident, so at least `n − k` of that pass's `n` references must miss.
+It is not always tight (the true optimum can exceed it), but any solver
+result *below* it is a mathematical impossibility.
+
+The solver MUST detect when its input is a strict cyclic scan (the same
+permutation of chunk ids repeated verbatim for the whole trace) and, when
+it is, assert `result.misses >= floor(...)`, aborting with a clear message
+if not. Run this on every invocation, not just a self-test — it is what
+would have caught Defect 1 immediately instead of shipping impossible
+numbers. Also re-verify the solver against an independent naive O(n²)
+reference implementation (linear scan for true next-occurrence, nothing
+clever to get wrong) across many random cases — this is the primary
+correctness gate; the cyclic floor is the secondary, exact-bound gate.
 
 ---
 
@@ -431,6 +519,20 @@ data point.
 
 **Machine exclusivity is a hard rule.** No CN project, no other workload, nothing
 on the machine during a run. The spike was contaminated by exactly this.
+
+**Amendment A-4 (item 10 correction).** The replay driver (and the mmap
+baseline arms A/B) MUST consume every page of a chunk on each reference —
+the way a real consumer (e.g. a transformer reading a layer's weights)
+reads every byte of what it needs — not a single sentinel byte. A
+single-byte touch under-reads by orders of magnitude relative to the
+pager's full-chunk fetch, which both invalidates the wall-clock comparison
+between arms and biases `madvise` mode selection (sparse random reads look
+artificially better than they do under real consumption). This access
+pattern must be **identical across every arm** — A/B and C/D/E execute the
+same reads; the only difference between arms is who owns the replacement
+decision. Verify the read loop is not compiler-elided (accumulate into a
+`volatile` sink; confirm via `objdump` or timing) — a silently-elided loop
+reproduces this exact defect invisibly.
 
 ---
 

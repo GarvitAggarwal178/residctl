@@ -62,6 +62,7 @@ static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
     fetch_chunk(r, c);            // §6, lock held throughout (I-6)
     c->state = CHUNK_RESIDENT;
     r->resident_bytes += c->len;
+    r->stat_bytes_fetched += c->len; // Defect 3: pager's own byte accounting
     if (r->policy && r->policy->on_resident) r->policy->on_resident(r, c);
     if (r->prefetch_enabled) maybe_prefetch(r, c);
     r->stat_absent_handled++;

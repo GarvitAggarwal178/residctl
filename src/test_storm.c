@@ -69,6 +69,7 @@ int main(int argc, char **argv) {
         .region_len = REGION_LEN, .chunk_size = CHUNK_SIZE,
         .model_path = argv[2], .cgroup_path = argv[1],
         .budget_bytes = BUDGET_BYTES,
+        .reconcile_interval = 1, // A-3: §13 correctness runs use eager reconcile
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);

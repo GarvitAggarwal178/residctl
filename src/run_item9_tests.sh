@@ -1,12 +1,15 @@
 #!/bin/bash
-# Build-order item 9 verification: Belady offline optimal solver (§10).
+# Build-order item 9 verification: Belady offline optimal solver (§10),
+# corrected per item 10's Defect 1: the solver now takes a ground-truth
+# REFERENCE trace (workload-authored), never the pager's FAULT trace.
 set -u
 RESIDCTL=/root/residctl
 BELADY=$RESIDCTL/src/belady_main
 REPLAY=$RESIDCTL/src/replay_main
 GEN=$RESIDCTL/src/gen_pattern
 MODEL=$RESIDCTL/scratch/pattern_16m.bin
-TRACE=$RESIDCTL/scratch/item9_trace.bin
+FAULT_TRACE=$RESIDCTL/scratch/item9_fault_trace.bin
+REF_TRACE=$RESIDCTL/scratch/item9_ref_trace.bin
 RESULTS=$RESIDCTL/results
 CGROUP=/sys/fs/cgroup/residctl_item9
 OUT=$RESULTS/item9_test_log.txt
@@ -20,7 +23,11 @@ echo "--- selftest ---" | tee -a "$OUT"
 selftest_rc=${PIPESTATUS[0]}
 echo "selftest exit: $selftest_rc" | tee -a "$OUT"
 
-echo "--- generate a real trace via replay_main (layer_order, same scenario as items 6-8) ---" | tee -a "$OUT"
+echo "--- generate fault trace + ground-truth reference trace via replay_main ---" | tee -a "$OUT"
+echo "(policy=layer_order, prefetch=OFF -- i.e. arm D, not E: OPT is only a valid bound" | tee -a "$OUT"
+echo " for the run that generated its reference trace. Comparing OPT to a prefetch=ON run" | tee -a "$OUT"
+echo " would repeat the exact V1 Defect-1-adjacent mistake -- prefetch changes what counts" | tee -a "$OUT"
+echo " as demand, so it can legitimately beat OPT-for-a-different-trace without contradiction.)" | tee -a "$OUT"
 if [ -d "$CGROUP" ]; then
     procs=$(cat "$CGROUP/cgroup.procs" 2>/dev/null)
     if [ -n "$procs" ]; then for p in $procs; do kill -9 "$p" 2>/dev/null; done; sleep 1; fi
@@ -29,18 +36,31 @@ fi
 mkdir "$CGROUP"
 echo 536870912 > "$CGROUP/memory.max"
 echo 0 > "$CGROUP/memory.swap.max"
-rm -f "$TRACE"
+rm -f "$FAULT_TRACE" "$REF_TRACE"
 
 bash -c 'echo $BASHPID > "'"$CGROUP"'/cgroup.procs"; exec "$@"' -- \
-  "$REPLAY" "$CGROUP" "$MODEL" 16777216 2097152 6291456 5 layer_order on "$TRACE" 2>&1 | tee -a "$OUT"
+  "$REPLAY" "$CGROUP" "$MODEL" 16777216 2097152 6291456 5 layer_order off "$FAULT_TRACE" "$REF_TRACE" 2>&1 | tee -a "$OUT"
 replay_rc=${PIPESTATUS[0]}
 
 procs=$(cat "$CGROUP/cgroup.procs" 2>/dev/null)
 if [ -n "$procs" ]; then for p in $procs; do kill -9 "$p" 2>/dev/null; done; fi
 rmdir "$CGROUP" 2>/dev/null
 
-echo "--- run belady_main against that trace (chunk_size=2097152, budget=6291456) ---" | tee -a "$OUT"
-belady_out=$("$BELADY" "$TRACE" 2097152 6291456 2>&1)
+echo "--- negative test: belady_main must ABORT if handed the FAULT trace ---" | tee -a "$OUT"
+neg_out=$("$BELADY" "$FAULT_TRACE" 2097152 6291456 2>&1)
+neg_rc=$?
+echo "$neg_out" | tee -a "$OUT"
+echo "exit code: $neg_rc" | tee -a "$OUT"
+if [ $neg_rc -eq 134 ] && echo "$neg_out" | grep -q "Defect 1 from the item 10 correction"; then
+    echo "negative test: PASS (correctly aborted with SIGABRT on FAULT trace)" | tee -a "$OUT"
+    negative_ok=1
+else
+    echo "negative test: FAIL (expected SIGABRT/134 with Defect-1 message, got rc=$neg_rc)" | tee -a "$OUT"
+    negative_ok=0
+fi
+
+echo "--- run belady_main against the REFERENCE trace (chunk_size=2097152, budget=6291456) ---" | tee -a "$OUT"
+belady_out=$("$BELADY" "$REF_TRACE" 2097152 6291456 2>&1)
 belady_rc=$?
 echo "$belady_out" | tee -a "$OUT"
 
@@ -64,8 +84,8 @@ else
 fi
 
 echo "" | tee -a "$OUT"
-if [ "$selftest_rc" -eq 0 ] && [ "$replay_rc" -eq 0 ] && [ "$belady_rc" -eq 0 ] && [ "$consistency_ok" -eq 1 ]; then
+if [ "$selftest_rc" -eq 0 ] && [ "$replay_rc" -eq 0 ] && [ "$belady_rc" -eq 0 ] && [ "$consistency_ok" -eq 1 ] && [ "$negative_ok" -eq 1 ]; then
     echo "RESULT: PASS" | tee -a "$OUT"
 else
-    echo "RESULT: FAIL (selftest_rc=$selftest_rc replay_rc=$replay_rc belady_rc=$belady_rc consistency_ok=$consistency_ok)" | tee -a "$OUT"
+    echo "RESULT: FAIL (selftest_rc=$selftest_rc replay_rc=$replay_rc belady_rc=$belady_rc consistency_ok=$consistency_ok negative_ok=$negative_ok)" | tee -a "$OUT"
 fi

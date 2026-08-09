@@ -64,7 +64,7 @@ static int run_scenario(const char *cgroup_path, const char *model_path, policy_
     pager_args_t pager_args = { &g_r, &stop };
     pthread_create(&pager_thread, NULL, pager_trampoline, &pager_args);
 
-    replay_result_t res = replay_cyclic(&g_r, N_PASSES);
+    replay_result_t res = replay_cyclic(&g_r, N_PASSES, NULL);
     (void)res;
 
     stop = 1;

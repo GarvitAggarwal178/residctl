@@ -89,8 +89,22 @@ static uint32_t default_select_victim(region_t *r) {
     return CHUNK_NONE;
 }
 
+// Spec amendment A-3 (item 10 correction): reconcile() used to run
+// unconditionally here, on EVERY fetch -- a real, measured, un-amortized
+// cost (a fresh open/read/close of memory.stat per fetch). Now it runs
+// unconditionally on every eviction (I-7's core safety property --
+// "the only defence against an eviction that silently didn't happen" -- is
+// unchanged, since we still check immediately after every single punch)
+// and otherwise only every reconcile_interval fetches.
+// reconcile_interval==1 (region_config_t.reconcile_interval=1, or
+// --eager-reconcile in the CLI binaries) reproduces the old eager behaviour
+// exactly; the §13 correctness harness runs with that set.
 int ensure_budget(region_t *r, uint64_t need) {
-    reconcile(r); // I-7, every policy decision point
+    r->fetches_since_reconcile++;
+    if (r->reconcile_interval <= 1 || r->fetches_since_reconcile >= r->reconcile_interval) {
+        reconcile(r);
+        r->fetches_since_reconcile = 0;
+    }
 
     while (r->resident_bytes + need > r->budget_bytes) {
         uint32_t victim_idx = r->policy ? r->policy->select_victim(r) : default_select_victim(r);
@@ -99,6 +113,8 @@ int ensure_budget(region_t *r, uint64_t need) {
             return -1;
         }
         evict_chunk(r, &r->chunks[victim_idx]);
+        reconcile(r); // A-3: unconditionally on every eviction
+        r->fetches_since_reconcile = 0; // an eviction just gave us a fresh check
     }
     return 0;
 }
