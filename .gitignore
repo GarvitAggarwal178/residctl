@@ -1,0 +1,7 @@
+scratch/
+*.o
+*.bin
+build/
+results/*.csv
+results/*.log
+!results/.gitkeep
