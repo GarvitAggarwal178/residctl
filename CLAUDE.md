@@ -44,7 +44,7 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 | 7 | `lru` and `layer_order` policies (§8) | 2h | done |
 | 8 | Prefetch (§6.3) | 1h | done (inline, not a separate thread -- see note) |
 | 9 | Belady solver (§10) | 2h | done (spec's own sanity formula turned out wrong -- see note) |
-| 10 | Harness, arms, sweep (§11) | 3h | done -- see results/HARNESS_REPORT.md |
+| 10 | Harness, arms, sweep (§11) | 3h | V1 SUPERSEDED (3 defects, see note below) -- corrected, see results/HARNESS_REPORT_V2.md |
 | 11 | llama.cpp integration (separate spec, stretch) | 7h | out of scope for now |
 
 The replay driver (item 6) comes before any engine integration so there is
@@ -85,22 +85,123 @@ branches in `handle_fault()` have still never been observed to fire) is now
 backed by much stronger negative evidence and is being accepted as a known,
 understood limitation for v1 rather than chased further.
 
-**Item 10 note -- full report in `results/HARNESS_REPORT.md`.** Two real
-methodology bugs were caught and fixed while building the harness, not
-during a later review:
+**ITEM 10 CORRECTION (supersedes the note below and `results/HARNESS_REPORT.md`,
+which is marked SUPERSEDED in place, not deleted). Full account in
+`results/HARNESS_REPORT_V2.md`.** V1's two "methodology bugs" below were
+real but incomplete -- an external review of V1 found three further,
+deeper defects that made every V1 number void:
+
+1. **Defect 1 (circular OPT bound).** §5's original text called the
+   handler's fault trace "the reference string" and fed it straight to the
+   solver. A pager only observes misses (a hit generates no uffd event), so
+   that trace is a function of whichever policy produced it, not the
+   workload's true access sequence -- feeding it to Belady is circular.
+   Proof it was happening: V1's reported OPT values were BELOW the
+   provable cyclic floor `n + (passes-1)*(n-k)` at every ratio (e.g.
+   floor=32 at r=0.25, reported 31) -- a mathematical impossibility. Fixed
+   by spec Amendment A-1: the trace now carries a header (`TRACE_TYPE_REFERENCE`
+   vs `TRACE_TYPE_FAULT`); the **workload** (`replay_cyclic()`, via a new
+   `ref_trace` argument) writes the ground-truth reference trace; the
+   solver (`belady_main.c`) aborts if handed a fault trace. See `trace.h`,
+   `replay.c`, `belady_main.c`.
+2. **Defect 2 (arms not doing the same work).** The replay driver and
+   baseline touched one byte per chunk. The pager fetches a full chunk per
+   miss, so the pager was moving ~250x more data than the baseline for the
+   "same" 40 touches -- invalidating both the wall-clock comparison and
+   the `MADV_RANDOM` finding (RANDOM only won because the workload was
+   genuinely sparse under 1-byte touches). Fixed by spec Amendment A-4:
+   every reference now reads every 4096-byte page of the chunk, identically
+   across all arms, accumulated into a `volatile` sink and verified via
+   `objdump` to not be compiler-elided (confirmed: see `replay.c`'s and
+   `baseline_main.c`'s disassembly, a genuine per-page load/accumulate/store
+   loop, not optimized away).
+3. **Defect 3 (wrong primary metric).** §9 already named
+   `/proc/PID/io:read_bytes` as the primary cross-arm metric; the harness
+   reported fault counts instead. This is what let arm E appear to beat
+   OPT (prefetch removes faults but reads the same bytes). Fixed: both
+   `replay_main.c` and `baseline_main.c` now report `read_bytes` from
+   `/proc/self/io` deltas, and the pager arms additionally report their own
+   byte accounting (`region_t.stat_bytes_fetched`, incremented in
+   `pager.c`/`prefetch.c`) as an independent cross-check -- a discrepancy
+   beyond one chunk is reported, not silently resolved by picking one.
+
+**Spec amendments applied to `docs/MECHANISM_SPEC.md`:**
+- **A-1** (§5, §9): reference trace is workload-authored, never the
+  handler's; header distinguishes the two; solver aborts on a fault trace.
+- **A-2** (§10): replaced the approximate `(1-r)*W` sanity check --
+  which item 9 already found rested on a flawed derivation, see the item 9
+  note below -- with the exact, provable cyclic floor
+  `n + (passes-1)*max(n-k,0)`, checked unconditionally on every solver run.
+- **A-3** (§7, I-7): `reconcile()` now runs on every eviction and every
+  16th fetch otherwise (was: every single fetch), amortizing a real,
+  measured cost (a fresh `memory.stat` open/read/close per fetch). A
+  `region_config_t.reconcile_interval` field (`--eager-reconcile` in the
+  CLI binaries) restores per-fetch checking; the §13 correctness harness
+  (`test_correctness.c`, `test_storm.c`) now sets it explicitly.
+- **A-4** (§11): the replay driver's (and baseline's) access pattern must
+  consume full chunks, identically across every arm.
+
+Repeating a mistake while fixing another one, caught during this
+correction: the first attempt at item 9's re-verification script compared
+the new OPT (computed over a `layer_order`+prefetch-ON reference trace) to
+that same run's 28 real faults, and OPT came out *higher* (30 > 28) --
+which looked like a bug but was the same class of error as Defect
+3/V1's original E-vs-OPT confusion: OPT is only a valid bound for the run
+that generated its reference trace, and prefetch changes what counts as
+demand. Fixed by generating the reference trace from a prefetch-OFF
+(`layer_order`, arm-D-equivalent) run instead; 30 <= 32 holds correctly.
+Left in as a reminder that this specific confusion is easy to reintroduce.
+
+---
+
+**Item 10 V2 results (the corrected, valid sweep).** Full report:
+`results/HARNESS_REPORT_V2.md`. Realistic scale (2 GiB region, 128 MiB
+chunks, 16 chunks, 5 passes), 3 budget ratios (0.25/0.5/0.75), n=3 reps/cell,
+fresh 2 GiB pattern file, `drop_caches` before every A/B run, machine
+exclusivity and resource headroom checked before/after. Headline results:
+- OPT at/above the exact cyclic floor at every ratio (65/48/32 vs floors
+  64/48/32) -- the check that would have caught V1's Defect 1 immediately.
+- OPT <= D and E-never-beats-OPT hold on the primary metric (`read_bytes`)
+  at every ratio -- the check Defect 3 exists to make possible.
+- C (`lru`) still thrashes at 100% miss at every ratio, unchanged from V1/item 7.
+- `MADV_RANDOM` inverted hard: V1's fastest mode is now 60-75x *slower*
+  than sequential under full-chunk consumption (disabling readahead turns
+  every 4096-byte stride into its own small random read). Sequential wins
+  now.
+- Arm B (hints): reduces bytes read ~5% at every ratio, but costs 30-40%
+  more wall-clock time (per-touch `madvise` overhead) -- a genuine mixed
+  result, not forced into "helps" or "hurts."
+- D's bytes/touch drops with more budget (115.8->95.6->68.8 MiB); the
+  kernel-native arms stay flat (~134 MiB/touch) regardless of ratio -- the
+  core result supporting the byte-reduction thesis at this scale.
+- Now that byte counts are finally comparable across arms (Defect 2 fixed),
+  the pager is measurably slower per byte than the kernel's native mmap
+  path (~2.3x at r=0.25) -- a real, disclosed architectural cost (uffd
+  dispatch, amortized `reconcile()`, no read-ahead pipelining, no
+  fetch/compute overlap in this synthetic benchmark), not glossed over.
+- Censoring rule did not fire at any ratio tested (no OOM, no
+  `E_INFEASIBLE`) -- still unexercised for real, same limitation as V1.
+
+**Item 10 V1 note (historical, kept for the record -- see the correction
+above for what superseded it).** Two methodology bugs were caught and
+fixed while building the original harness:
 1. Arms A/B (mmap baseline) initially showed microsecond wall-times and
    zero `pgscan`/`pgsteal` at every budget ratio, including the tightest.
    Cause: `pattern_16m.bin` had been touched repeatedly by items 1-9's
    tests all session and sat warm in the kernel's shared page cache, so
    arm A/B were measuring page-cache-hit speed regardless of `memory.max`
    -- defeating the entire point of a baseline arm. Fixed by
-   `sync; echo 3 > /proc/sys/vm/drop_caches` before every A/B run.
+   `sync; echo 3 > /proc/sys/vm/drop_caches` before every A/B run. (This
+   fix is still correct and is carried forward into V2.)
 2. OPT (item 9's solver) is computed over arm D's trace specifically.
    Comparing OPT numerically against arm E (which uses prefetch) is
    invalid -- prefetch changes what counts as "demand" by satisfying some
    references before they'd fault, so E can legitimately beat OPT-for-D
    without contradiction. The only relationship that must hold is
-   OPT <= D, verified at all three ratios (31<=36, 17<=29, 9<=21).
+   OPT <= D, verified at all three ratios (31<=36, 17<=29, 9<=21). (This
+   reasoning was correct, but the underlying OPT values were themselves
+   invalid per Defect 1 above -- the comparison logic was sound, the inputs
+   weren't.)
 
 **Read `results/HARNESS_REPORT.md` before drawing any conclusion from this
 data, especially the "what NOT to conclude" section** -- the wall-clock

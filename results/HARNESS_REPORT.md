@@ -1,5 +1,21 @@
 # HARNESS_REPORT — residctl build-order item 10
 
+> **SUPERSEDED.** This report's numbers are VOID and must not be cited.
+> An external review found three defects invalidating every result here:
+> (1) OPT was computed over the pager's fault trace, which is circular and
+> produced mathematically impossible values (below the provable cyclic
+> floor at every ratio); (2) the replay driver and baseline touched one
+> byte per chunk while the pager fetched full chunks, so arms were not
+> doing comparable work (~250x byte-count gap); (3) the sensitivity table
+> led with fault counts instead of §9's specified primary metric
+> (`read_bytes`), which is what let arm E appear to beat OPT. See
+> `results/HARNESS_REPORT_V2.md` for the corrected re-run and
+> `CLAUDE.md`'s "ITEM 10 CORRECTION" note for the full account of what was
+> wrong and what changed. This file is kept for the historical record, not
+> deleted, but nothing below should be treated as a valid measurement.
+
+---
+
 MECHANISM_SPEC.md §11: six arms (A mmap baseline, B mmap+hints, C pager+lru,
 D pager+layer_order, E pager+layer_order+prefetch, OPT offline solver over
 D's trace), swept across at least three budget ratios, in a cgroup with

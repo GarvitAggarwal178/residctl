@@ -1,0 +1,892 @@
+=== resource headroom check ===
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       585Mi       4.9Gi       3.6Mi       2.3Gi       7.0Gi
+Swap:          2.0Gi          0B       2.0Gi
+model file: -rw-r--r-- 1 root root 2147483648 Aug  9 13:58 /root/residctl/scratch/pattern_2g.bin
+=== machine exclusivity check (before) ===
+ 14:03:50 up  2:03,  1 user,  load average: 0.14, 0.14, 0.10
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           7  0.2  0.0   4416  2516 hvc0     Sl+  12:00   0:14 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root        5856  0.0  0.1  35428 12424 ?        Ss   12:11   0:01 /usr/lib/systemd/systemd-udevd
+root           1  0.0  0.1  24248 15376 ?        Ss   12:00   0:00 /sbin/init
+root        5814  0.0  0.1  33988 13208 ?        S<s  12:11   0:00 /usr/lib/systemd/systemd-journald
+root        5944  0.0  0.3  44192 29876 ?        Ss   12:11   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root           2  0.0  0.0   3180  2200 hvc0     Sl+  12:00   0:00 /init
+root        5989  0.0  0.4 123464 32716 ?        Ssl  12:11   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+
+############################################################
+# ratio=0.25 budget_bytes=536870912 memory.max=603979776
+############################################################
+--- ratio=0.25 arm=A detail=mmap_normal_off rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3050744427 (3.051s) touches/sec=26.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=8
+  io_read_bytes_delta=10743746560
+  pgscan_delta=5104620 pgsteal_delta=2479603 workingset_refault_file_delta=2098696
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3050744427,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10743746560,majflt_delta=8,pgscan_delta=5104620,pgsteal_delta=2479603
+PASS
+--- ratio=0.25 arm=A detail=mmap_normal_off rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2746772713 (2.747s) touches/sec=29.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=8
+  io_read_bytes_delta=10743615488
+  pgscan_delta=5104603 pgsteal_delta=2479586 workingset_refault_file_delta=2098664
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2746772713,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10743615488,majflt_delta=8,pgscan_delta=5104603,pgsteal_delta=2479586
+PASS
+--- ratio=0.25 arm=A detail=mmap_normal_off rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2680388975 (2.680s) touches/sec=29.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=5104523 pgsteal_delta=2478048 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2680388975,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=5104523,pgsteal_delta=2478048
+PASS
+arm A mode=normal rates=[ 26.2 29.1 29.8] median=29.1
+--- ratio=0.25 arm=A detail=mmap_random_off rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=169295351655 (169.295s) touches/sec=0.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621370
+  io_read_bytes_delta=10737164288
+  pgscan_delta=2480563 pgsteal_delta=2479593 workingset_refault_file_delta=2097089
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=169295351655,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737164288,majflt_delta=2621370,pgscan_delta=2480563,pgsteal_delta=2479593
+PASS
+--- ratio=0.25 arm=A detail=mmap_random_off rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=167673276219 (167.673s) touches/sec=0.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621316
+  io_read_bytes_delta=10736943104
+  pgscan_delta=2480811 pgsteal_delta=2479840 workingset_refault_file_delta=2097035
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=167673276219,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10736943104,majflt_delta=2621316,pgscan_delta=2480811,pgsteal_delta=2479840
+PASS
+--- ratio=0.25 arm=A detail=mmap_random_off rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=162494206613 (162.494s) touches/sec=0.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621244
+  io_read_bytes_delta=10736648192
+  pgscan_delta=2480712 pgsteal_delta=2479772 workingset_refault_file_delta=2096963
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=162494206613,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10736648192,majflt_delta=2621244,pgscan_delta=2480712,pgsteal_delta=2479772
+PASS
+arm A mode=random rates=[ 0.5 0.5 0.5] median=0.5
+--- ratio=0.25 arm=A detail=mmap_sequential_off rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2221852297 (2.222s) touches/sec=36.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2479020 pgsteal_delta=2478085 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2221852297,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2479020,pgsteal_delta=2478085
+PASS
+--- ratio=0.25 arm=A detail=mmap_sequential_off rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2124657373 (2.125s) touches/sec=37.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2479041 pgsteal_delta=2478063 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2124657373,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2479041,pgsteal_delta=2478063
+PASS
+--- ratio=0.25 arm=A detail=mmap_sequential_off rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2138817855 (2.139s) touches/sec=37.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2478986 pgsteal_delta=2478024 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2138817855,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2478986,pgsteal_delta=2478024
+PASS
+arm A mode=sequential rates=[ 36.0 37.7 37.4] median=37.4
+arm A best mode: sequential (median 37.4 touches/sec)
+--- ratio=0.25 arm=B detail=mmap_sequential_on rep=1 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=sequential hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2924744563 (2.925s) touches/sec=27.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=259
+  io_read_bytes_delta=10191699968
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1965968
+ARM_CSV,policy=mmap_sequential_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2924744563,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10191699968,majflt_delta=259,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.25 arm=B detail=mmap_sequential_on rep=2 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=sequential hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=3015974946 (3.016s) touches/sec=26.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=259
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_sequential_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3015974946,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=259,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.25 arm=B detail=mmap_sequential_on rep=3 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=sequential hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2888533058 (2.889s) touches/sec=27.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=259
+  io_read_bytes_delta=10191994880
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966040
+ARM_CSV,policy=mmap_sequential_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2888533058,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10191994880,majflt_delta=259,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.25 arm=C detail=lru_off rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=lru prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4932255429 (4.932s) touches/sec=16.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=80 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=80 evictions=76 bytes_punched=10200547328 infeasible=0
+  handler_latency: count=80 min_ns=48679904 p50_ns=67108863 p99_ns=134217727 max_ns=90444921
+  queue_depth_high_water=1
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4932255429,absent_handled=80,evictions=76,infeasible=0,prefetches=0,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240
+PASS
+--- ratio=0.25 arm=C detail=lru_off rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=lru prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5022858775 (5.023s) touches/sec=15.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=80 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=80 evictions=76 bytes_punched=10200547328 infeasible=0
+  handler_latency: count=80 min_ns=47963305 p50_ns=67108863 p99_ns=134217727 max_ns=93027951
+  queue_depth_high_water=1
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=5022858775,absent_handled=80,evictions=76,infeasible=0,prefetches=0,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240
+PASS
+--- ratio=0.25 arm=C detail=lru_off rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=lru prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4996305198 (4.996s) touches/sec=16.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=80 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=80 evictions=76 bytes_punched=10200547328 infeasible=0
+  handler_latency: count=80 min_ns=43317196 p50_ns=67108863 p99_ns=134217727 max_ns=111226791
+  queue_depth_high_water=1
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4996305198,absent_handled=80,evictions=76,infeasible=0,prefetches=0,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240
+PASS
+--- ratio=0.25 arm=D detail=layer_order_off rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4285412980 (4.285s) touches/sec=18.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=69 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=69 evictions=65 bytes_punched=8724152320 infeasible=0
+  handler_latency: count=69 min_ns=45654935 p50_ns=67108863 p99_ns=134217727 max_ns=82269130
+  queue_depth_high_water=1
+  pager_bytes_fetched=9261023232 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9261023232
+  byte accounting cross-check: pager (9261023232) vs io_read_bytes_delta (9261023232) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4285412980,absent_handled=69,evictions=65,infeasible=0,prefetches=0,pager_bytes_fetched=9261023232,io_read_bytes_delta=9261023232
+PASS
+--- ratio=0.25 arm=D detail=layer_order_off rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4141899211 (4.142s) touches/sec=19.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=69 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=69 evictions=65 bytes_punched=8724152320 infeasible=0
+  handler_latency: count=69 min_ns=42350643 p50_ns=67108863 p99_ns=134217727 max_ns=81023195
+  queue_depth_high_water=1
+  pager_bytes_fetched=9261023232 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9261023232
+  byte accounting cross-check: pager (9261023232) vs io_read_bytes_delta (9261023232) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4141899211,absent_handled=69,evictions=65,infeasible=0,prefetches=0,pager_bytes_fetched=9261023232,io_read_bytes_delta=9261023232
+PASS
+--- ratio=0.25 arm=D detail=layer_order_off rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4678915601 (4.679s) touches/sec=17.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=69 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=69 evictions=65 bytes_punched=8724152320 infeasible=0
+  handler_latency: count=69 min_ns=45994407 p50_ns=67108863 p99_ns=134217727 max_ns=103779718
+  queue_depth_high_water=1
+  pager_bytes_fetched=9261023232 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9261023232
+  byte accounting cross-check: pager (9261023232) vs io_read_bytes_delta (9261023232) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4678915601,absent_handled=69,evictions=65,infeasible=0,prefetches=0,pager_bytes_fetched=9261023232,io_read_bytes_delta=9261023232
+PASS
+--- ratio=0.25 arm=E detail=layer_order_on rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5202241792 (5.202s) touches/sec=15.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=55 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=55 evictions=81 bytes_punched=10871635968 infeasible=0
+  handler_latency: count=55 min_ns=43003345 p50_ns=134217727 p99_ns=268435455 max_ns=151837904
+  queue_depth_high_water=12
+  pager_bytes_fetched=11408506880 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11408506880
+  byte accounting cross-check: pager (11408506880) vs io_read_bytes_delta (11408506880) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=5202241792,absent_handled=55,evictions=81,infeasible=0,prefetches=30,pager_bytes_fetched=11408506880,io_read_bytes_delta=11408506880
+PASS
+--- ratio=0.25 arm=E detail=layer_order_on rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5182127252 (5.182s) touches/sec=15.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=55 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=55 evictions=81 bytes_punched=10871635968 infeasible=0
+  handler_latency: count=55 min_ns=52017617 p50_ns=134217727 p99_ns=134217727 max_ns=129248313
+  queue_depth_high_water=12
+  pager_bytes_fetched=11408506880 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11408506880
+  byte accounting cross-check: pager (11408506880) vs io_read_bytes_delta (11408506880) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=5182127252,absent_handled=55,evictions=81,infeasible=0,prefetches=30,pager_bytes_fetched=11408506880,io_read_bytes_delta=11408506880
+PASS
+--- ratio=0.25 arm=E detail=layer_order_on rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5097893560 (5.098s) touches/sec=15.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=55 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=55 evictions=81 bytes_punched=10871635968 infeasible=0
+  handler_latency: count=55 min_ns=50538421 p50_ns=134217727 p99_ns=134217727 max_ns=126346498
+  queue_depth_high_water=12
+  pager_bytes_fetched=11408506880 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11408506880
+  byte accounting cross-check: pager (11408506880) vs io_read_bytes_delta (11408506880) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=5097893560,absent_handled=55,evictions=81,infeasible=0,prefetches=30,pager_bytes_fetched=11408506880,io_read_bytes_delta=11408506880
+PASS
+--- ratio=0.25 arm=OPT rep=1 ---
+loaded 80 ground-truth references from /root/residctl/scratch/harness_v2_arm_d_ratio_0.25_rep1.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=4 floor=64 actual_misses=65 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_v2_arm_d_ratio_0.25_rep1.reftrace chunk_size=134217728 budget_bytes=536870912 capacity=4 chunks
+  total_refs=80 minimum_misses=65 minimum_bytes_fetched=8724152320 hit_rate=0.1875
+--- ratio=0.25 arm=OPT rep=2 ---
+loaded 80 ground-truth references from /root/residctl/scratch/harness_v2_arm_d_ratio_0.25_rep2.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=4 floor=64 actual_misses=65 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_v2_arm_d_ratio_0.25_rep2.reftrace chunk_size=134217728 budget_bytes=536870912 capacity=4 chunks
+  total_refs=80 minimum_misses=65 minimum_bytes_fetched=8724152320 hit_rate=0.1875
+--- ratio=0.25 arm=OPT rep=3 ---
+loaded 80 ground-truth references from /root/residctl/scratch/harness_v2_arm_d_ratio_0.25_rep3.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=4 floor=64 actual_misses=65 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_v2_arm_d_ratio_0.25_rep3.reftrace chunk_size=134217728 budget_bytes=536870912 capacity=4 chunks
+  total_refs=80 minimum_misses=65 minimum_bytes_fetched=8724152320 hit_rate=0.1875
+
+############################################################
+# ratio=0.5 budget_bytes=1073741824 memory.max=1140850688
+############################################################
+=== resource headroom check ===
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       549Mi       6.0Gi       3.6Mi       1.2Gi       7.1Gi
+Swap:          2.0Gi          0B       2.0Gi
+model file: -rw-r--r-- 1 root root 2147483648 Aug  9 13:58 /root/residctl/scratch/pattern_2g.bin
+=== machine exclusivity check (before) ===
+ 14:14:19 up  2:13,  1 user,  load average: 0.39, 0.73, 0.50
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       20563 25.0  0.0   4948  3676 pts/0    Ss+  14:14   0:00 bash /root/residctl/scratch/run_v2_resume.sh 0.5
+root           7  0.1  0.0   4432  2544 hvc0     Sl+  12:00   0:15 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root        5856  0.0  0.1  35428 12424 ?        Ss   12:11   0:01 /usr/lib/systemd/systemd-udevd
+root           1  0.0  0.1  24248 15376 ?        Ss   12:00   0:00 /sbin/init
+root        5814  0.0  0.1  33988 13216 ?        S<s  12:11   0:00 /usr/lib/systemd/systemd-journald
+root        5944  0.0  0.3  44192 29876 ?        Ss   12:11   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root           2  0.0  0.0   3180  2200 hvc0     Sl+  12:00   0:00 /init
+
+############################################################
+# ratio=0.5 budget_bytes=1073741824 memory.max=1140850688
+############################################################
+--- ratio=0.5 arm=A detail=mmap_normal_off rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2347774208 (2.348s) touches/sec=34.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=22
+  io_read_bytes_delta=10787782656
+  pgscan_delta=4837753 pgsteal_delta=2359773 workingset_refault_file_delta=2109447
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2347774208,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10787782656,majflt_delta=22,pgscan_delta=4837753,pgsteal_delta=2359773
+PASS
+--- ratio=0.5 arm=A detail=mmap_normal_off rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2419378997 (2.419s) touches/sec=33.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=22
+  io_read_bytes_delta=10787655680
+  pgscan_delta=4837184 pgsteal_delta=2359688 workingset_refault_file_delta=2109416
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2419378997,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10787655680,majflt_delta=22,pgscan_delta=4837184,pgsteal_delta=2359688
+PASS
+--- ratio=0.5 arm=A detail=mmap_normal_off rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2475370791 (2.475s) touches/sec=32.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=16
+  io_read_bytes_delta=10768850944
+  pgscan_delta=4838818 pgsteal_delta=2355124 workingset_refault_file_delta=2104825
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2475370791,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10768850944,majflt_delta=16,pgscan_delta=4838818,pgsteal_delta=2355124
+PASS
+arm A mode=normal rates=[ 34.1 33.1 32.3] median=33.1
+--- ratio=0.5 arm=A detail=mmap_random_off rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=164427822762 (164.428s) touches/sec=0.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621314
+  io_read_bytes_delta=10736934912
+  pgscan_delta=2349714 pgsteal_delta=2348766 workingset_refault_file_delta=2097033
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=164427822762,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10736934912,majflt_delta=2621314,pgscan_delta=2349714,pgsteal_delta=2348766
+PASS
+--- ratio=0.5 arm=A detail=mmap_random_off rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=174529981535 (174.530s) touches/sec=0.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621163
+  io_read_bytes_delta=10736316416
+  pgscan_delta=2349524 pgsteal_delta=2348568 workingset_refault_file_delta=2096882
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=174529981535,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10736316416,majflt_delta=2621163,pgscan_delta=2349524,pgsteal_delta=2348568
+PASS
+--- ratio=0.5 arm=A detail=mmap_random_off rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=169187069106 (169.187s) touches/sec=0.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621321
+  io_read_bytes_delta=10736963584
+  pgscan_delta=2349744 pgsteal_delta=2348808 workingset_refault_file_delta=2097040
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=169187069106,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10736963584,majflt_delta=2621321,pgscan_delta=2349744,pgsteal_delta=2348808
+PASS
+arm A mode=random rates=[ 0.5 0.5 0.5] median=0.5
+--- ratio=0.5 arm=A detail=mmap_sequential_off rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2637438423 (2.637s) touches/sec=30.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2347906 pgsteal_delta=2346993 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2637438423,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2347906,pgsteal_delta=2346993
+PASS
+--- ratio=0.5 arm=A detail=mmap_sequential_off rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2220940454 (2.221s) touches/sec=36.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2348424 pgsteal_delta=2347505 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2220940454,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2348424,pgsteal_delta=2347505
+PASS
+--- ratio=0.5 arm=A detail=mmap_sequential_off rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2270586763 (2.271s) touches/sec=35.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2347913 pgsteal_delta=2346954 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2270586763,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2347913,pgsteal_delta=2346954
+PASS
+arm A mode=sequential rates=[ 30.3 36.0 35.2] median=35.2
+arm A best mode: sequential (median 35.2 touches/sec)
+--- ratio=0.5 arm=B detail=mmap_sequential_on rep=1 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=sequential hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2953645080 (2.954s) touches/sec=27.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=259
+  io_read_bytes_delta=10192093184
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966064
+ARM_CSV,policy=mmap_sequential_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2953645080,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192093184,majflt_delta=259,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.5 arm=B detail=mmap_sequential_on rep=2 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=sequential hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2966219625 (2.966s) touches/sec=27.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=259
+  io_read_bytes_delta=10192093184
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966064
+ARM_CSV,policy=mmap_sequential_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2966219625,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192093184,majflt_delta=259,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.5 arm=B detail=mmap_sequential_on rep=3 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=sequential hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=3092273595 (3.092s) touches/sec=25.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=259
+  io_read_bytes_delta=10192027648
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966048
+ARM_CSV,policy=mmap_sequential_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3092273595,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192027648,majflt_delta=259,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.5 arm=C detail=lru_off rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=lru prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5803510093 (5.804s) touches/sec=13.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=80 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=80 evictions=72 bytes_punched=9663676416 infeasible=0
+  handler_latency: count=80 min_ns=50704957 p50_ns=134217727 p99_ns=134217727 max_ns=104485649
+  queue_depth_high_water=1
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=5803510093,absent_handled=80,evictions=72,infeasible=0,prefetches=0,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240
+PASS
+--- ratio=0.5 arm=C detail=lru_off rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=lru prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5501610468 (5.502s) touches/sec=14.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=80 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=80 evictions=72 bytes_punched=9663676416 infeasible=0
+  handler_latency: count=80 min_ns=49196739 p50_ns=134217727 p99_ns=134217727 max_ns=102828031
+  queue_depth_high_water=1
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=5501610468,absent_handled=80,evictions=72,infeasible=0,prefetches=0,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240
+PASS
+--- ratio=0.5 arm=C detail=lru_off rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=lru prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5322515074 (5.323s) touches/sec=15.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=80 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=80 evictions=72 bytes_punched=9663676416 infeasible=0
+  handler_latency: count=80 min_ns=53096330 p50_ns=67108863 p99_ns=134217727 max_ns=84480069
+  queue_depth_high_water=1
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=5322515074,absent_handled=80,evictions=72,infeasible=0,prefetches=0,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240
+PASS
+--- ratio=0.5 arm=D detail=layer_order_off rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3733507415 (3.734s) touches/sec=21.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=57 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=57 evictions=49 bytes_punched=6576668672 infeasible=0
+  handler_latency: count=57 min_ns=45732988 p50_ns=67108863 p99_ns=134217727 max_ns=91777182
+  queue_depth_high_water=1
+  pager_bytes_fetched=7650410496 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7650410496
+  byte accounting cross-check: pager (7650410496) vs io_read_bytes_delta (7650410496) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3733507415,absent_handled=57,evictions=49,infeasible=0,prefetches=0,pager_bytes_fetched=7650410496,io_read_bytes_delta=7650410496
+PASS
+--- ratio=0.5 arm=D detail=layer_order_off rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3828054439 (3.828s) touches/sec=20.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=57 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=57 evictions=49 bytes_punched=6576668672 infeasible=0
+  handler_latency: count=57 min_ns=50944175 p50_ns=67108863 p99_ns=134217727 max_ns=87341362
+  queue_depth_high_water=1
+  pager_bytes_fetched=7650410496 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7650410496
+  byte accounting cross-check: pager (7650410496) vs io_read_bytes_delta (7650410496) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3828054439,absent_handled=57,evictions=49,infeasible=0,prefetches=0,pager_bytes_fetched=7650410496,io_read_bytes_delta=7650410496
+PASS
+--- ratio=0.5 arm=D detail=layer_order_off rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3674918686 (3.675s) touches/sec=21.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=57 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=57 evictions=49 bytes_punched=6576668672 infeasible=0
+  handler_latency: count=57 min_ns=52015148 p50_ns=67108863 p99_ns=134217727 max_ns=88268134
+  queue_depth_high_water=1
+  pager_bytes_fetched=7650410496 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7650410496
+  byte accounting cross-check: pager (7650410496) vs io_read_bytes_delta (7650410496) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3674918686,absent_handled=57,evictions=49,infeasible=0,prefetches=0,pager_bytes_fetched=7650410496,io_read_bytes_delta=7650410496
+PASS
+--- ratio=0.5 arm=E detail=layer_order_on rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4172940725 (4.173s) touches/sec=19.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=44 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=44 evictions=56 bytes_punched=7516192768 infeasible=0
+  handler_latency: count=44 min_ns=46180094 p50_ns=134217727 p99_ns=268435455 max_ns=157128212
+  queue_depth_high_water=4
+  pager_bytes_fetched=8589934592 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8589934592
+  byte accounting cross-check: pager (8589934592) vs io_read_bytes_delta (8589934592) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4172940725,absent_handled=44,evictions=56,infeasible=0,prefetches=20,pager_bytes_fetched=8589934592,io_read_bytes_delta=8589934592
+PASS
+--- ratio=0.5 arm=E detail=layer_order_on rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4397527541 (4.398s) touches/sec=18.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=44 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=44 evictions=56 bytes_punched=7516192768 infeasible=0
+  handler_latency: count=44 min_ns=47927704 p50_ns=134217727 p99_ns=268435455 max_ns=165506989
+  queue_depth_high_water=4
+  pager_bytes_fetched=8589934592 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8589934592
+  byte accounting cross-check: pager (8589934592) vs io_read_bytes_delta (8589934592) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4397527541,absent_handled=44,evictions=56,infeasible=0,prefetches=20,pager_bytes_fetched=8589934592,io_read_bytes_delta=8589934592
+PASS
+--- ratio=0.5 arm=E detail=layer_order_on rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4173131473 (4.173s) touches/sec=19.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=44 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=44 evictions=56 bytes_punched=7516192768 infeasible=0
+  handler_latency: count=44 min_ns=50575391 p50_ns=134217727 p99_ns=268435455 max_ns=134881049
+  queue_depth_high_water=4
+  pager_bytes_fetched=8589934592 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8589934592
+  byte accounting cross-check: pager (8589934592) vs io_read_bytes_delta (8589934592) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4173131473,absent_handled=44,evictions=56,infeasible=0,prefetches=20,pager_bytes_fetched=8589934592,io_read_bytes_delta=8589934592
+PASS
+--- ratio=0.5 arm=OPT rep=1 ---
+loaded 80 ground-truth references from /root/residctl/scratch/harness_v2_arm_d_ratio_0.5_rep1.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=8 floor=48 actual_misses=48 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_v2_arm_d_ratio_0.5_rep1.reftrace chunk_size=134217728 budget_bytes=1073741824 capacity=8 chunks
+  total_refs=80 minimum_misses=48 minimum_bytes_fetched=6442450944 hit_rate=0.4000
+--- ratio=0.5 arm=OPT rep=2 ---
+loaded 80 ground-truth references from /root/residctl/scratch/harness_v2_arm_d_ratio_0.5_rep2.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=8 floor=48 actual_misses=48 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_v2_arm_d_ratio_0.5_rep2.reftrace chunk_size=134217728 budget_bytes=1073741824 capacity=8 chunks
+  total_refs=80 minimum_misses=48 minimum_bytes_fetched=6442450944 hit_rate=0.4000
+--- ratio=0.5 arm=OPT rep=3 ---
+loaded 80 ground-truth references from /root/residctl/scratch/harness_v2_arm_d_ratio_0.5_rep3.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=8 floor=48 actual_misses=48 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_v2_arm_d_ratio_0.5_rep3.reftrace chunk_size=134217728 budget_bytes=1073741824 capacity=8 chunks
+  total_refs=80 minimum_misses=48 minimum_bytes_fetched=6442450944 hit_rate=0.4000
+
+=== machine exclusivity check (after) ===
+ 14:23:55 up  2:23,  1 user,  load average: 1.03, 0.99, 0.76
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           7  0.1  0.0   3576  2492 hvc0     Sl+  12:00   0:15 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root        5856  0.0  0.1  35428 12424 ?        Ss   12:11   0:01 /usr/lib/systemd/systemd-udevd
+root       20563  0.0  0.0   5080  3788 pts/0    Ss+  14:14   0:00 bash /root/residctl/scratch/run_v2_resume.sh 0.5
+root           1  0.0  0.1  24248 15376 ?        Ss   12:00   0:00 /sbin/init
+root       20839  0.0  0.1 1866288 15096 ?       Ssl  14:15   0:00 /usr/libexec/wsl-pro-service
+root        5814  0.0  0.1  33988 13248 ?        S<s  12:11   0:00 /usr/lib/systemd/systemd-journald
+root        5944  0.0  0.3  44192 29876 ?        Ss   12:11   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+
+=== free memory (after) ===
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       624Mi       6.8Gi       3.6Mi       299Mi       7.0Gi
+Swap:          2.0Gi          0B       2.0Gi
+
+=== sweep complete, results in /root/residctl/results/harness_v2_sweep.csv ===
+=== resource headroom check ===
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       559Mi       6.9Gi       3.6Mi       307Mi       7.1Gi
+Swap:          2.0Gi          0B       2.0Gi
+model file: -rw-r--r-- 1 root root 2147483648 Aug  9 13:58 /root/residctl/scratch/pattern_2g.bin
+=== machine exclusivity check (before) ===
+ 14:24:25 up  2:23,  1 user,  load average: 0.69, 0.91, 0.74
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           7  0.1  0.0   4424  2524 hvc0     Sl+  12:00   0:15 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root        5856  0.0  0.1  35428 12424 ?        Ss   12:11   0:01 /usr/lib/systemd/systemd-udevd
+root           1  0.0  0.1  24248 15376 ?        Ss   12:00   0:00 /sbin/init
+root       20839  0.0  0.1 1866288 15096 ?       Ssl  14:15   0:00 /usr/libexec/wsl-pro-service
+root        5814  0.0  0.1  33988 13248 ?        S<s  12:11   0:00 /usr/lib/systemd/systemd-journald
+root           2  0.0  0.0   3180  2200 hvc0     Sl+  12:00   0:00 /init
+root        5944  0.0  0.3  44192 29876 ?        Ss   12:11   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+
+############################################################
+# ratio=0.75 budget_bytes=1610612736 memory.max=1677721600
+############################################################
+--- ratio=0.75 arm=A detail=mmap_normal_off rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3000761924 (3.001s) touches/sec=26.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=14
+  io_read_bytes_delta=10762620928
+  pgscan_delta=4664715 pgsteal_delta=2222067 workingset_refault_file_delta=2103304
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3000761924,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10762620928,majflt_delta=14,pgscan_delta=4664715,pgsteal_delta=2222067
+PASS
+--- ratio=0.75 arm=A detail=mmap_normal_off rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2451499215 (2.451s) touches/sec=32.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=16
+  io_read_bytes_delta=10768846848
+  pgscan_delta=4664215 pgsteal_delta=2224046 workingset_refault_file_delta=2104824
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2451499215,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10768846848,majflt_delta=16,pgscan_delta=4664215,pgsteal_delta=2224046
+PASS
+--- ratio=0.75 arm=A detail=mmap_normal_off rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2448246397 (2.448s) touches/sec=32.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=16
+  io_read_bytes_delta=10768912384
+  pgscan_delta=4665291 pgsteal_delta=2224118 workingset_refault_file_delta=2104840
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2448246397,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10768912384,majflt_delta=16,pgscan_delta=4665291,pgsteal_delta=2224118
+PASS
+arm A mode=normal rates=[ 26.7 32.6 32.7] median=32.6
+--- ratio=0.75 arm=A detail=mmap_random_off rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=162884318387 (162.884s) touches/sec=0.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2620658
+  io_read_bytes_delta=10734247936
+  pgscan_delta=2217946 pgsteal_delta=2216999 workingset_refault_file_delta=2096377
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=162884318387,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10734247936,majflt_delta=2620658,pgscan_delta=2217946,pgsteal_delta=2216999
+PASS
+--- ratio=0.75 arm=A detail=mmap_random_off rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=167356925134 (167.357s) touches/sec=0.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2620237
+  io_read_bytes_delta=10732523520
+  pgscan_delta=2217591 pgsteal_delta=2216643 workingset_refault_file_delta=2095956
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=167356925134,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10732523520,majflt_delta=2620237,pgscan_delta=2217591,pgsteal_delta=2216643
+PASS
+--- ratio=0.75 arm=A detail=mmap_random_off rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=163572176847 (163.572s) touches/sec=0.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2616548
+  io_read_bytes_delta=10717413376
+  pgscan_delta=2213784 pgsteal_delta=2212866 workingset_refault_file_delta=2092267
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=163572176847,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10717413376,majflt_delta=2616548,pgscan_delta=2213784,pgsteal_delta=2212866
+PASS
+arm A mode=random rates=[ 0.5 0.5 0.5] median=0.5
+--- ratio=0.75 arm=A detail=mmap_sequential_off rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2628471465 (2.628s) touches/sec=30.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2216828 pgsteal_delta=2215927 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2628471465,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2216828,pgsteal_delta=2215927
+PASS
+--- ratio=0.75 arm=A detail=mmap_sequential_off rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2346919396 (2.347s) touches/sec=34.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2216820 pgsteal_delta=2215925 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2346919396,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2216820,pgsteal_delta=2215925
+PASS
+--- ratio=0.75 arm=A detail=mmap_sequential_off rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2334351125 (2.334s) touches/sec=34.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2213404 pgsteal_delta=2213395 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2334351125,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2213404,pgsteal_delta=2213395
+PASS
+arm A mode=sequential rates=[ 30.4 34.1 34.3] median=34.1
+arm A best mode: sequential (median 34.1 touches/sec)
+--- ratio=0.75 arm=B detail=mmap_sequential_on rep=1 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=sequential hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=3613688176 (3.614s) touches/sec=22.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=259
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_sequential_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3613688176,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=259,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.75 arm=B detail=mmap_sequential_on rep=2 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=sequential hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=3151147784 (3.151s) touches/sec=25.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=259
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_sequential_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3151147784,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=259,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.75 arm=B detail=mmap_sequential_on rep=3 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=sequential hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=3030911336 (3.031s) touches/sec=26.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=259
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_sequential_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3030911336,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=259,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.75 arm=C detail=lru_off rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=lru prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5660724516 (5.661s) touches/sec=14.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=80 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=80 evictions=68 bytes_punched=9126805504 infeasible=0
+  handler_latency: count=80 min_ns=49493429 p50_ns=67108863 p99_ns=134217727 max_ns=127206902
+  queue_depth_high_water=1
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=5660724516,absent_handled=80,evictions=68,infeasible=0,prefetches=0,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240
+PASS
+--- ratio=0.75 arm=C detail=lru_off rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=lru prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5564341734 (5.564s) touches/sec=14.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=80 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=80 evictions=68 bytes_punched=9126805504 infeasible=0
+  handler_latency: count=80 min_ns=47486447 p50_ns=67108863 p99_ns=134217727 max_ns=126207123
+  queue_depth_high_water=1
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=5564341734,absent_handled=80,evictions=68,infeasible=0,prefetches=0,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240
+PASS
+--- ratio=0.75 arm=C detail=lru_off rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=lru prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=5383153571 (5.383s) touches/sec=14.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=80 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=80 evictions=68 bytes_punched=9126805504 infeasible=0
+  handler_latency: count=80 min_ns=47766071 p50_ns=67108863 p99_ns=134217727 max_ns=147737607
+  queue_depth_high_water=1
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=lru,prefetch=off,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=5383153571,absent_handled=80,evictions=68,infeasible=0,prefetches=0,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240
+PASS
+--- ratio=0.75 arm=D detail=layer_order_off rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2867021567 (2.867s) touches/sec=27.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=41 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=41 evictions=29 bytes_punched=3892314112 infeasible=0
+  handler_latency: count=41 min_ns=50405343 p50_ns=67108863 p99_ns=134217727 max_ns=153789589
+  queue_depth_high_water=1
+  pager_bytes_fetched=5502926848 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5502926848
+  byte accounting cross-check: pager (5502926848) vs io_read_bytes_delta (5502926848) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2867021567,absent_handled=41,evictions=29,infeasible=0,prefetches=0,pager_bytes_fetched=5502926848,io_read_bytes_delta=5502926848
+PASS
+--- ratio=0.75 arm=D detail=layer_order_off rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3085375282 (3.085s) touches/sec=25.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=41 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=41 evictions=29 bytes_punched=3892314112 infeasible=0
+  handler_latency: count=41 min_ns=54585486 p50_ns=134217727 p99_ns=134217727 max_ns=158870654
+  queue_depth_high_water=1
+  pager_bytes_fetched=5502926848 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5502926848
+  byte accounting cross-check: pager (5502926848) vs io_read_bytes_delta (5502926848) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=3085375282,absent_handled=41,evictions=29,infeasible=0,prefetches=0,pager_bytes_fetched=5502926848,io_read_bytes_delta=5502926848
+PASS
+--- ratio=0.75 arm=D detail=layer_order_off rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3422033093 (3.422s) touches/sec=23.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=41 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=41 evictions=29 bytes_punched=3892314112 infeasible=0
+  handler_latency: count=41 min_ns=49899490 p50_ns=134217727 p99_ns=268435455 max_ns=260503050
+  queue_depth_high_water=1
+  pager_bytes_fetched=5502926848 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5502926848
+  byte accounting cross-check: pager (5502926848) vs io_read_bytes_delta (5502926848) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=3422033093,absent_handled=41,evictions=29,infeasible=0,prefetches=0,pager_bytes_fetched=5502926848,io_read_bytes_delta=5502926848
+PASS
+--- ratio=0.75 arm=E detail=layer_order_on rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4087005305 (4.087s) touches/sec=19.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=32 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=32 evictions=28 bytes_punched=3758096384 infeasible=0
+  handler_latency: count=32 min_ns=42864273 p50_ns=134217727 p99_ns=1073741823 max_ns=637524780
+  queue_depth_high_water=1
+  pager_bytes_fetched=5368709120 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5368709120
+  byte accounting cross-check: pager (5368709120) vs io_read_bytes_delta (5368709120) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=4087005305,absent_handled=32,evictions=28,infeasible=0,prefetches=8,pager_bytes_fetched=5368709120,io_read_bytes_delta=5368709120
+PASS
+--- ratio=0.75 arm=E detail=layer_order_on rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3344141615 (3.344s) touches/sec=23.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=32 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=32 evictions=28 bytes_punched=3758096384 infeasible=0
+  handler_latency: count=32 min_ns=54246205 p50_ns=67108863 p99_ns=536870911 max_ns=359176817
+  queue_depth_high_water=1
+  pager_bytes_fetched=5368709120 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5368709120
+  byte accounting cross-check: pager (5368709120) vs io_read_bytes_delta (5368709120) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=3344141615,absent_handled=32,evictions=28,infeasible=0,prefetches=8,pager_bytes_fetched=5368709120,io_read_bytes_delta=5368709120
+PASS
+--- ratio=0.75 arm=E detail=layer_order_on rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2587945119 (2.588s) touches/sec=30.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=32 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=32 evictions=28 bytes_punched=3758096384 infeasible=0
+  handler_latency: count=32 min_ns=40157047 p50_ns=67108863 p99_ns=268435455 max_ns=155951456
+  queue_depth_high_water=1
+  pager_bytes_fetched=5368709120 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5368709120
+  byte accounting cross-check: pager (5368709120) vs io_read_bytes_delta (5368709120) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2587945119,absent_handled=32,evictions=28,infeasible=0,prefetches=8,pager_bytes_fetched=5368709120,io_read_bytes_delta=5368709120
+PASS
+--- ratio=0.75 arm=OPT rep=1 ---
+loaded 80 ground-truth references from /root/residctl/scratch/harness_v2_arm_d_ratio_0.75_rep1.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=12 floor=32 actual_misses=32 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_v2_arm_d_ratio_0.75_rep1.reftrace chunk_size=134217728 budget_bytes=1610612736 capacity=12 chunks
+  total_refs=80 minimum_misses=32 minimum_bytes_fetched=4294967296 hit_rate=0.6000
+--- ratio=0.75 arm=OPT rep=2 ---
+loaded 80 ground-truth references from /root/residctl/scratch/harness_v2_arm_d_ratio_0.75_rep2.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=12 floor=32 actual_misses=32 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_v2_arm_d_ratio_0.75_rep2.reftrace chunk_size=134217728 budget_bytes=1610612736 capacity=12 chunks
+  total_refs=80 minimum_misses=32 minimum_bytes_fetched=4294967296 hit_rate=0.6000
+--- ratio=0.75 arm=OPT rep=3 ---
+loaded 80 ground-truth references from /root/residctl/scratch/harness_v2_arm_d_ratio_0.75_rep3.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=12 floor=32 actual_misses=32 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/harness_v2_arm_d_ratio_0.75_rep3.reftrace chunk_size=134217728 budget_bytes=1610612736 capacity=12 chunks
+  total_refs=80 minimum_misses=32 minimum_bytes_fetched=4294967296 hit_rate=0.6000
+
+=== machine exclusivity check (after) ===
+ 14:33:45 up  2:33,  1 user,  load average: 1.11, 1.03, 0.89
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           7  0.1  0.0   3576  2492 hvc0     Sl+  12:00   0:15 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root        5856  0.0  0.1  35428 12424 ?        Ss   12:11   0:01 /usr/lib/systemd/systemd-udevd
+root       21926  0.0  0.0   5080  3804 pts/0    Ss+  14:24   0:00 bash /root/residctl/scratch/run_v2_resume.sh 0.75
+root           1  0.0  0.1  24248 15376 ?        Ss   12:00   0:00 /sbin/init
+root        5814  0.0  0.1  33988 13280 ?        S<s  12:11   0:00 /usr/lib/systemd/systemd-journald
+root           2  0.0  0.0   3180  2200 hvc0     Sl+  12:00   0:00 /init
+root        5944  0.0  0.3  44192 29876 ?        Ss   12:11   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+
+=== free memory (after) ===
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       585Mi       6.9Gi       3.6Mi       285Mi       7.0Gi
+Swap:          2.0Gi          0B       2.0Gi
+
+=== sweep complete, results in /root/residctl/results/harness_v2_sweep.csv ===
