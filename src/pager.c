@@ -2,6 +2,7 @@
 #define _GNU_SOURCE
 #include "pager.h"
 #include "fetch.h"
+#include "budget.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,32 +29,22 @@ chunk_t *pager_lookup(region_t *r, uint64_t rel_off) {
     return NULL;
 }
 
-// Stand-in for MECHANISM_SPEC §7's ensure_budget(), which owns real
-// eviction (build-order item 4). Until then this refuses to silently
-// exceed budget: it aborts rather than let resident_bytes grow past
-// budget_bytes unaccounted, which would be exactly the kind of "weakened
-// test" the project rules forbid. Item 4 replaces this with real
-// reconcile() + policy->select_victim() + evict().
-static void ensure_budget_stub(region_t *r, uint64_t need) {
-    if (r->resident_bytes + need > r->budget_bytes) {
-        fprintf(stderr,
-                "PAGER FAILED: fetch of %llu bytes would exceed budget "
-                "(resident=%llu + need=%llu > budget=%llu). Eviction is not "
-                "implemented yet (build-order item 4) -- this configuration "
-                "requires eviction to proceed and none exists, so this stops "
-                "here instead of silently over-committing.\n",
-                (unsigned long long)need, (unsigned long long)r->resident_bytes,
-                (unsigned long long)need, (unsigned long long)r->budget_bytes);
-        abort();
-    }
-}
-
 static void handle_absent(region_t *r, chunk_t *c) {
     c->state = CHUNK_FETCHING;
     c->last_fault_seq = ++r->fault_seq;
     // trace.record(...) -- item 5, trace is NULL for now
     // policy->on_fault(...) -- item 7, policy is NULL for now
-    ensure_budget_stub(r, c->len);
+    if (ensure_budget(r, c->len) != 0) {
+        // Infeasible at this budget (§7/§11's censoring rule, not a bug --
+        // reconcile() already ran inside ensure_budget and would have
+        // aborted if OUR accounting disagreed with the kernel's). Revert to
+        // ABSENT so a later fault can retry once budget frees up; drop this
+        // fault message the same way the FETCHING branch does (don't wait,
+        // don't issue I/O). The faulting thread stays blocked -- that's the
+        // correct, honest behaviour when the workload doesn't fit budget B.
+        c->state = CHUNK_ABSENT;
+        return;
+    }
     fetch_chunk(r, c);            // §6, lock held throughout (I-6)
     c->state = CHUNK_RESIDENT;
     r->resident_bytes += c->len;

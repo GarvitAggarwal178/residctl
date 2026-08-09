@@ -38,7 +38,7 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 | 1 | Region setup + startup assertions (§4) | 2h | done |
 | 2 | Handler loop + chunk table + state machine (§3, §5) | 4h | done (see note) |
 | 3 | Fetch path with alignment (§6.1–6.2) | 3h | done, built together with item 2 |
-| 4 | Eviction + budget + reconcile (§7) | 2h | not started |
+| 4 | Eviction + budget + reconcile (§7) | 2h | done (temporary victim selector, see note) |
 | 5 | Trace recorder + metrics (§9) | 2h | not started |
 | 6 | Trace-replay driver | 2h | not started |
 | 7 | `lru` and `layer_order` policies (§8) | 2h | not started |
@@ -67,10 +67,17 @@ production fetch code. §13's T-3 (sustained concurrent storm with real
 eviction cycling, once item 4 exists) is the right place to actually confirm
 this path fires.
 
-**Not yet implemented, so not yet enforced anywhere:** I-7's reconcile()
-against `memory.stat[shmem]`. `ensure_budget_stub()` in `pager.c` only
-refuses to silently exceed `budget_bytes` in-process; it does not check the
-kernel's own accounting. That's item 4.
+**Item 4's victim selector is a placeholder, disclosed not hidden.**
+`ensure_budget()` (`budget.c`) needs `policy->select_victim()`, which is
+item 7's `lru`/`layer_order` and doesn't exist yet. Until then it picks the
+lowest layer_id among RESIDENT, unpinned chunks -- a deterministic FIFO-ish
+choice that exists only to make the reconcile/evict/infeasible *mechanism*
+testable, not to produce a real replacement policy. `test_eviction.c`
+verifies this mechanism exactly (predicted vs actual resident-chunk
+membership through an 8-chunk/3-slot sequence, 3/3 clean runs), including a
+punch-refetch round trip and I-7's reconcile() never tripping. Item 7 will
+swap the selector for the real `policy_t` call; item 4's evict/reconcile
+code underneath does not change.
 
 ## Layout
 

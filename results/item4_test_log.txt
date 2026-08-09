@@ -1,0 +1,14 @@
+region_startup OK: n_chunks=8 budget_bytes=6291456 (fits 3 chunks)
+after touch(0): resident_count=1 (expect 1) resident_bytes=2097152 evictions=0
+after touch(1): resident_count=2 (expect 2) resident_bytes=4194304 evictions=0
+after touch(2): resident_count=3 (expect 3) resident_bytes=6291456 evictions=0
+after touch(3): resident_count=3 (expect 3) resident_bytes=6291456 evictions=1
+after touch(4): resident_count=3 (expect 3) resident_bytes=6291456 evictions=2
+after touch(5): resident_count=3 (expect 3) resident_bytes=6291456 evictions=3
+after touch(6): resident_count=3 (expect 3) resident_bytes=6291456 evictions=4
+after touch(7): resident_count=3 (expect 3) resident_bytes=6291456 evictions=5
+after full pass: evictions=5 bytes_punched=10485760 infeasible=0
+punch-refetch round trip on chunk 0: state=2 evictions=6
+PASS
+exit code: 0
+RESULT: PASS

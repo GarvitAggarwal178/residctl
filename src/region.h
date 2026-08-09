@@ -55,6 +55,9 @@ typedef struct {
     uint64_t stat_dedup_resident;
     uint64_t stat_dedup_fetching;
     uint64_t stat_absent_handled;
+    uint64_t stat_evictions;
+    uint64_t stat_bytes_punched;
+    uint64_t stat_infeasible;
 } region_t;
 
 // Startup configuration. Everything the caller must supply to region_startup().
