@@ -5,16 +5,20 @@
 // integration runs long").
 //
 // Usage: replay_main <cgroup_path> <model_path> <region_len> <chunk_size>
-//                     <budget_bytes> <n_passes> [trace_out_path]
+//                     <budget_bytes> <n_passes> [policy] [trace_out_path]
+//   policy: "default" (no policy set -- lowest-index fallback, budget.c),
+//           "lru", or "layer_order". Defaults to "default".
 #define _GNU_SOURCE
 #include "region.h"
 #include "pager.h"
 #include "trace.h"
 #include "metrics.h"
 #include "replay.h"
+#include "policy.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include <signal.h>
 
@@ -28,10 +32,10 @@ static void *pager_trampoline(void *argp) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 7 && argc != 8) {
+    if (argc < 7 || argc > 9) {
         fprintf(stderr,
                 "usage: %s <cgroup_path> <model_path> <region_len> <chunk_size> "
-                "<budget_bytes> <n_passes> [trace_out_path]\n", argv[0]);
+                "<budget_bytes> <n_passes> [policy] [trace_out_path]\n", argv[0]);
         return 2;
     }
     const char *cgroup_path = argv[1];
@@ -40,7 +44,8 @@ int main(int argc, char **argv) {
     uint64_t chunk_size = strtoull(argv[4], NULL, 10);
     uint64_t budget_bytes = strtoull(argv[5], NULL, 10);
     uint32_t n_passes = (uint32_t)strtoul(argv[6], NULL, 10);
-    const char *trace_path = (argc == 8) ? argv[7] : NULL;
+    const char *policy_name = (argc >= 8) ? argv[7] : "default";
+    const char *trace_path = (argc == 9) ? argv[8] : NULL;
 
     region_config_t cfg = {
         .region_len = region_len,
@@ -52,6 +57,17 @@ int main(int argc, char **argv) {
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
 
+    policy_t *policy = NULL;
+    if (strcmp(policy_name, "lru") == 0) {
+        policy = policy_lru_create();
+    } else if (strcmp(policy_name, "layer_order") == 0) {
+        policy = policy_layer_order_create(g_r.n_chunks);
+    } else if (strcmp(policy_name, "default") != 0) {
+        fprintf(stderr, "unknown policy '%s' (expected default|lru|layer_order)\n", policy_name);
+        return 2;
+    }
+    g_r.policy = policy;
+
     trace_t *trace = NULL;
     if (trace_path) {
         trace = trace_open(trace_path);
@@ -61,10 +77,10 @@ int main(int argc, char **argv) {
     metrics_init(&metrics);
     g_r.metrics = &metrics;
 
-    printf("region_startup OK: n_chunks=%u chunk_size=%llu budget_bytes=%llu (%.1f chunks)\n",
+    printf("region_startup OK: n_chunks=%u chunk_size=%llu budget_bytes=%llu (%.1f chunks) policy=%s\n",
            g_r.n_chunks, (unsigned long long)g_r.chunks[0].len,
            (unsigned long long)g_r.budget_bytes,
-           (double)g_r.budget_bytes / (double)g_r.chunks[0].len);
+           (double)g_r.budget_bytes / (double)g_r.chunks[0].len, policy_name);
 
     volatile sig_atomic_t stop = 0;
     pthread_t pager_thread;
@@ -104,6 +120,7 @@ int main(int argc, char **argv) {
     }
 
     region_teardown(&g_r);
+    policy_destroy(policy);
     printf("PASS\n");
     return 0;
 }

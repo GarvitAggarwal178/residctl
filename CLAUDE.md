@@ -41,7 +41,7 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 | 4 | Eviction + budget + reconcile (§7) | 2h | done (temporary victim selector, see note) |
 | 5 | Trace recorder + metrics (§9) | 2h | done |
 | 6 | Trace-replay driver | 2h | done |
-| 7 | `lru` and `layer_order` policies (§8) | 2h | not started |
+| 7 | `lru` and `layer_order` policies (§8) | 2h | done |
 | 8 | Prefetch (§6.3) | 1h | not started |
 | 9 | Belady solver (§10) | 2h | not started |
 | 10 | Harness, arms, sweep (§11) | 3h | not started |
@@ -66,6 +66,38 @@ reported, not silently fixed by adding a test-only delay hook into
 production fetch code. §13's T-3 (sustained concurrent storm with real
 eviction cycling, once item 4 exists) is the right place to actually confirm
 this path fires.
+
+**Item 7 note -- an unplanned but genuinely useful observation.**
+`policy.c` implements `lru` (evict min `last_fault_seq` among RESIDENT+
+unpinned -- note this is age-since-LAST-FETCH, not general access time,
+because that's literally the only recency signal a fault-driven design has:
+touching an already-resident page installs no PTE change and generates no
+event at all, so there's nothing to observe) and `layer_order` (learns a
+successor map online from the ACTUAL fetch sequence via `on_fault`, never
+from a declared/assumed order per §8; `select_victim` walks the learned
+chain from "now" and evicts whichever RESIDENT+unpinned chunk has the
+largest next-use distance, treating never-observed chunks as infinitely far
+-- the standard Belady approximation). `ensure_budget()` (item 4) now
+dispatches to `r->policy->select_victim()` when a policy is set, falling
+back to the old lowest-index rule when `r->policy` is NULL, so items 4-6's
+tests keep passing unchanged. `test_policy.c` unit-tests both policies
+directly (no memfd/uffd needed) against hand-derived cases, including one
+built specifically to distinguish Belady-style prediction from "lowest
+index": residents `{2,3}` with chunk 2 due next and chunk 3 due later must
+evict 3, not 2. 3/3 clean.
+
+Smoke-testing `replay_main` (8 chunks, 3-chunk budget, 5 cyclic passes)
+across all three policies turned up something worth keeping: `lru` produced
+40/40 faults (100% miss rate -- textbook LRU "sequential flooding": strict
+recency-based eviction thrashes completely on a cyclic scan larger than the
+cache, because by the time the scan wraps around, everything just got
+evicted in fetched order anyway), while `layer_order` tied the `default`
+fallback at 32/40. This isn't a designed correctness test, but it's a real,
+reproducible demonstration of exactly the effect item 10/11's harness is
+supposed to measure -- informed eviction beating recency-based eviction on
+an LLM-like cyclic access pattern -- and it fell out of an ordinary smoke
+test, not a rigged one. Numbers are from one WSL2 run, not a formal
+benchmark; treat as illustrative until item 10 does this properly.
 
 **Item 6 note, a test bug caught and fixed, not the implementation:**
 `replay_cyclic()` (`replay.c`) sweeps chunks 0..n_chunks-1 for n_passes,

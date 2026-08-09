@@ -2,6 +2,7 @@
 #define _GNU_SOURCE
 #include "budget.h"
 #include "cgroup_stat.h"
+#include "policy.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,22 +75,30 @@ void evict_chunk(region_t *r, chunk_t *c) {
     pthread_mutex_unlock(&c->lock);
 }
 
+// Default victim selector when r->policy is NULL: lowest layer_id /
+// region_off among RESIDENT+unpinned. This used to be the only option
+// (documented as "temporary until item 7"); now that item 7 exists, it's
+// kept as the no-policy-configured default so items 4-6's tests (which
+// never set region_t.policy) keep working unchanged, and it's still a
+// legitimate deterministic fallback, not a hack.
+static uint32_t default_select_victim(region_t *r) {
+    for (uint32_t i = 0; i < r->n_chunks; i++) {
+        if (r->chunks[i].state == CHUNK_RESIDENT && r->chunks[i].pin == 0)
+            return i;
+    }
+    return CHUNK_NONE;
+}
+
 int ensure_budget(region_t *r, uint64_t need) {
     reconcile(r); // I-7, every policy decision point
 
     while (r->resident_bytes + need > r->budget_bytes) {
-        chunk_t *victim = NULL;
-        for (uint32_t i = 0; i < r->n_chunks; i++) {
-            if (r->chunks[i].state == CHUNK_RESIDENT && r->chunks[i].pin == 0) {
-                victim = &r->chunks[i];
-                break; // lowest layer_id / region_off first -- see budget.h note
-            }
-        }
-        if (!victim) {
+        uint32_t victim_idx = r->policy ? r->policy->select_victim(r) : default_select_victim(r);
+        if (victim_idx == CHUNK_NONE) {
             r->stat_infeasible++;
             return -1;
         }
-        evict_chunk(r, victim);
+        evict_chunk(r, &r->chunks[victim_idx]);
     }
     return 0;
 }

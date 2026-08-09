@@ -5,6 +5,7 @@
 #include "budget.h"
 #include "trace.h"
 #include "metrics.h"
+#include "policy.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,7 +46,7 @@ static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
     c->last_fault_seq = ++r->fault_seq;
     if (r->trace)
         trace_record(r->trace, r->fault_seq, (uint32_t)(c - r->chunks), trace_fault_type, 0 /* was_prefetched, item 8 */);
-    // policy->on_fault(...) -- item 7, policy is NULL for now
+    if (r->policy && r->policy->on_fault) r->policy->on_fault(r, c);
     if (ensure_budget(r, c->len) != 0) {
         // Infeasible at this budget (§7/§11's censoring rule, not a bug --
         // reconcile() already ran inside ensure_budget and would have
@@ -60,7 +61,7 @@ static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
     fetch_chunk(r, c);            // §6, lock held throughout (I-6)
     c->state = CHUNK_RESIDENT;
     r->resident_bytes += c->len;
-    // policy->on_resident(...) -- item 7
+    if (r->policy && r->policy->on_resident) r->policy->on_resident(r, c);
     // maybe_prefetch(...) -- item 8
     r->stat_absent_handled++;
 
