@@ -6,6 +6,8 @@ results/*.csv
 results/*.log
 !results/.gitkeep
 src/test_startup
+src/test_pager
+src/gen_pattern
 src/*_replay
 src/*_solver
 src/*_harness

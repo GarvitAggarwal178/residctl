@@ -45,6 +45,16 @@ typedef struct {
     trace_t *trace;     // NULL until item 5
     metrics_t *metrics; // NULL until item 5
     char cgroup_path[256];
+
+    // Bare counters standing in for item 5's real metrics_t. Recorded per
+    // I-8 ("record type as a metric; do not branch on it") so the handler
+    // loop is honestly testable before item 5 exists. Item 5 replaces these
+    // with the real metrics_t and this block goes away.
+    uint64_t stat_fault_missing;
+    uint64_t stat_fault_minor;
+    uint64_t stat_dedup_resident;
+    uint64_t stat_dedup_fetching;
+    uint64_t stat_absent_handled;
 } region_t;
 
 // Startup configuration. Everything the caller must supply to region_startup().

@@ -1,0 +1,9 @@
+region_startup OK: n_chunks=8
+phase 1 (contention: 8 threads racing chunk 0 from cold) done
+counters after phase 1: fault_missing=1 fault_minor=0 dedup_resident=0 dedup_fetching=0 absent_handled=1
+NOTE: dedup counters are both 0 -- the race window wasn't hit this run (timing-dependent, not a failure by itself; see resident_bytes and mismatch checks below for the actual pass criteria).
+phase 2 (resolve remaining 7 chunks + verify all 8): mismatches=0 resident_bytes=16777216
+final counters: fault_missing=8 fault_minor=0 dedup_resident=0 dedup_fetching=0 absent_handled=8
+PASS
+exit code: 0
+RESULT: PASS

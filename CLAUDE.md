@@ -35,9 +35,9 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 
 | # | Item | Est. | Status |
 |---|---|---|---|
-| 1 | Region setup + startup assertions (§4) | 2h | in progress |
-| 2 | Handler loop + chunk table + state machine (§3, §5) | 4h | not started |
-| 3 | Fetch path with alignment (§6.1–6.2) | 3h | not started |
+| 1 | Region setup + startup assertions (§4) | 2h | done |
+| 2 | Handler loop + chunk table + state machine (§3, §5) | 4h | done (see note) |
+| 3 | Fetch path with alignment (§6.1–6.2) | 3h | done, built together with item 2 |
 | 4 | Eviction + budget + reconcile (§7) | 2h | not started |
 | 5 | Trace recorder + metrics (§9) | 2h | not started |
 | 6 | Trace-replay driver | 2h | not started |
@@ -49,6 +49,28 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 
 The replay driver (item 6) comes before any engine integration so there is
 always a complete, runnable result even if integration runs long.
+
+**Deviation from the fixed order, disclosed rather than silently done:**
+items 2 and 3 were implemented and committed together. §5's handle_absent()
+pseudocode calls fetch_chunk() directly, so the handler loop cannot be
+tested in isolation from the fetch path -- there's no meaningful "state
+machine works" checkpoint that doesn't also exercise §6. Everything else in
+the fixed order stays separate.
+
+**Known gap in item 2/3's own test** (`test_pager.c`): the dedup branches in
+`handle_fault()` (I-8's RESIDENT/FETCHING cases) are implemented per spec and
+believed correct by inspection, but a deliberate barrier-synchronized,
+8-thread race onto a single cold chunk produced exactly one uffd message in
+5/5 observed runs, not several -- the race window wasn't hit. This is
+reported, not silently fixed by adding a test-only delay hook into
+production fetch code. §13's T-3 (sustained concurrent storm with real
+eviction cycling, once item 4 exists) is the right place to actually confirm
+this path fires.
+
+**Not yet implemented, so not yet enforced anywhere:** I-7's reconcile()
+against `memory.stat[shmem]`. `ensure_budget_stub()` in `pager.c` only
+refuses to silently exceed `budget_bytes` in-process; it does not check the
+kernel's own accounting. That's item 4.
 
 ## Layout
 
