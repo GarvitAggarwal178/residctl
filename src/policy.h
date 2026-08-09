@@ -13,6 +13,16 @@ struct policy {
     void (*on_resident)(region_t *, chunk_t *);
     uint32_t (*select_victim)(region_t *);      // CHUNK_NONE if none evictable
     int32_t (*predict_next)(region_t *, chunk_t *); // -1 if no prediction
+    // item 10c Task B (A-6): how many hops away (by the SAME notion of
+    // "next use" select_victim already uses) chunk c is from "now."
+    // INT64_MAX means unknown/unreachable. Used by budget.c's
+    // prefetch_admit() to compare a candidate eviction victim against a
+    // prefetch's own target -- a prefetch may not evict something needed
+    // SOONER than itself. lru always returns INT64_MAX (it has no
+    // predict_next either, so it can never show a prefetch target is
+    // closer than a victim -- guarded admission correctly declines every
+    // eviction-requiring prefetch under lru).
+    int64_t (*next_use_distance)(region_t *, chunk_t *);
     void *state; // policy-private; NULL for lru (needs none)
 };
 

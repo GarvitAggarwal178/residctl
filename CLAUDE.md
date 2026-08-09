@@ -150,8 +150,43 @@ confirmations of the old zero). Two NEW tests per the item 10c spec:
 Both scripts run via `run_t6_t7.sh`, same `fresh_cgroup`/`cleanup` pattern as
 the rest of the correctness harness. Full log: `results/t6_t7_log.txt`.
 
-Task B (prefetch admission rule, A-6) and Task C (the three re-run sweeps)
-are next; `results/ASYNC_REPORT.md` will be written once both are done.
+**ITEM 10c Task B — prefetch admission rule (A-6).** `policy_t` gained
+`next_use_distance(region, chunk)` (§8): `layer_order`'s
+`layer_order_select_victim` and the new `layer_order_next_use_distance`
+both call one shared `layer_order_compute_dist()` walk (refactored out of
+`select_victim`'s body, not reimplemented) so the two can never silently
+disagree about what "next use" means; `lru` returns `INT64_MAX`
+unconditionally, matching the spec's explicit requirement (moot in
+practice since `lru`'s `predict_next` is always -1, so nothing ever calls
+into the admission path for it). New `budget.c` function
+`ensure_budget_prefetch()` mirrors `ensure_budget()`'s reconcile/evict/
+reserve loop but checks each candidate eviction with `prefetch_admit()`'s
+distance guard first (§6.3 pseudocode) before allowing it — decline (not
+force) if the victim isn't strictly colder than the prefetch's own target.
+Wired into both prefetch call sites: `prefetch_pool.c`'s `do_one_prefetch`
+(used by the async default at every depth, and by `--sync-handler` at
+depth>1) and `prefetch.c`'s `maybe_prefetch` (the `--sync-handler`
+depth==1 inline path). Demand fetches are untouched — they still call the
+unconditional `ensure_budget()`. `--prefetch-admission {always,guarded}`,
+default `guarded`; new `stat_prefetch_declined` counter, reported in
+`replay_main`'s summary and `ARM_CSV` line.
+
+Regression: full §13 T-1..T-7 re-run clean under the new `guarded` default
+(all existing test binaries pick it up automatically, same as async did for
+Task A). Visible, expected effect even on old tests that were never touched:
+T-3's `prefetches` count dropped from ~12000 to ~8300 on the same 60s storm
+— the admission rule is declining roughly a third of what would have been
+forced evictions, exactly the kind of measurable change item 10b's 14-27%
+hit-rate finding predicted was needed. `test_prefetch` (item 8) and
+`test_pager` (items 2/3) still pass unmodified; `test_pager`'s own dedup
+counters, which item 2 could never get to fire (see the item 2/3 "known
+gap" note above) now read `dedup_fetching=7` on the same barrier-release
+scenario under the new async default — a second, independent confirmation
+(beyond T-3/T-6/T-7) that the item 10c Task A fix generalizes beyond the
+one storm test it was built against.
+
+Task C (the three re-run sweeps) is next; `results/ASYNC_REPORT.md` will be
+written once it's done.
 
 **ITEM 10b — I/O pipelining diagnostic, prefetch depth, dedup instrumentation
 (diagnosis on top of accepted V2, not a correction).** Full report:

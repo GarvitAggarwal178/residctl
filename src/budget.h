@@ -39,6 +39,20 @@ void evict_chunk(region_t *r, chunk_t *c);
 // budget_lock serializes the whole reconcile+evict+reserve sequence.
 int ensure_budget(region_t *r, uint64_t need);
 
+// item 10c Task B (A-6): like ensure_budget(), but for a SPECULATIVE fetch
+// (target is the prefetch candidate chunk, still CHUNK_ABSENT). Demand
+// fetches always call ensure_budget() unchanged -- only prefetches go
+// through this gated path. Under r->prefetch_admission_always==false (the
+// default, "guarded"), each eviction this would otherwise force is checked
+// against r->policy->next_use_distance(): a victim must be STRICTLY colder
+// (needed later) than target itself, or the eviction -- and therefore the
+// whole prefetch -- is declined (stat_prefetch_declined++, budget_lock
+// released, returns -1, same "abandon this prefetch, not fatal" contract
+// ensure_budget() already has). Under prefetch_admission_always==true,
+// behaves identically to ensure_budget(r, target->len) (item 10b's original
+// unconditional-eviction behavior, for A/B comparison).
+int ensure_budget_prefetch(region_t *r, chunk_t *target);
+
 // Moves `len` bytes from reserved_bytes to resident_bytes, under
 // budget_lock. Call exactly once, immediately after fetch_chunk()
 // completes successfully for a chunk whose budget was reserved via a

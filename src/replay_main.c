@@ -29,6 +29,10 @@
 //     async handler (demand + prefetch). Default 4. Ignored with
 //     --sync-handler (which uses --prefetch-depth workers for its own
 //     prefetch-only pool, exactly as item 10b did).
+//   --prefetch-admission {always,guarded}: item 10c Task B. Default
+//     guarded: a prefetch that would need to evict a chunk needed sooner
+//     than its own target is dropped, not forced. "always" restores item
+//     10b's original unconditional-eviction behavior, for comparison.
 #define _GNU_SOURCE
 #include "region.h"
 #include "pager.h"
@@ -79,6 +83,7 @@ int main(int argc, char **argv) {
     uint32_t prefetch_depth = 0; // 0 => region_startup's default (1)
     int sync_handler = 0;        // item 10c
     uint32_t fetch_workers = 0;  // item 10c: 0 => region_startup's default (4)
+    int prefetch_admission_always = 0; // item 10c Task B: 0 => guarded (default)
     int nargs = 0;
     char *args[16];
     for (int i = 1; i < argc && nargs < 16; i++) {
@@ -97,6 +102,14 @@ int main(int argc, char **argv) {
         if (strcmp(argv[i], "--fetch-workers") == 0) {
             if (i + 1 >= argc) { fprintf(stderr, "--fetch-workers requires a number\n"); return 2; }
             fetch_workers = (uint32_t)strtoul(argv[++i], NULL, 10);
+            continue;
+        }
+        if (strcmp(argv[i], "--prefetch-admission") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--prefetch-admission requires always|guarded\n"); return 2; }
+            const char *mode = argv[++i];
+            if (strcmp(mode, "always") == 0) prefetch_admission_always = 1;
+            else if (strcmp(mode, "guarded") == 0) prefetch_admission_always = 0;
+            else { fprintf(stderr, "--prefetch-admission must be 'always' or 'guarded', got '%s'\n", mode); return 2; }
             continue;
         }
         args[nargs++] = argv[i];
@@ -135,6 +148,7 @@ int main(int argc, char **argv) {
         .prefetch_depth = prefetch_depth,               // 0 => region_startup's default (1)
         .sync_handler = sync_handler,                    // item 10c
         .fetch_workers = fetch_workers,                  // item 10c: 0 => region_startup's default (4)
+        .prefetch_admission_always = prefetch_admission_always, // item 10c Task B
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
@@ -235,6 +249,9 @@ int main(int argc, char **argv) {
     printf("  absent_handled=%llu evictions=%llu bytes_punched=%llu infeasible=%llu\n",
            (unsigned long long)g_r.stat_absent_handled, (unsigned long long)g_r.stat_evictions,
            (unsigned long long)g_r.stat_bytes_punched, (unsigned long long)g_r.stat_infeasible);
+    printf("  prefetch_admission=%s prefetch_infeasible=%llu prefetch_declined=%llu\n",
+           g_r.prefetch_admission_always ? "always" : "guarded",
+           (unsigned long long)g_r.stat_prefetch_infeasible, (unsigned long long)g_r.stat_prefetch_declined);
     printf("  handler_latency: count=%llu min_ns=%llu p50_ns=%llu p99_ns=%llu max_ns=%llu\n",
            (unsigned long long)metrics.handler_latency.count,
            (unsigned long long)metrics.handler_latency.min_ns,
@@ -270,14 +287,15 @@ int main(int argc, char **argv) {
     printf("ARM_CSV,policy=%s,prefetch=%s,budget_bytes=%llu,touches=%u,bytes_touched=%llu,wall_ns=%llu,"
            "absent_handled=%llu,evictions=%llu,infeasible=%llu,prefetches=%llu,"
            "pager_bytes_fetched=%llu,io_read_bytes_delta=%llu,dedup_resident=%llu,dedup_fetching=%llu,"
-           "handler=%s,fetch_workers=%u\n",
+           "handler=%s,fetch_workers=%u,prefetch_admission=%s,prefetch_declined=%llu\n",
            policy_name, prefetch_arg, (unsigned long long)budget_bytes, res.n_touches,
            (unsigned long long)res.bytes_touched, (unsigned long long)res.wall_ns,
            (unsigned long long)g_r.stat_absent_handled, (unsigned long long)g_r.stat_evictions,
            (unsigned long long)g_r.stat_infeasible, (unsigned long long)g_r.stat_prefetches,
            (unsigned long long)g_r.stat_bytes_fetched, io_delta == UINT64_MAX ? 0 : (unsigned long long)io_delta,
            (unsigned long long)g_r.stat_dedup_resident, (unsigned long long)g_r.stat_dedup_fetching,
-           g_r.async_handler ? "async" : "sync", g_r.fetch_workers);
+           g_r.async_handler ? "async" : "sync", g_r.fetch_workers,
+           g_r.prefetch_admission_always ? "always" : "guarded", (unsigned long long)g_r.stat_prefetch_declined);
 
     if (g_r.resident_bytes > g_r.budget_bytes) {
         fprintf(stderr, "FAIL: resident_bytes exceeded budget_bytes -- I-4/§7 violated\n");

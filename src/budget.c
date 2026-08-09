@@ -163,6 +163,53 @@ int ensure_budget(region_t *r, uint64_t need) {
     return 0;
 }
 
+// item 10c Task B (A-6): see budget.h. Mirrors ensure_budget()'s
+// reconcile/evict/reserve loop exactly, except each candidate eviction is
+// gated by prefetch_admit()'s distance check before it's allowed to happen.
+int ensure_budget_prefetch(region_t *r, chunk_t *target) {
+    pthread_mutex_lock(&r->budget_lock);
+
+    r->fetches_since_reconcile++;
+    if (r->reconcile_interval <= 1 || r->fetches_since_reconcile >= r->reconcile_interval) {
+        reconcile(r);
+        r->fetches_since_reconcile = 0;
+    }
+
+    uint64_t need = target->len;
+    while (r->resident_bytes + r->reserved_bytes + need > r->budget_bytes) {
+        uint32_t victim_idx = r->policy ? r->policy->select_victim(r) : default_select_victim(r);
+        if (victim_idx == CHUNK_NONE) {
+            r->stat_infeasible++;
+            pthread_mutex_unlock(&r->budget_lock);
+            return -1;
+        }
+
+        if (!r->prefetch_admission_always && r->policy && r->policy->next_use_distance) {
+            // prefetch_admit(): "a prefetch may not force an eviction unless
+            // it is strictly justified" -- the victim must be needed
+            // STRICTLY later than the prefetch's own target, or this
+            // eviction (and therefore the whole prefetch) is declined
+            // rather than forced. Demand fetches never go through this
+            // function, so they're unaffected.
+            int64_t victim_dist = r->policy->next_use_distance(r, &r->chunks[victim_idx]);
+            int64_t target_dist = r->policy->next_use_distance(r, target);
+            if (!(victim_dist > target_dist)) {
+                r->stat_prefetch_declined++;
+                pthread_mutex_unlock(&r->budget_lock);
+                return -1; // same "abandon this prefetch, not fatal" contract as ensure_budget()
+            }
+        }
+
+        evict_chunk(r, &r->chunks[victim_idx]);
+        reconcile(r); // A-3: unconditionally on every eviction
+        r->fetches_since_reconcile = 0;
+    }
+
+    r->reserved_bytes += need;
+    pthread_mutex_unlock(&r->budget_lock);
+    return 0;
+}
+
 void commit_reserved(region_t *r, uint64_t len) {
     pthread_mutex_lock(&r->budget_lock);
     r->reserved_bytes -= len;

@@ -26,6 +26,18 @@ static int32_t lru_predict_next(region_t *r, chunk_t *c) {
     return -1;
 }
 
+// item 10c Task B (A-6): lru has no predict_next (always -1), so it has no
+// basis to claim any chunk is "closer" than any other -- always INT64_MAX,
+// per the spec's explicit requirement. In practice this is moot: lru's
+// predict_next==-1 already means prefetch_pool_top_up() never enqueues
+// anything under lru, so prefetch_admit() is never even called for it.
+// Implemented anyway for interface completeness and to fail safe if that
+// ever changes.
+static int64_t lru_next_use_distance(region_t *r, chunk_t *c) {
+    (void)r; (void)c;
+    return INT64_MAX;
+}
+
 static void lru_noop(region_t *r, chunk_t *c) { (void)r; (void)c; }
 
 policy_t *policy_lru_create(void) {
@@ -35,6 +47,7 @@ policy_t *policy_lru_create(void) {
     p->on_resident = lru_noop;
     p->select_victim = lru_select_victim;
     p->predict_next = lru_predict_next;
+    p->next_use_distance = lru_next_use_distance;
     p->state = NULL;
     return p;
 }
@@ -68,10 +81,13 @@ static int32_t layer_order_predict_next(region_t *r, chunk_t *c) {
     return (next == CHUNK_NONE) ? -1 : (int32_t)next;
 }
 
-static uint32_t layer_order_select_victim(region_t *r) {
-    layer_order_state_t *st = (layer_order_state_t *)r->policy->state;
-
-    uint32_t *dist = malloc(st->n_chunks * sizeof(uint32_t));
+// item 10c Task B (A-6): extracted so next_use_distance() can reuse the
+// EXACT same walk select_victim() already used internally -- "next use
+// distance" must mean the same thing in both places, or a prefetch's
+// admission decision could disagree with what the policy itself believes
+// about eviction order. Fills dist[i] for every chunk (not just RESIDENT
+// ones); UINT32_MAX = never reached by the walk = infinitely far/unknown.
+static void layer_order_compute_dist(layer_order_state_t *st, uint32_t *dist) {
     for (uint32_t i = 0; i < st->n_chunks; i++) dist[i] = UINT32_MAX; // unknown = infinitely far
 
     if (st->last_fetched != CHUNK_NONE) {
@@ -84,6 +100,13 @@ static uint32_t layer_order_select_victim(region_t *r) {
             node = next;
         }
     }
+}
+
+static uint32_t layer_order_select_victim(region_t *r) {
+    layer_order_state_t *st = (layer_order_state_t *)r->policy->state;
+
+    uint32_t *dist = malloc(st->n_chunks * sizeof(uint32_t));
+    layer_order_compute_dist(st, dist);
 
     uint32_t best = CHUNK_NONE;
     uint32_t best_dist = 0;
@@ -100,6 +123,18 @@ static uint32_t layer_order_select_victim(region_t *r) {
     return best;
 }
 
+static int64_t layer_order_next_use_distance(region_t *r, chunk_t *c) {
+    layer_order_state_t *st = (layer_order_state_t *)r->policy->state;
+    uint32_t idx = chunk_index(r, c);
+
+    uint32_t *dist = malloc(st->n_chunks * sizeof(uint32_t));
+    layer_order_compute_dist(st, dist);
+    uint32_t d = dist[idx];
+    free(dist);
+
+    return (d == UINT32_MAX) ? INT64_MAX : (int64_t)d;
+}
+
 policy_t *policy_layer_order_create(uint32_t n_chunks) {
     policy_t *p = calloc(1, sizeof *p);
     layer_order_state_t *st = calloc(1, sizeof *st);
@@ -113,6 +148,7 @@ policy_t *policy_layer_order_create(uint32_t n_chunks) {
     p->on_resident = layer_order_on_resident;
     p->select_victim = layer_order_select_victim;
     p->predict_next = layer_order_predict_next;
+    p->next_use_distance = layer_order_next_use_distance;
     p->state = st;
     return p;
 }

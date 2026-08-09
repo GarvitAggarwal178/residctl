@@ -56,7 +56,13 @@ void maybe_prefetch(region_t *r, chunk_t *just_resident) {
     // far, exactly the profile of its preferred victim. Without this,
     // evict_chunk() would try to lock a mutex this thread already holds.
     just_resident->pin++;
-    int budget_rc = ensure_budget(r, target->len);
+    // item 10c Task B (A-6): gated the same way as prefetch_pool.c's
+    // do_one_prefetch -- see that file's note. This path is only reachable
+    // under --sync-handler at --prefetch-depth 1 (item 10c's async handler
+    // routes every prefetch, at every depth, through prefetch_pool.c
+    // instead), but it's the same "prefetch, not demand" call, so it gets
+    // the same gate for consistency.
+    int budget_rc = ensure_budget_prefetch(r, target);
     just_resident->pin--;
 
     if (budget_rc != 0) {

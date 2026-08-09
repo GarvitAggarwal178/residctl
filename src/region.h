@@ -69,6 +69,12 @@ typedef struct {
     uint64_t stat_infeasible;
     uint64_t stat_prefetches;            // successful prefetch completions (item 8)
     uint64_t stat_prefetch_infeasible;   // prefetch abandoned, budget couldn't fit it
+    uint64_t stat_prefetch_declined;     // item 10c Task B (A-6): prefetch abandoned by
+                                          // prefetch_admit() because its only available
+                                          // victim is needed SOONER than the prefetch
+                                          // target itself -- distinct from
+                                          // stat_prefetch_infeasible (no victim existed at
+                                          // all). Always 0 under --prefetch-admission always.
     uint64_t stat_bytes_fetched;         // pager's own byte accounting (item 10 Defect 3):
                                           // sum of c->len over every successful fetch_chunk()
                                           // call (real faults + successful prefetches). Cross-
@@ -121,6 +127,14 @@ typedef struct {
     bool async_handler;      // !cfg->sync_handler; default true (async)
     uint32_t fetch_workers;  // set by region_startup from cfg; default 4.
                               // Only meaningful when async_handler is true.
+
+    // item 10c Task B (A-6): "A prefetch may not force an eviction unless it
+    // is strictly justified" -- see budget.h's ensure_budget_prefetch().
+    // false (the default, "guarded"): a prefetch that would need to evict a
+    // chunk needed SOONER than its own target (per policy->next_use_distance)
+    // is dropped instead of forced. true (--prefetch-admission always):
+    // restores the original unconditional-eviction behavior for comparison.
+    bool prefetch_admission_always;
 } region_t;
 
 // Startup configuration. Everything the caller must supply to region_startup().
@@ -146,6 +160,10 @@ typedef struct {
     uint32_t fetch_workers;      // item 10c: 0 => default (4). Shared fetch-pool worker count
                                   // for the async handler (demand + prefetch). Independent of
                                   // prefetch_depth. Ignored when sync_handler is true.
+    bool prefetch_admission_always; // item 10c Task B: false (default) => guarded
+                                     // (--prefetch-admission guarded); true => always
+                                     // (--prefetch-admission always, item 10b's original
+                                     // unconditional-eviction behavior).
 } region_config_t;
 
 // Run manifest, written once per run per §4 step 11.

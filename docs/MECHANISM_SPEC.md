@@ -407,6 +407,36 @@ chunk goes to `RESIDENT` without ever generating a fault — **this is where the
 performance comes from and it must be counted separately in metrics** (§9), since
 it's the D→E delta in the arm table.
 
+**Amendment A-6 (item 10c Task B) — prefetch admission.** Item 10b's
+sweep measured prefetch hit rates of only 14-27%, flat across depth: three
+quarters of prefetched bytes were evicted before ever being used. Cause: a
+prefetch calls the same unconditional `ensure_budget()` a demand fetch
+does, which evicts whatever the policy's `select_victim()` names — but
+under `layer_order` that victim can legitimately be something needed
+*sooner* than the prefetch's own speculative target, wasting the bytes just
+fetched for it and forcing a real, urgent refetch of whatever it evicted.
+**A prefetch may not force an eviction unless it is strictly justified**:
+
+```
+prefetch_admit(target):
+    if resident + reserved + target->len <= budget:  admit    # free room, always fine
+    victim = policy->select_victim()
+    if victim == NONE:                                drop
+    if next_use_distance(victim) > next_use_distance(target):  admit  # victim genuinely colder
+    else:                                             drop; stat_prefetch_declined++
+```
+
+This governs the eviction loop `ensure_budget()` already runs (§7) when
+called on behalf of a *prefetch specifically* — each candidate eviction is
+checked before it's allowed to proceed; declining aborts the whole prefetch
+(same "not fatal, abandon it" contract as `E_INFEASIBLE`), it does not fall
+back to forcing the eviction anyway. **Demand fetches are unaffected** —
+they keep calling the unconditional `ensure_budget()` from §7 exactly as
+before; only speculative fetches are gated. `--prefetch-admission
+{always,guarded}` selects between item 10b's original unconditional
+behavior (`always`) and this rule (`guarded`, the default). `victim` and
+`target` are compared via `policy->next_use_distance` (§8, Amendment A-6).
+
 ---
 
 ## 7. EVICTION AND BUDGET
@@ -463,20 +493,34 @@ typedef struct {
     void      (*on_resident)(region_t*, chunk_t*);
     uint32_t  (*select_victim)(region_t*);      // CHUNK_NONE if none evictable
     int32_t   (*predict_next)(region_t*, chunk_t*);  // -1 if no prediction
+    int64_t   (*next_use_distance)(region_t*, chunk_t*);  // Amendment A-6 (item 10c)
 } policy_t;
 ```
 
 Three implementations:
 
-| Policy | `select_victim` | `predict_next` | Purpose |
-|---|---|---|---|
-| `lru` | max age by `last_fault_seq` | −1 | **Control.** Same rule as the kernel. Isolates authority from policy. Predicted to tie the baseline. |
-| `layer_order` | chunk whose next use is furthest, from the known cyclic order | `chunk_id + 1` | The informed policy. |
-| `belady` | — | — | Offline only; never runs live. §10. |
+| Policy | `select_victim` | `predict_next` | `next_use_distance` | Purpose |
+|---|---|---|---|---|
+| `lru` | max age by `last_fault_seq` | −1 | always `INT64_MAX` (A-6) | **Control.** Same rule as the kernel. Isolates authority from policy. Predicted to tie the baseline. |
+| `layer_order` | chunk whose next use is furthest, from the known cyclic order | `chunk_id + 1` | hops from "now" via the learned successor chain (A-6) | The informed policy. |
+| `belady` | — | — | — | Offline only; never runs live. §10. |
 
 `layer_order` must not hardcode "next = +1" in `select_victim`; it computes next-use
 distance from the recorded cyclic order so the same code works if the access
 pattern turns out to be less regular than assumed.
+
+**Amendment A-6 (item 10c Task B) — `next_use_distance`.** Added to support
+§6.3's prefetch admission rule: an eviction a *prefetch* wants to force must
+be checked against how soon the victim is actually needed, and the policy is
+the only thing that knows that. `next_use_distance(region, chunk)` returns
+the same notion of "hops from now" that `select_victim` already computes
+internally to rank victims — `layer_order` must derive both from one shared
+walk (not two independently-reasoned-about distance functions that could
+silently disagree), returning `INT64_MAX` for a chunk the walk never
+reaches. `lru` has no `predict_next` and therefore no basis to call
+anything "closer" than anything else: it returns `INT64_MAX`
+unconditionally, which correctly makes it decline every eviction a
+prefetch would otherwise force (see §6.3).
 
 ---
 

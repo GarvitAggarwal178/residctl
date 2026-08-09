@@ -173,7 +173,12 @@ static void do_one_prefetch(prefetch_pool_t *pool, uint32_t idx) {
     if (r->trace)
         trace_record(r->trace, seq, idx, TRACE_FAULT_MISSING, 1 /* was_prefetched */);
 
-    int budget_rc = ensure_budget(r, target->len); // may itself select/evict a victim; never forces a pinned one (I-4)
+    // item 10c Task B (A-6): prefetches go through the GATED budget path --
+    // ensure_budget_prefetch() declines an eviction (rather than forcing
+    // it) when the only available victim is needed sooner than this
+    // prefetch's own target. Demand fetches (do_one_demand) still call the
+    // unconditional ensure_budget() unchanged.
+    int budget_rc = ensure_budget_prefetch(r, target);
 
     if (budget_rc != 0) {
         // Infeasible: abandon this prefetch, not fatal -- "a prefetch that
