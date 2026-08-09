@@ -13,6 +13,7 @@ src/test_replay
 src/test_policy
 src/test_prefetch
 src/replay_main
+src/belady_main
 src/gen_pattern
 src/*_replay
 src/*_solver

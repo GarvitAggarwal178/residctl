@@ -43,7 +43,7 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 | 6 | Trace-replay driver | 2h | done |
 | 7 | `lru` and `layer_order` policies (§8) | 2h | done |
 | 8 | Prefetch (§6.3) | 1h | done (inline, not a separate thread -- see note) |
-| 9 | Belady solver (§10) | 2h | not started |
+| 9 | Belady solver (§10) | 2h | done (spec's own sanity formula turned out wrong -- see note) |
 | 10 | Harness, arms, sweep (§11) | 3h | not started |
 | 11 | llama.cpp integration (separate spec, stretch) | 7h | out of scope for now |
 
@@ -66,6 +66,35 @@ reported, not silently fixed by adding a test-only delay hook into
 production fetch code. §13's T-3 (sustained concurrent storm with real
 eviction cycling, once item 4 exists) is the right place to actually confirm
 this path fires.
+
+**Item 9 note -- the spec's own required sanity check turned out to be
+wrong, investigated rather than silently loosened or silently trusted.**
+§10 requires: "on a strictly cyclic reference string at budget ratio r, the
+solver must return approximately (1-r) x W bytes per pass. If it doesn't,
+the solver is wrong, not the theory." Implemented that check first and it
+failed: for W=20 items/cycle, K=5 slots (r=0.25), steady-state measured
+15.56 misses/pass against an expected 15.00 -- small but stable and
+reproducible (checked P=10 through P=1000, converges to ~15.79..15.8, not
+15). Per the spec's own instruction, treated this as "solver is wrong" and
+investigated by hand: traced a small W=4,K=2 example step by step and found
+the naive "(1-r)*W" derivation assumes you can permanently pin K items in
+cache -- false under strict demand paging, because every miss for a
+"cold" item still needs a slot *right now*, which necessarily evicts one of
+the supposedly-pinned items. The naive bound isn't achievable; the true
+optimal is higher, matching what was measured.
+
+Rather than trust that reasoning alone, cross-checked `belady_simulate()`
+(the heap-based, lazily-deleted O(n log n) implementation) against a
+deliberately naive O(n^2) reference (linear forward scan for the true next
+occurrence at every eviction -- nothing clever to get wrong) across 300
+random reference strings/capacities: 300/300 exact matches. That random
+cross-check is now `belady_main --selftest`'s actual pass/fail gate; the
+cyclic-pattern check from §10 is still computed and printed (per the
+spec's letter) but as an informational diagnostic, explicitly labeled "NOT
+a pass/fail bound," not asserted against the wrong formula. Also verified:
+on a real trace from the item 8 scenario (layer_order+prefetch, 5 passes),
+OPT reported 19 minimum misses against the online policy's actual 28 --
+OPT <= online always must hold, and does.
 
 **Item 8 note -- a design deviation disclosed up front, and a real bug
 caught before it shipped.**

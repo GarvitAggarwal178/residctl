@@ -1,0 +1,27 @@
+--- selftest ---
+=== belady self-test 1/2: random cross-check vs naive O(n^2) reference ===
+300/300 trials matched -- OK
+=== belady self-test 2/2: pure cyclic reference string (informational) ===
+  W=20 P=10 K=5 (r=0.25): steady-state misses/pass=15.56 (naive (1-r)*W=15.00 -- NOT a pass/fail bound, see CLAUDE.md item 9)
+  W=20 P=10 K=10 (r=0.50): steady-state misses/pass=10.00 (naive (1-r)*W=10.00 -- NOT a pass/fail bound, see CLAUDE.md item 9)
+  W=20 P=10 K=15 (r=0.75): steady-state misses/pass=5.00 (naive (1-r)*W=5.00 -- NOT a pass/fail bound, see CLAUDE.md item 9)
+SELFTEST PASS
+selftest exit: 0
+--- generate a real trace via replay_main (layer_order, same scenario as items 6-8) ---
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=6291456 (3.0 chunks) policy=layer_order
+REPLAY SUMMARY
+  passes=5 touches=40 wall_ns=78218785 (0.078s) touches/sec=511.4
+  resident_bytes=6291456 budget_bytes=6291456
+  fault_missing=28 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=28 evictions=38 bytes_punched=79691776 infeasible=0
+  handler_latency: count=28 min_ns=1447866 p50_ns=4194303 p99_ns=4194303 max_ns=4138200
+  queue_depth_high_water=6
+PASS
+--- run belady_main against that trace (chunk_size=2097152, budget=6291456) ---
+loaded 28 genuine-fault references from /root/residctl/scratch/item9_trace.bin (skipped 13 prefetched)
+OPT (Belady) result
+  trace=/root/residctl/scratch/item9_trace.bin chunk_size=2097152 budget_bytes=6291456 capacity=3 chunks
+  total_refs=28 minimum_misses=19 minimum_bytes_fetched=39845888 hit_rate=0.3214
+consistency check: OPT misses (19) <= online policy faults (28) -- OK
+
+RESULT: PASS
