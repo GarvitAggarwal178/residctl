@@ -5,7 +5,7 @@ LDFLAGS = -pthread
 CORE_SRC = pager.c fetch.c budget.c trace.c metrics.c cgroup_stat.c replay.c policy.c prefetch.c region.c
 CORE_HDR = region.h pager.h fetch.h budget.h trace.h metrics.h cgroup_stat.h replay.h policy.h prefetch.h
 
-all: test_startup test_pager test_eviction test_trace test_replay test_policy test_prefetch replay_main belady_main gen_pattern
+all: test_startup test_pager test_eviction test_trace test_replay test_policy test_prefetch test_correctness test_storm replay_main belady_main baseline_main gen_pattern
 
 test_startup: test_startup.c region.c region.h
 	$(CC) $(CFLAGS) -o test_startup test_startup.c region.c $(LDFLAGS)
@@ -34,10 +34,19 @@ replay_main: replay_main.c $(CORE_SRC) $(CORE_HDR)
 belady_main: belady_main.c belady.c belady.h trace.h trace.c
 	$(CC) $(CFLAGS) -o belady_main belady_main.c belady.c trace.c $(LDFLAGS)
 
+baseline_main: baseline_main.c cgroup_stat.c cgroup_stat.h
+	$(CC) $(CFLAGS) -o baseline_main baseline_main.c cgroup_stat.c $(LDFLAGS)
+
+test_correctness: test_correctness.c $(CORE_SRC) $(CORE_HDR)
+	$(CC) $(CFLAGS) -o test_correctness test_correctness.c $(CORE_SRC) $(LDFLAGS)
+
+test_storm: test_storm.c $(CORE_SRC) $(CORE_HDR)
+	$(CC) $(CFLAGS) -o test_storm test_storm.c $(CORE_SRC) $(LDFLAGS)
+
 gen_pattern: gen_pattern.c
 	$(CC) $(CFLAGS) -o gen_pattern gen_pattern.c
 
 clean:
-	rm -f test_startup test_pager test_eviction test_trace test_replay test_policy test_prefetch replay_main belady_main gen_pattern *.o
+	rm -f test_startup test_pager test_eviction test_trace test_replay test_policy test_prefetch test_correctness test_storm replay_main belady_main baseline_main gen_pattern *.o
 
 .PHONY: all clean

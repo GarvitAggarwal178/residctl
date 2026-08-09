@@ -1,0 +1,29 @@
+=== T-1, T-2, T-4 (test_correctness) ===
+=== T-1: full-region data integrity under 25% budget, all policies ===
+  policy=default     bytes_checked=16777216 mismatches=0 resident_bytes=4194304 budget=4194304 evictions=6 -- OK
+  policy=lru         bytes_checked=16777216 mismatches=0 resident_bytes=4194304 budget=4194304 evictions=6 -- OK
+  policy=layer_order bytes_checked=16777216 mismatches=0 resident_bytes=4194304 budget=4194304 evictions=6 -- OK
+=== T-2: punch-refetch cycle x1000 ===
+  1000 iterations, mismatches=0, evictions=999 -- OK
+=== T-4: exact accounting after mixed fetch/evict sequence ===
+  memory.stat[shmem]=6291456, resident_bytes+known_overhead=6291456 -- EXACT MATCH
+PASS
+exit code: 0
+
+=== T-3 (test_storm, 60s, timeout-guarded at 90s) ===
+storm running for 60s with 8 threads, budget=4194304 (2 chunks of 2097152)...
+storm done: total_touches=104314 mismatches=0 resident_bytes=4194304 budget_bytes=4194304 evictions=36115 absent_handled=20585 dedup_resident=0 dedup_fetching=0 prefetches=15532 infeasible=0
+PASS
+exit code: 0
+
+=== T-5 (belady_main --selftest, item 9) ===
+=== belady self-test 1/2: random cross-check vs naive O(n^2) reference ===
+300/300 trials matched -- OK
+=== belady self-test 2/2: pure cyclic reference string (informational) ===
+  W=20 P=10 K=5 (r=0.25): steady-state misses/pass=15.56 (naive (1-r)*W=15.00 -- NOT a pass/fail bound, see CLAUDE.md item 9)
+  W=20 P=10 K=10 (r=0.50): steady-state misses/pass=10.00 (naive (1-r)*W=10.00 -- NOT a pass/fail bound, see CLAUDE.md item 9)
+  W=20 P=10 K=15 (r=0.75): steady-state misses/pass=5.00 (naive (1-r)*W=5.00 -- NOT a pass/fail bound, see CLAUDE.md item 9)
+SELFTEST PASS
+exit code: 0
+
+RESULT: PASS (all of T-1, T-2, T-3, T-4, T-5)
