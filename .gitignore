@@ -9,6 +9,8 @@ src/test_startup
 src/test_pager
 src/test_eviction
 src/test_trace
+src/test_replay
+src/replay_main
 src/gen_pattern
 src/*_replay
 src/*_solver

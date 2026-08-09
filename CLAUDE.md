@@ -40,7 +40,7 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 | 3 | Fetch path with alignment (§6.1–6.2) | 3h | done, built together with item 2 |
 | 4 | Eviction + budget + reconcile (§7) | 2h | done (temporary victim selector, see note) |
 | 5 | Trace recorder + metrics (§9) | 2h | done |
-| 6 | Trace-replay driver | 2h | not started |
+| 6 | Trace-replay driver | 2h | done |
 | 7 | `lru` and `layer_order` policies (§8) | 2h | not started |
 | 8 | Prefetch (§6.3) | 1h | not started |
 | 9 | Belady solver (§10) | 2h | not started |
@@ -66,6 +66,24 @@ reported, not silently fixed by adding a test-only delay hook into
 production fetch code. §13's T-3 (sustained concurrent storm with real
 eviction cycling, once item 4 exists) is the right place to actually confirm
 this path fires.
+
+**Item 6 note, a test bug caught and fixed, not the implementation:**
+`replay_cyclic()` (`replay.c`) sweeps chunks 0..n_chunks-1 for n_passes,
+touching each once via `map_a` -- this is the synthetic "known cyclic
+order" workload standing in for llama.cpp (item 11) per §12. The first
+version of `test_replay.c` asserted a pure-cyclic trace (every touch faults,
+chunk_id cycles 0..7 forever) and failed: 20 faults observed, not 24. This
+was the TEST's bug, not `ensure_budget()`'s -- the temporary FIFO-by-
+lowest-index victim selector (item 4) makes the two highest-indexed chunks
+in a sweep permanently resident after the first pass (they're never the
+*lowest* index among residents, so they're never picked as victims again).
+Verified independently in Python before touching the test (see the
+commit), then rewrote the test around a reference-oracle simulation of the
+same selection rule instead of a closed-form guess. 3/3 clean runs after
+the fix, oracle sequence `[0,1,2,3,4,5,6,7, 0,1,2,3,4,5, 0,1,2,3,4,5]`
+matches the trace exactly. `replay_main` (the standalone CLI, reusable by
+item 10's harness) smoke-tested separately and is self-consistent with the
+same pattern extended to 4 passes.
 
 **Item 5 note:** the region_t bare counters from items 2-4 (fault/dedup/
 eviction) were kept as-is rather than folded into `metrics_t` -- they're
