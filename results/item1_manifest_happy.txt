@@ -1,0 +1,11 @@
+kernel_release=6.18.33.2-microsoft-standard-WSL2
+shmem_enabled=always within_size advise [never] deny force
+memory_max=536870912
+memory_swap_max=0
+memory_high=max
+chunk_size=4194304
+used_o_direct=yes
+region_len=16777216
+n_chunks=4
+model_path=/root/residctl/scratch/test_model.bin
+cgroup_path=/sys/fs/cgroup/residctl_item1

@@ -1,0 +1,27 @@
+=== case: happy (mode=happy swap=zero expect=pass) ===
+cgroup readback: memory.swap.max=0
+test_startup mode=happy: calling region_startup...
+region_startup returned successfully.
+n_chunks=4 chunk[0].len=4194304 used_o_direct=1 resident_bytes=0 budget_bytes=8388608
+map_a=0x78665c600000 map_b=0x78665d600000 (must differ: I-1) memfd=4 uffd=3
+manifest written to /root/residctl/results/item1_manifest_happy.txt
+PASS
+exit code: 0
+RESULT: PASS (expected success, got success)
+
+=== case: bad_swap (mode=happy swap=nonzero expect=abort) ===
+cgroup readback: memory.swap.max=max
+test_startup mode=happy: calling region_startup...
+STARTUP FAILED at step [verify_cgroup]: /sys/fs/cgroup/residctl_item1/memory.swap.max reads 'max', not '0' (I-3). Without this the kernel can swap out weight pages while our accounting believes them resident (S3e measured 236 MiB swapped per run when this was left at default). Fix the cgroup config and rerun; this program will not proceed with a non-zero swap ceiling.
+exit code: 134
+RESULT: PASS (expected abort, got SIGABRT with STARTUP FAILED message)
+
+=== case: bad_budget (mode=bad_budget swap=zero expect=abort) ===
+cgroup readback: memory.swap.max=0
+test_startup mode=bad_budget: calling region_startup...
+STARTUP FAILED at step [compute_budget]: auto-budget (memory.max - N_peak - margin) is not implemented: N_peak requires a pilot run that doesn't exist yet at build-order item 1. Pass an explicit region_config_t.budget_bytes.
+exit code: 134
+RESULT: PASS (expected abort, got SIGABRT with STARTUP FAILED message)
+
+=== item 1 test run complete ===
+PASS count: 3 / 3
