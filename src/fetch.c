@@ -8,11 +8,18 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/ioctl.h>
 #include <linux/userfaultfd.h>
 
 static uint64_t align_down(uint64_t v, uint64_t a) { return v - (v % a); }
 static uint64_t align_up(uint64_t v, uint64_t a) { return align_down(v + a - 1, a); }
+
+static uint64_t now_ns(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
+}
 
 static void fetch_fail(const char *step, const char *fmt, ...) {
     va_list ap;
@@ -74,7 +81,10 @@ static void fetch_resolve(region_t *r, chunk_t *c) {
                    (long long)cont.mapped, (unsigned long long)c->len);
 }
 
-void fetch_chunk(region_t *r, chunk_t *c) {
+void fetch_chunk(region_t *r, chunk_t *c, fetch_timing_t *out_timing) {
+    if (out_timing) out_timing->read_start_ns = now_ns();
     fetch_read(r, c);     // §6.1, I-5's "every byte exists before CONTINUE"
+    if (out_timing) out_timing->read_end_ns = now_ns();
     fetch_resolve(r, c);  // §6.2
+    if (out_timing) out_timing->continue_end_ns = now_ns();
 }

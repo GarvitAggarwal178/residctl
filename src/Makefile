@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS = -Wall -Wextra -O2 -g -pthread
 LDFLAGS = -pthread
 
-CORE_SRC = pager.c fetch.c budget.c trace.c metrics.c cgroup_stat.c replay.c policy.c prefetch.c region.c
-CORE_HDR = region.h pager.h fetch.h budget.h trace.h metrics.h cgroup_stat.h replay.h policy.h prefetch.h
+CORE_SRC = pager.c fetch.c budget.c trace.c metrics.c cgroup_stat.c replay.c policy.c prefetch.c prefetch_pool.c fetch_trace.c region.c
+CORE_HDR = region.h pager.h fetch.h budget.h trace.h metrics.h cgroup_stat.h replay.h policy.h prefetch.h prefetch_pool.h fetch_trace.h
 
 all: test_startup test_pager test_eviction test_trace test_replay test_policy test_prefetch test_correctness test_storm replay_main belady_main baseline_main gen_pattern
 

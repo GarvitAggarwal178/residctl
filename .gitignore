@@ -5,6 +5,7 @@ build/
 results/*.csv
 !results/harness_sweep.csv
 !results/harness_v2_sweep.csv
+!results/task_b_sweep.csv
 results/*.log
 !results/.gitkeep
 src/test_startup

@@ -15,19 +15,19 @@ selftest exit: 0
  for the run that generated its reference trace. Comparing OPT to a prefetch=ON run
  would repeat the exact V1 Defect-1-adjacent mistake -- prefetch changes what counts
  as demand, so it can legitimately beat OPT-for-a-different-trace without contradiction.)
-region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=6291456 (3.0 chunks) policy=layer_order prefetch=off reconcile_interval=16
+region_startup OK: n_chunks=8 chunk_size=2097152 budget_bytes=6291456 (3.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1
 REPLAY SUMMARY
-  passes=5 touches=40 bytes_touched=83886080 wall_ns=54112643 (0.054s) touches/sec=739.2
+  passes=5 touches=40 bytes_touched=83886080 wall_ns=67311477 (0.067s) touches/sec=594.3
   elision_guard_sink=2611200 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
   resident_bytes=6291456 budget_bytes=6291456
   fault_missing=32 fault_minor=0 dedup_resident=0 dedup_fetching=0
   absent_handled=32 evictions=29 bytes_punched=60817408 infeasible=0
-  handler_latency: count=32 min_ns=1421799 p50_ns=2097151 p99_ns=2097151 max_ns=2460626
+  handler_latency: count=32 min_ns=1466862 p50_ns=2097151 p99_ns=4194303 max_ns=8188010
   queue_depth_high_water=1
   pager_bytes_fetched=67108864 (own accounting: sum of c->len over every successful fetch)
   io_read_bytes_delta=67108864
   byte accounting cross-check: pager (67108864) vs io_read_bytes_delta (67108864) agree within one chunk
-ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=6291456,touches=40,bytes_touched=83886080,wall_ns=54112643,absent_handled=32,evictions=29,infeasible=0,prefetches=0,pager_bytes_fetched=67108864,io_read_bytes_delta=67108864
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=6291456,touches=40,bytes_touched=83886080,wall_ns=67311477,absent_handled=32,evictions=29,infeasible=0,prefetches=0,pager_bytes_fetched=67108864,io_read_bytes_delta=67108864
 PASS
 --- negative test: belady_main must ABORT if handed the FAULT trace ---
 SOLVER FAILED: /root/residctl/scratch/item9_fault_trace.bin is a TRACE_TYPE_FAULT trace (pager-authored, misses only). This is Defect 1 from the item 10 correction: a fault trace is a function of whichever policy produced it, not the workload's true reference string, and feeding it to Belady computes a circular, invalid bound. This solver requires a TRACE_TYPE_REFERENCE trace, written by the WORKLOAD (replay_cyclic with a ref_trace argument), not the pager. Aborting.

@@ -248,6 +248,10 @@ static void compute_budget(region_t *r, const region_config_t *cfg, const run_ma
     r->known_overhead_bytes = 0; // no pager-owned shmem allocations yet at item 1
     r->reconcile_interval = cfg->reconcile_interval ? cfg->reconcile_interval : 16; // A-3
     r->fetches_since_reconcile = 0;
+    r->prefetch_depth = cfg->prefetch_depth ? cfg->prefetch_depth : 1; // Task B
+    r->reserved_bytes = 0;
+    if (pthread_mutex_init(&r->budget_lock, NULL) != 0)
+        fail("compute_budget", "pthread_mutex_init(budget_lock) failed");
 }
 
 static void read_shmem_enabled(char *out, size_t outsz) {
@@ -327,6 +331,7 @@ void region_write_manifest(const run_manifest_t *m, const char *path) {
 
 void region_teardown(region_t *r) {
     if (!r) return;
+    pthread_mutex_destroy(&r->budget_lock);
     if (r->chunks) {
         for (uint32_t i = 0; i < r->n_chunks; i++) {
             pthread_mutex_destroy(&r->chunks[i].lock);

@@ -1,5 +1,5 @@
 region_startup OK: n_chunks=8 budget fits 3 chunks
-replay: passes=3 touches=24 wall_ns=29960457
+replay: passes=3 touches=24 wall_ns=35132179
 counters: absent_handled=20 dedup_resident=0 dedup_fetching=0 evictions=17 infeasible=0
 reference oracle: expected 20 faults, sequence: 0 1 2 3 4 5 6 7 0 1 2 3 4 5 0 1 2 3 4 5 
 trace: 20 records read back (expected 20)

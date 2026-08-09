@@ -35,25 +35,52 @@ static uint64_t read_memory_stat_shmem(const char *cgroup_path) {
     return val;
 }
 
+// Caller must hold r->budget_lock (see budget.h).
 void reconcile(region_t *r) {
     uint64_t shmem = read_memory_stat_shmem(r->cgroup_path);
-    uint64_t expected = r->resident_bytes + r->known_overhead_bytes;
     uint64_t threshold = r->n_chunks > 0 ? r->chunks[0].len : RESIDCTL_ALIGN;
-    uint64_t diff = shmem > expected ? shmem - expected : expected - shmem;
-    if (diff > threshold) {
+
+    // Item 10b Task B: with prefetch_depth>1, a fetch's pwrite() into map_b
+    // populates real shmem pages incrementally WHILE the fetch is still
+    // in flight -- i.e. before commit_reserved() moves its bytes from
+    // reserved_bytes into resident_bytes. If another thread's reconcile()
+    // lands in that window, the kernel's memory.stat[shmem] can already be
+    // partway (or all the way) toward reflecting an in-flight fetch that
+    // our resident_bytes alone doesn't know about yet. That's not I-7's
+    // "eviction that silently didn't happen" failure mode -- it's a
+    // legitimate timing window. The true value of shmem at any instant is
+    // somewhere in [resident_bytes, resident_bytes+reserved_bytes]; only
+    // a value OUTSIDE that range (by more than one chunk of slack on
+    // either side) is a real divergence. At depth==1, reserved_bytes is
+    // always 0 whenever reconcile() runs (the single thread that reserves
+    // it is the same one that commits it, sequentially), so this reduces
+    // to exactly the original single-sided check.
+    uint64_t lower = r->resident_bytes + r->known_overhead_bytes;
+    uint64_t upper = lower + r->reserved_bytes;
+
+    if (shmem + threshold < lower) {
         fprintf(stderr,
-                "RECONCILE FAILED (I-7): memory.stat[shmem]=%llu vs our "
-                "accounting (resident_bytes=%llu + known_overhead=%llu) = "
-                "%llu, diff=%llu exceeds one-chunk threshold=%llu. This is "
-                "the only defence against an eviction that silently didn't "
-                "happen -- treating as fatal, not a warning.\n",
+                "RECONCILE FAILED (I-7): memory.stat[shmem]=%llu is BELOW our confirmed-resident "
+                "floor (resident_bytes=%llu + known_overhead=%llu = %llu) by more than one chunk "
+                "(threshold=%llu). This is the only defence against an eviction that silently "
+                "didn't happen -- treating as fatal, not a warning.\n",
                 (unsigned long long)shmem, (unsigned long long)r->resident_bytes,
-                (unsigned long long)r->known_overhead_bytes, (unsigned long long)expected,
-                (unsigned long long)diff, (unsigned long long)threshold);
+                (unsigned long long)r->known_overhead_bytes, (unsigned long long)lower,
+                (unsigned long long)threshold);
+        abort();
+    }
+    if (shmem > upper + threshold) {
+        fprintf(stderr,
+                "RECONCILE FAILED (I-7): memory.stat[shmem]=%llu exceeds even our upper bound "
+                "(resident_bytes+reserved_bytes+known_overhead=%llu) by more than one chunk "
+                "(threshold=%llu) -- something is resident that neither our confirmed nor our "
+                "in-flight accounting knows about.\n",
+                (unsigned long long)shmem, (unsigned long long)upper, (unsigned long long)threshold);
         abort();
     }
 }
 
+// Caller must hold r->budget_lock (see budget.h).
 void evict_chunk(region_t *r, chunk_t *c) {
     pthread_mutex_lock(&c->lock);
     if (c->state != CHUNK_RESIDENT)
@@ -99,22 +126,71 @@ static uint32_t default_select_victim(region_t *r) {
 // reconcile_interval==1 (region_config_t.reconcile_interval=1, or
 // --eager-reconcile in the CLI binaries) reproduces the old eager behaviour
 // exactly; the §13 correctness harness runs with that set.
+//
+// Item 10b Task B: the whole reconcile+evict+reserve sequence runs under
+// r->budget_lock, so it's safe to call this concurrently from the handler
+// thread and any prefetch_pool workers (depth>1). At depth==1 there is
+// never any contention on this lock (only one thread ever calls it), so
+// behavior and performance are unchanged from before Task B.
 int ensure_budget(region_t *r, uint64_t need) {
+    pthread_mutex_lock(&r->budget_lock);
+
     r->fetches_since_reconcile++;
     if (r->reconcile_interval <= 1 || r->fetches_since_reconcile >= r->reconcile_interval) {
         reconcile(r);
         r->fetches_since_reconcile = 0;
     }
 
-    while (r->resident_bytes + need > r->budget_bytes) {
+    while (r->resident_bytes + r->reserved_bytes + need > r->budget_bytes) {
         uint32_t victim_idx = r->policy ? r->policy->select_victim(r) : default_select_victim(r);
         if (victim_idx == CHUNK_NONE) {
+            // Infeasible: no evictable victim (e.g. everything left is
+            // pinned). Not forced -- per Task B's explicit instruction, a
+            // prefetch that would need to evict a pinned chunk is dropped,
+            // not forced; this is exactly the mechanism that drops it
+            // (the caller treats -1 as "abandon this prefetch").
             r->stat_infeasible++;
+            pthread_mutex_unlock(&r->budget_lock);
             return -1;
         }
         evict_chunk(r, &r->chunks[victim_idx]);
         reconcile(r); // A-3: unconditionally on every eviction
         r->fetches_since_reconcile = 0; // an eviction just gave us a fresh check
     }
+
+    r->reserved_bytes += need; // reserve the space; caller must commit_reserved() after the real fetch
+    pthread_mutex_unlock(&r->budget_lock);
     return 0;
+}
+
+void commit_reserved(region_t *r, uint64_t len) {
+    pthread_mutex_lock(&r->budget_lock);
+    r->reserved_bytes -= len;
+    r->resident_bytes += len;
+    pthread_mutex_unlock(&r->budget_lock);
+}
+
+// Task B: like commit_reserved(), but also pins `c` in the SAME budget_lock
+// critical section. Needed specifically by handle_absent(): it still holds
+// c->lock and may need budget_lock again afterward (prefetch_pool_top_up's
+// predict_next calls) before it's done with this chunk. If state became
+// RESIDENT and pin were applied as two separate steps, there's a real
+// window between them where a concurrent worker's select_victim() can pick
+// this chunk (RESIDENT, still unpinned) and block on c->lock, while this
+// thread blocks acquiring budget_lock for the (not-yet-applied) pin --
+// circular wait. Doing both under one lock acquisition closes the window
+// entirely. Reproduced as a flaky (timing-dependent) hang at
+// --prefetch-depth 8 before this fix.
+void commit_reserved_and_pin(region_t *r, chunk_t *c, uint64_t len) {
+    pthread_mutex_lock(&r->budget_lock);
+    r->reserved_bytes -= len;
+    r->resident_bytes += len;
+    c->pin++;
+    pthread_mutex_unlock(&r->budget_lock);
+}
+
+void unpin_chunk(region_t *r, chunk_t *c) {
+    pthread_mutex_lock(&r->budget_lock);
+    c->pin--;
+    pthread_mutex_unlock(&r->budget_lock);
 }

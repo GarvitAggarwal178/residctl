@@ -3,7 +3,7 @@ cgroup readback: memory.swap.max=0
 test_startup mode=happy: calling region_startup...
 region_startup returned successfully.
 n_chunks=4 chunk[0].len=4194304 used_o_direct=1 resident_bytes=0 budget_bytes=8388608
-map_a=0x772dd3400000 map_b=0x772dd4400000 (must differ: I-1) memfd=4 uffd=3
+map_a=0x795773a00000 map_b=0x795774a00000 (must differ: I-1) memfd=4 uffd=3
 manifest written to /root/residctl/results/item1_manifest_happy.txt
 PASS
 exit code: 0

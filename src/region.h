@@ -29,6 +29,8 @@ typedef struct {
 typedef struct policy policy_t;   // NULL until item 7
 typedef struct trace trace_t;     // caller-assigned after region_startup(); NULL if untraced
 typedef struct metrics metrics_t; // caller-assigned after region_startup(); NULL if unmeasured
+typedef struct fetch_trace fetch_trace_t; // item 10b Task A; NULL unless --fetch-trace
+typedef struct prefetch_pool prefetch_pool_t; // item 10b Task B; NULL unless prefetch_depth>1
 
 typedef struct {
     int memfd;
@@ -48,6 +50,7 @@ typedef struct {
     bool prefetch_enabled; // item 8's maybe_prefetch() only runs when this is true; default false
     trace_t *trace;     // NULL unless the caller opens one (trace_open()) and assigns it
     metrics_t *metrics; // NULL unless the caller inits one (metrics_init()) and assigns it
+    fetch_trace_t *diag_fetch_trace; // item 10b Task A; NULL unless --fetch-trace
     char cgroup_path[256];
 
     // Bare fault/dedup/eviction counters. These satisfy §9's "treatment-arm
@@ -81,6 +84,25 @@ typedef struct {
     // region_config_t.reconcile_interval / an --eager-reconcile flag.
     uint32_t reconcile_interval; // set by region_startup from cfg; default 16
     uint64_t fetches_since_reconcile;
+
+    // Item 10b Task B: prefetch depth. depth==1 (default) is the ORIGINAL
+    // item-8 inline-synchronous path (prefetch.c's maybe_prefetch()),
+    // completely unchanged -- budget_lock/reserved_bytes exist below but
+    // are only exercised by more than one thread when depth>1, since
+    // that's the only case with a worker pool. See prefetch_pool.h.
+    uint32_t prefetch_depth; // set by region_startup from cfg; default 1
+    pthread_mutex_t budget_lock;  // serializes ensure_budget/evict_chunk/reserve
+                                   // across the handler thread and any prefetch
+                                   // workers (depth>1 only introduces real
+                                   // contention on this; at depth==1 it's
+                                   // uncontended and costs one uncontended
+                                   // lock/unlock per fetch)
+    uint64_t reserved_bytes; // bytes "spoken for" by in-flight FETCHING chunks
+                              // (real fetch or prefetch), not yet actually
+                              // resident. NOT included in reconcile()'s
+                              // comparison against memory.stat[shmem] -- only
+                              // resident_bytes represents real, populated pages.
+    prefetch_pool_t *prefetch_pool_handle; // NULL unless prefetch_depth>1 (Task B)
 } region_t;
 
 // Startup configuration. Everything the caller must supply to region_startup().
@@ -99,6 +121,7 @@ typedef struct {
     const char *cgroup_path;    // e.g. "/sys/fs/cgroup/spike"
     uint64_t budget_bytes;      // must be nonzero; auto-compute (§4 step 9 formula) is not yet implemented
     uint32_t reconcile_interval; // 0 => default (16); 1 => eager, every fetch (A-3, --eager-reconcile)
+    uint32_t prefetch_depth;     // 0 => default (1, item 8's original inline behavior). Task B: --prefetch-depth N
 } region_config_t;
 
 // Run manifest, written once per run per §4 step 11.

@@ -18,6 +18,10 @@
 //     belady_main (item 9).
 //   --eager-reconcile: recognized anywhere in argv, sets reconcile_interval=1
 //     (A-3). Default is the amortized interval (16).
+//   --fetch-trace <path>: recognized anywhere in argv (consumes the next
+//     arg as its value). Item 10b Task A: emits one fetch_trace_record_t
+//     per real fetch AND per successful prefetch to <path> (raw binary
+//     array, no header), written once at process exit -- see fetch_trace.h.
 #define _GNU_SOURCE
 #include "region.h"
 #include "pager.h"
@@ -25,6 +29,8 @@
 #include "metrics.h"
 #include "replay.h"
 #include "policy.h"
+#include "fetch_trace.h"
+#include "prefetch_pool.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,13 +65,25 @@ static uint64_t read_io_read_bytes(void) {
 }
 
 int main(int argc, char **argv) {
-    // Pull --eager-reconcile out of argv wherever it appears, before
-    // positional parsing.
+    // Pull --eager-reconcile and --fetch-trace <path> out of argv wherever
+    // they appear, before positional parsing.
     int eager_reconcile = 0;
+    const char *fetch_trace_path = NULL;
+    uint32_t prefetch_depth = 0; // 0 => region_startup's default (1)
     int nargs = 0;
     char *args[16];
     for (int i = 1; i < argc && nargs < 16; i++) {
         if (strcmp(argv[i], "--eager-reconcile") == 0) { eager_reconcile = 1; continue; }
+        if (strcmp(argv[i], "--fetch-trace") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--fetch-trace requires a path\n"); return 2; }
+            fetch_trace_path = argv[++i];
+            continue;
+        }
+        if (strcmp(argv[i], "--prefetch-depth") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--prefetch-depth requires a number\n"); return 2; }
+            prefetch_depth = (uint32_t)strtoul(argv[++i], NULL, 10);
+            continue;
+        }
         args[nargs++] = argv[i];
     }
 
@@ -99,6 +117,7 @@ int main(int argc, char **argv) {
         .cgroup_path = cgroup_path,
         .budget_bytes = budget_bytes,
         .reconcile_interval = eager_reconcile ? 1 : 0, // 0 => region_startup's default (16)
+        .prefetch_depth = prefetch_depth,               // 0 => region_startup's default (1)
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
@@ -115,6 +134,11 @@ int main(int argc, char **argv) {
     g_r.policy = policy;
     g_r.prefetch_enabled = prefetch_on;
 
+    prefetch_pool_t *pool = NULL;
+    if (prefetch_on && g_r.prefetch_depth > 1) {
+        pool = prefetch_pool_start(&g_r); // Task B: fixed worker pool, only when depth>1
+    }
+
     trace_t *fault_trace = NULL;
     if (fault_trace_path) {
         fault_trace = trace_open(fault_trace_path, TRACE_TYPE_FAULT);
@@ -128,12 +152,18 @@ int main(int argc, char **argv) {
     metrics_init(&metrics);
     g_r.metrics = &metrics;
 
+    fetch_trace_t *fetch_trace = NULL;
+    if (fetch_trace_path) {
+        fetch_trace = fetch_trace_open(fetch_trace_path, 200000); // generous; aborts if exceeded, not silently truncated
+        g_r.diag_fetch_trace = fetch_trace;
+    }
+
     printf("region_startup OK: n_chunks=%u chunk_size=%llu budget_bytes=%llu (%.1f chunks) "
-           "policy=%s prefetch=%s reconcile_interval=%u\n",
+           "policy=%s prefetch=%s reconcile_interval=%u prefetch_depth=%u\n",
            g_r.n_chunks, (unsigned long long)g_r.chunks[0].len,
            (unsigned long long)g_r.budget_bytes,
            (double)g_r.budget_bytes / (double)g_r.chunks[0].len, policy_name, prefetch_arg,
-           g_r.reconcile_interval);
+           g_r.reconcile_interval, g_r.prefetch_depth);
 
     uint64_t io_before = read_io_read_bytes();
 
@@ -146,8 +176,21 @@ int main(int argc, char **argv) {
 
     stop = 1;
     pthread_join(pager_thread, NULL);
+    // Stop the pool AFTER the handler thread (no more real faults means no
+    // more prefetch_pool_top_up() calls can enqueue new work) but BEFORE
+    // flushing the fetch trace (workers may still be mid-fetch and can
+    // still call fetch_trace_reserve() until they've all drained/joined).
+    // prefetch_pool_stop() lets outstanding work finish rather than
+    // abandoning an in-flight fetch_chunk() mid-call, which has no
+    // partial-failure mode to unwind from.
+    if (pool) prefetch_pool_stop(pool);
     if (fault_trace) { trace_close(fault_trace); g_r.trace = NULL; }
     if (ref_trace) trace_close(ref_trace);
+    if (fetch_trace) {
+        fetch_trace_flush(fetch_trace); // once, here, after the handler thread has stopped -- never from inside it
+        fetch_trace_close(fetch_trace);
+        g_r.diag_fetch_trace = NULL;
+    }
 
     uint64_t io_after = read_io_read_bytes();
     uint64_t io_delta = (io_before != UINT64_MAX && io_after != UINT64_MAX) ? (io_after - io_before) : UINT64_MAX;
