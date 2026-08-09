@@ -85,6 +85,65 @@ branches in `handle_fault()` have still never been observed to fire) is now
 backed by much stronger negative evidence and is being accepted as a known,
 understood limitation for v1 rather than chased further.
 
+**ITEM 10b — I/O pipelining diagnostic, prefetch depth, dedup instrumentation
+(diagnosis on top of accepted V2, not a correction).** Full report:
+`results/DIAGNOSTIC_REPORT.md`.
+- **Task A**: added `--fetch-trace` (per-fetch timing, in-memory,
+  flushed once at exit). Arm D is **bandwidth-limited, not
+  serialization-limited**: device-busy fraction 0.82-0.86, per-fetch
+  bandwidth within 85-95% of the spike's O_DIRECT median, inter-fetch dead
+  time negligible (<1%). This directly corrects V2's stated cause for the
+  arm-A-vs-D wall-clock gap ("per-fetch overhead," which the spike's own
+  numbers already ruled out): arm A's V2 throughput (4785 MiB/s) exceeded
+  even the spike's measured *maximum* O_DIRECT bandwidth (3396 MiB/s),
+  consistent with arm A having been served by the Windows VHDX host cache
+  (unreachable by guest `drop_caches`), not genuine device I/O. Also found
+  a real, secondary ~14% handler-overhead contribution, traced precisely to
+  `reconcile()` running on nearly every fetch via the eviction trigger
+  (A-3's periodic amortization helps less when budget is tight enough that
+  most fetches also evict).
+- **Task B**: added `--prefetch-depth N` (default 1 = item 8's original
+  inline path, byte-for-byte unchanged) and a fixed N-worker pool for N>1
+  (`prefetch_pool.c` — the only place multi-threading enters the pager).
+  **Found and fixed three real concurrency bugs via reproduction, not in
+  advance**: (1) a false-positive `RECONCILE FAILED` from in-flight
+  `pwrite()`s populating real shmem before `commit_reserved()` runs --
+  fixed by widening reconcile's check to a range
+  `[resident_bytes, resident_bytes+reserved_bytes]`; (2) a deadlock
+  (100% reproducible at depth 8 before the fix) from marking a chunk
+  RESIDENT before committing its reservation -- fixed by reordering
+  commit-before-RESIDENT in all three fetch call sites; (3) a second, flaky
+  deadlock from pinning the just-resident chunk one step too late relative
+  to when it became visible as RESIDENT -- fixed via
+  `commit_reserved_and_pin()`, landing the pin atomically with the commit
+  under one `budget_lock` critical section, plus a bounded retry (200x2ms)
+  for real fetches that go infeasible specifically due to prefetch
+  reservations (not real residents) -- unreachable at depth==1. All fixes
+  verified via 40+ stress iterations at the worst-case depth with zero
+  hangs, plus the full existing regression suite (items 1-9, §13) passing
+  unchanged, including item 8's exact historical numbers byte-for-byte at
+  depth 1.
+  Sweep result (depth 1/2/4/8 x 3 ratios x n=3): expectations 2 and 3 held
+  (read_bytes/infeasible worsen with depth at tight budget; device-busy
+  fraction rises with depth at r=0.25/0.5, flat at r=0.75); expectations 1
+  and 4 did NOT cleanly hold (wall-clock vs depth is non-monotonic at
+  r=0.75, and the gap to arm A closes only about half-way at best) --
+  directly explained by Task A's bandwidth-limited finding: with a single
+  fetch already near the device ceiling, added concurrency has little idle
+  capacity left to fill. Reported as such, not summarized into "prefetch
+  helps."
+- **Task C**: dedup counters (existing since item 2) still read 0/0 on an
+  unmodified T-3 (5th independent confirmation). `dedup_fetching` is now
+  **provably unreachable** (source-level proof, not just empirical): the
+  handler drains uffd messages strictly sequentially, one fully processed
+  before the next is read, so no execution context can ever observe a
+  chunk mid-FETCHING from `handle_fault()` -- and this stays true even with
+  Task B's worker pool, since prefetch workers dispatch through a separate
+  internal queue, never through `handle_fault()`. `dedup_resident` remains
+  theoretically reachable but empirically unhit at this scale/thread-count
+  -- reported as a finding about T-3's coverage, T-3 left unmodified, per
+  instructions.
+
 **ITEM 10 CORRECTION (supersedes the note below and `results/HARNESS_REPORT.md`,
 which is marked SUPERSEDED in place, not deleted). Full account in
 `results/HARNESS_REPORT_V2.md`.** V1's two "methodology bugs" below were
