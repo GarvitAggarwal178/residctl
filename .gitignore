@@ -6,6 +6,9 @@ results/*.csv
 !results/harness_sweep.csv
 !results/harness_v2_sweep.csv
 !results/task_b_sweep.csv
+!results/task_c_sweep1.csv
+!results/task_c_sweep2.csv
+!results/task_c_sweep3.csv
 results/*.log
 !results/.gitkeep
 src/test_startup

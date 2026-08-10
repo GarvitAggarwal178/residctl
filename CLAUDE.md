@@ -185,8 +185,42 @@ scenario under the new async default — a second, independent confirmation
 (beyond T-3/T-6/T-7) that the item 10c Task A fix generalizes beyond the
 one storm test it was built against.
 
-Task C (the three re-run sweeps) is next; `results/ASYNC_REPORT.md` will be
-written once it's done.
+**ITEM 10c Task C — three re-run sweeps. Full report:
+`results/ASYNC_REPORT.md`.** Sweep 1 (arm D, sync vs async at
+`--fetch-workers` 1/2/4): reproduced item 10b's device-busy numbers exactly
+under `--sync-handler` (0.831/0.826/0.859 vs item 10b's 0.82-0.86 band);
+device-busy did NOT rise above that band at any worker count, explained
+(not just observed) by arm D being single-threaded with prefetch off, so
+there is structurally never more than one outstanding demand fault for
+extra workers to overlap with. Sweep 2 (full 6-arm sweep, async default,
+`--fetch-workers 4 --prefetch-depth 2 --prefetch-admission guarded`):
+OPT≤D and E-never-beats-OPT still hold at every ratio (unchanged from V2),
+but E does NOT beat D at any ratio here (worse at r=0.25/0.5, tied at
+r=0.75) — contradicts one of item 10c's own pre-registered expectations.
+Sweep 3 (arm E, `guarded` vs `always` admission, depth 2/4): the two
+admission modes are statistically indistinguishable at every one of 12
+cells — `stat_prefetch_declined=0` everywhere despite 30-100+ evictions
+per run. Traced to a real mechanism, not a bug: `layer_order_select_victim`
+already picks the single farthest resident chunk, which by construction is
+essentially always farther than a prefetch's own near-term target, so the
+admission guard is close to redundant with what the policy's existing
+victim selection already guarantees for this workload. All 4 of Task B's
+pre-registered expectations failed to hold, reported as such with the
+mechanism traced, not glossed over.
+
+Two genuine process notes, both handled and disclosed rather than hidden:
+(1) both Sweep 2 and Sweep 3 exceeded the harness's 10-minute
+background-task cap and were killed mid-run; both were resumed from a
+verified exact point (row counts checked against the CSV before resuming),
+appending rather than restarting. (2) a system `updatedb.plocate` indexing
+job overlapped with the first attempt at Sweep 2's ratio=0.75 arm E cell —
+caught by the post-run exclusivity check (a `pgrep -x` false negative
+delayed catching it by one check), waited out properly via `pgrep -f`, and
+that one cell was redone cleanly after removing the contaminated rows.
+
+T-1 through T-7 all re-run clean under every configuration exercised in
+this phase. `results/ASYNC_REPORT.md` has the full sensitivity tables,
+mechanism writeups, and final check.
 
 **ITEM 10b — I/O pipelining diagnostic, prefetch depth, dedup instrumentation
 (diagnosis on top of accepted V2, not a correction).** Full report:
