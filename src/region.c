@@ -253,6 +253,14 @@ static void compute_budget(region_t *r, const region_config_t *cfg, const run_ma
     r->async_handler = !cfg->sync_handler; // item 10c: async is the default
     r->fetch_workers = cfg->fetch_workers ? cfg->fetch_workers : 4; // item 10c
     r->prefetch_admission_always = cfg->prefetch_admission_always; // item 10c Task B: guarded is the default
+    r->prefetch_retention_pinned = !cfg->prefetch_retention_none; // item 10d Task C: pinned is the default
+    r->pinned_prefetch_cap = r->prefetch_depth > 0 ? r->prefetch_depth : 1;
+    r->pinned_prefetch_queue = calloc(r->pinned_prefetch_cap, sizeof(uint32_t));
+    if (!r->pinned_prefetch_queue)
+        fail("compute_budget", "calloc(pinned_prefetch_queue, cap=%u) failed", r->pinned_prefetch_cap);
+    r->pinned_prefetch_head = 0;
+    r->pinned_prefetch_len = 0;
+    r->stat_pin_broken = 0;
     if (pthread_mutex_init(&r->budget_lock, NULL) != 0)
         fail("compute_budget", "pthread_mutex_init(budget_lock) failed");
 }
@@ -335,6 +343,8 @@ void region_write_manifest(const run_manifest_t *m, const char *path) {
 void region_teardown(region_t *r) {
     if (!r) return;
     pthread_mutex_destroy(&r->budget_lock);
+    free(r->pinned_prefetch_queue);
+    r->pinned_prefetch_queue = NULL;
     if (r->chunks) {
         for (uint32_t i = 0; i < r->n_chunks; i++) {
             pthread_mutex_destroy(&r->chunks[i].lock);

@@ -1,0 +1,55 @@
+=== machine exclusivity check (before) ===
+ 09:13:55 up  1:21,  1 user,  load average: 0.14, 0.06, 0.02
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root        3543 16.6  0.0   4948  3716 pts/0    Ss+  09:13   0:00 bash /root/residctl/src/run_task_a_gate.sh
+root        2738  0.2  0.1  35428 12332 ?        Ss   09:12   0:00 /usr/lib/systemd/systemd-udevd
+root        2703  0.2  0.1  33992 13024 ?        S<s  09:12   0:00 /usr/lib/systemd/systemd-journald
+root        3041  0.1  0.1  22336 13612 ?        Ss   09:12   0:00 /usr/lib/systemd/systemd --user
+root        2835  0.1  0.3  44192 29976 ?        Ss   09:12   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root        2901  0.1  0.4 123464 32692 ?        Ssl  09:12   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root        2846  0.0  0.1 1792300 13580 ?       Ssl  09:12   0:00 /usr/libexec/wsl-pro-service
+--- driver_threads=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=default prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3755528220 (3.756s) touches/sec=21.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=52 fault_minor=0 dedup_resident=0 dedup_fetching=0
+  absent_handled=52 evictions=44 bytes_punched=5905580032 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=52 min_ns=49451524 p50_ns=67108863 p99_ns=268435455 max_ns=145234174
+  queue_depth_high_water=1
+  pager_bytes_fetched=6979321856 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6979325952
+  byte accounting cross-check: pager (6979321856) vs io_read_bytes_delta (6979325952) agree within one chunk
+ARM_CSV,policy=default,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3755528220,absent_handled=52,evictions=44,infeasible=0,prefetches=0,pager_bytes_fetched=6979321856,io_read_bytes_delta=6979325952,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- driver_threads=8 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=default prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3277138562 (3.277s) touches/sec=24.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=377 fault_minor=2 dedup_resident=29 dedup_fetching=298
+  absent_handled=52 evictions=44 bytes_punched=5905580032 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=52 min_ns=48924051 p50_ns=67108863 p99_ns=134217727 max_ns=75753985
+  queue_depth_high_water=8
+  pager_bytes_fetched=6979321856 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6979321856
+  byte accounting cross-check: pager (6979321856) vs io_read_bytes_delta (6979321856) agree within one chunk
+ARM_CSV,policy=default,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3277138562,absent_handled=52,evictions=44,infeasible=0,prefetches=0,pager_bytes_fetched=6979321856,io_read_bytes_delta=6979321856,dedup_resident=29,dedup_fetching=298,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,prefetch_retention=pinned,pin_broken=0
+PASS
+
+=== machine exclusivity check (after) ===
+ 09:14:02 up  1:21,  1 user,  load average: 0.27, 0.09, 0.03
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root        3543  0.2  0.0   5076  3772 pts/0    Ss+  09:13   0:00 bash /root/residctl/src/run_task_a_gate.sh
+root        2738  0.2  0.1  35428 12332 ?        Ss   09:12   0:00 /usr/lib/systemd/systemd-udevd
+root        2703  0.1  0.1  33992 13024 ?        S<s  09:12   0:00 /usr/lib/systemd/systemd-journald
+root        3041  0.1  0.1  22336 13612 ?        Ss   09:12   0:00 /usr/lib/systemd/systemd --user
+root        2835  0.1  0.3  44192 29976 ?        Ss   09:12   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root        2901  0.1  0.4 123464 32692 ?        Ssl  09:12   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root        2846  0.0  0.1 1792300 13580 ?       Ssl  09:12   0:00 /usr/libexec/wsl-pro-service

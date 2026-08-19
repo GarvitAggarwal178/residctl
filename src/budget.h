@@ -69,4 +69,42 @@ void commit_reserved_and_pin(region_t *r, chunk_t *c, uint64_t len);
 // c->lock for a chunk that's already RESIDENT.
 void unpin_chunk(region_t *r, chunk_t *c);
 
+// Pins `c` under budget_lock (symmetric with unpin_chunk). item 10d: used to
+// close a latent unlocked-pin race found while implementing Task C -- see
+// prefetch_pool.c/prefetch.c's do_one_prefetch()/maybe_prefetch(), which
+// used to do a bare `target->pin++` with no lock at all.
+void pin_chunk(region_t *r, chunk_t *c);
+
+// item 10d Task C (A-9): called once, right after a PREFETCH target `target`
+// becomes CHUNK_RESIDENT, only when r->prefetch_retention_pinned is true.
+// Does NOT touch target->pin itself -- the pre-fetch pin++ (I-4, protects
+// the in-flight fetch) is repurposed as the retention pin, so callers must
+// NOT also unpin after calling this. Pushes target onto the bounded FIFO
+// (region_t.pinned_prefetch_queue); if this would exceed
+// r->pinned_prefetch_cap (== prefetch_depth) entries, the OLDEST pinned
+// entry is unpinned and evicted from the queue first ("it has waited
+// longest and is most likely stale," per §6.3 Amendment A-9). Caller must
+// hold budget_lock.
+void prefetch_retain_on_resident(region_t *r, chunk_t *target);
+
+// item 10d Task C (A-9): the "consumed" trigger. If chunk_idx is currently
+// in the bounded pinned-prefetch queue, removes it and releases its
+// retention pin; otherwise a no-op (the common case -- most references are
+// not to a currently-retained prefetch target). Caller must hold
+// budget_lock. See pager.h's pager_notify_access() for the public,
+// lock-acquiring entry point the workload calls.
+void prefetch_retain_release(region_t *r, uint32_t chunk_idx);
+
+// item 10d Task C (A-9): "Demand fetches must never be blocked by pinned
+// prefetch targets." Called by ensure_budget()'s eviction loop ONLY (never
+// ensure_budget_prefetch() -- a prefetch never breaks another prefetch's
+// retention pin) when select_victim() found no RESIDENT+unpinned chunk.
+// Returns the COLDEST currently-pinned prefetch target by
+// policy->next_use_distance (falling back to the queue's oldest entry if
+// the policy has none, or all distances tie), or CHUNK_NONE if the pinned
+// set is empty. Caller must hold budget_lock; caller is responsible for
+// calling prefetch_retain_release() on the result before evicting it (so
+// evict_chunk()'s I-4 pin==0 assertion still holds unweakened).
+uint32_t pin_break_select_victim(region_t *r);
+
 #endif

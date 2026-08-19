@@ -19,4 +19,20 @@ void pager_run(region_t *r, volatile sig_atomic_t *stop, int poll_timeout_ms);
 // Exposed for testing. Returns NULL if out of range.
 chunk_t *pager_lookup(region_t *r, uint64_t rel_off);
 
+// item 10d Task C (A-9): the "consumed" signal. Call once, right before the
+// workload reads chunk c (whether or not that read causes a real fault --
+// a touch on an already-RESIDENT chunk generates no uffd event at all, so
+// this is the ONLY way the pager can ever learn a prefetched chunk was
+// actually used; see CLAUDE.md's item 8 "known measurement gap" note). If c
+// is currently a retained prefetch target, releases its retention pin
+// immediately; otherwise a no-op (the common case). Safe to call
+// unconditionally on every reference regardless of --prefetch-retention
+// mode -- under "none" nothing is ever added to the retention set, so this
+// is permanently a no-op. This is not a mechanism-internal API: it's the
+// same kind of "I am about to use this layer's weights" signal a real
+// engine integration (item 11) would give before a compute pass, exactly
+// mirroring how the synthetic replay driver (replay.c) already knows its
+// own true reference sequence regardless of hit/miss.
+void pager_notify_access(region_t *r, chunk_t *c);
+
 #endif

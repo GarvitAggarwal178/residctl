@@ -68,6 +68,10 @@ static void do_one_demand(prefetch_pool_t *pool, uint32_t idx) {
                 "before enqueueing -- I-6 violation if not)\n", idx, (int)c->state);
         abort();
     }
+    // item 10d Task B: captured now, under c->lock, before anything else can
+    // touch these fields (a chunk can't be re-dispatched while FETCHING).
+    uint64_t dispatch_entry_ns = c->diag_dispatch_entry_ns;
+    uint64_t dispatch_enqueue_ns = c->diag_dispatch_enqueue_ns;
 
     int budget_rc = ensure_budget(r, c->len);
     if (budget_rc != 0) {
@@ -142,6 +146,8 @@ static void do_one_demand(prefetch_pool_t *pool, uint32_t idx) {
         rec->t_continue_end_ns = timing.continue_end_ns;
         rec->t_handler_exit_ns = t_exit;
         rec->bytes_read = c->len;
+        rec->t_dispatch_entry_ns = dispatch_entry_ns;
+        rec->t_dispatch_enqueue_ns = dispatch_enqueue_ns;
     }
 
     pthread_mutex_unlock(&c->lock);
@@ -166,7 +172,15 @@ static void do_one_prefetch(prefetch_pool_t *pool, uint32_t idx) {
     }
 
     uint64_t t_start = now_ns();
-    target->pin++; // I-4: never punched while this prefetch targets it
+    // item 10d: this used to be a bare `target->pin++` with no lock at all --
+    // harmless at item 10b's original prefetch-only pool sizes (still a real
+    // data race, just one that had never been observed to matter), but a
+    // genuine latent race now that this pool is shared with demand workers
+    // (item 10c) and multiple prefetch workers can run concurrently. Found
+    // by inspection while touching this exact line for Task C, fixed the
+    // same way the two item 10c latent bugs were: use the lock, not carry it
+    // forward silently.
+    pin_chunk(r, target); // I-4: never punched while this prefetch targets it
     target->state = CHUNK_FETCHING;
     uint64_t seq = __sync_add_and_fetch(&r->fault_seq, 1); // atomic: shared across workers + handler
     target->last_fault_seq = seq;
@@ -186,7 +200,7 @@ static void do_one_prefetch(prefetch_pool_t *pool, uint32_t idx) {
         // (ensure_budget's infeasible return already means no evictable,
         // unpinned victim existed).
         target->state = CHUNK_ABSENT;
-        target->pin--;
+        unpin_chunk(r, target); // item 10d: was a bare `target->pin--` -- see pin_chunk()'s note above
         __sync_fetch_and_add(&r->stat_prefetch_infeasible, 1);
         pthread_mutex_unlock(&target->lock);
         return;
@@ -200,7 +214,19 @@ static void do_one_prefetch(prefetch_pool_t *pool, uint32_t idx) {
     commit_reserved(r, target->len);
     target->state = CHUNK_RESIDENT;
     __sync_fetch_and_add(&r->stat_bytes_fetched, target->len); // item 10c: now genuinely concurrent, see do_one_demand's note
-    target->pin--;
+    // item 10d Task C (A-9): under --prefetch-retention pinned (the
+    // default), keep target pinned and register it in the bounded
+    // retention FIFO instead of unpinning immediately -- the pre-fetch
+    // pin_chunk() above is repurposed as the retention pin. Under
+    // --prefetch-retention none, restore item 10c's original behavior
+    // (unpin right away).
+    if (r->prefetch_retention_pinned) {
+        pthread_mutex_lock(&r->budget_lock);
+        prefetch_retain_on_resident(r, target);
+        pthread_mutex_unlock(&r->budget_lock);
+    } else {
+        unpin_chunk(r, target); // item 10d: was a bare `target->pin--` -- see pin_chunk()'s note above
+    }
     __sync_fetch_and_add(&r->stat_prefetches, 1);
     if (r->policy->on_resident) r->policy->on_resident(r, target);
 

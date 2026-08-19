@@ -85,6 +85,119 @@ branches in `handle_fault()` have still never been observed to fire) is now
 backed by much stronger negative evidence and is being accepted as a known,
 understood limitation for v1 rather than chased further.
 
+**ITEM 10d — concurrent demand workload + prefetch target retention. Full
+report: `results/CONCURRENCY_REPORT.md`.** Item 10c produced two null
+results, both correctly explained, and both explanations pointed at a
+specific unrun experiment. This item runs them. Nothing from item 10c is
+retracted — T-6's `dedup_fetching=14494` still stands as proof the async
+handler works; this item makes that result measurable on the benchmark
+arms rather than only in the correctness harness.
+
+**Task A (A-8) — multi-threaded replay driver.** Added
+`--driver-threads N` (default 1, `replay_cyclic()` unchanged byte-for-byte)
+and `replay_cyclic_mt()`: N threads execute the SAME reference sequence,
+partitioned WITHIN each chunk's page range (disjoint page stride per
+thread) with a barrier at every chunk boundary — models parallel compute
+over one layer, then advancing together, not N independent workers racing
+across chunks. Verification gate (`--driver-threads` 1 vs 8, same
+parameters): reference traces field-identical (excluding the unavoidably
+non-deterministic wall-clock `timestamp_ns` — belady_main itself never
+reads that field either), total bytes read identical
+(`pager_bytes_fetched`, `absent_handled`, `evictions` all exactly equal),
+OPT identical (`minimum_misses=48`, `minimum_bytes_fetched=6442450944`
+both traces) — **PASS on all three**, confirmed via `objdump` that the
+atomic-accumulated read loop survives `-O2` (`lock add` instruction
+present). Also wired in Task C's `pager_notify_access()` "consumed" call
+(see below) — doesn't affect the gate since it only touches internal pin
+bookkeeping, never the sink/bytes/trace.
+
+**Task B (no spec amendment needed — uses A-8's driver) — sync vs async
+under real concurrency.** Arm D (`layer_order`, prefetch off), V2 scale, 3
+ratios × n=3 × `--driver-threads` {1,2,4,8} × handler {sync, async
+`--fetch-workers 4`}, 72 runs, `results/task_d_sweep_b.csv`. Of 5
+pre-registered expectations: **1, 2, and 5 held; 3 and 4 did not.**
+`stat_dedup_fetching` is exactly 0 at `--driver-threads 1` in both handler
+modes and under `--sync-handler` at every thread count, and rises steeply
+with thread count under async (e.g. r=0.25: 0→66→201→428 medians at
+threads 1/2/4/8) — expectation 1 holds cleanly. Device-busy under sync
+stays flat (0.808-0.864 across the whole grid) — expectation 2 holds.
+**Device-busy under async does NOT rise with driver threads** (also
+0.808-0.864, statistically indistinguishable from sync at matching
+cells) — expectation 3 does not hold, reported as the plain negative
+result the spec required, with the mechanism traced (not hand-waved): the
+barrier structure A-8 requires means all N driver threads are always on
+the SAME chunk at once, so more threads create more concurrent demand for
+that ONE chunk (exactly what dedup_fetching measures) but never concurrent
+demand for DIFFERENT chunks, which is what the fetch-worker pool would
+need to actually overlap I/O. Wall-clock at 8 threads was NOT
+consistently lower under async (expectation 4): true at r=0.5
+(3.646s<3.701s) but false at r=0.25 (4.434s>4.421s) and r=0.75
+(3.144s>2.685s) — consistent with expectation 3's finding: with no extra
+I/O overlap to gain, async's added dispatch/enqueue/dequeue hop (median
+13-18µs, newly measurable via extended `--fetch-trace` fields) is a small
+net cost, not a win, on this specific arm. `read_bytes` was **exactly
+identical across all 24 cells at every ratio** — expectation 5 (the
+correctness check) holds with zero exceptions.
+
+**Task C (A-9) — prefetch target retention.** `budget.c` gained
+`prefetch_retain_on_resident()`/`prefetch_retain_release()`/
+`pin_break_select_victim()`, and `region_t` a bounded FIFO
+(`pinned_prefetch_queue`, capacity `prefetch_depth`). A prefetch target's
+existing fetch-time pin is now KEPT (not released) on becoming RESIDENT
+under the new default `--prefetch-retention pinned`, until either
+`pager_notify_access()` (pager.h; called by the workload right before it
+reads a chunk, hit or miss — the only way to observe "consumed" given a
+resident-chunk touch generates no uffd event at all) or the FIFO cap
+evicts the oldest entry first. `ensure_budget()`'s eviction loop (demand
+fetches only, never `ensure_budget_prefetch()`) now breaks the COLDEST
+pinned target's pin rather than going infeasible when no unpinned victim
+exists, counted as `stat_pin_broken` — "a speculative chunk must never
+starve a real one." Found and fixed a third latent unlocked-pin race while
+touching this code (matching item 10c's two): `prefetch_pool.c`'s
+`do_one_prefetch()` had THREE bare `target->pin++`/`pin--` with no lock at
+all (pre-fetch pin, infeasible-abandon unpin, post-fetch unpin) — harmless
+at item 10b's original scale, a real race once multiple prefetch workers
+run concurrently (item 10c). Fixed with the existing `pin_chunk()`
+(new)/`unpin_chunk()` helpers, same pattern as items 10b/10c's fixes.
+
+**Correctness gate (T-1..T-7, `--eager-reconcile`, unmodified test
+binaries picking up the new default automatically):** all PASS. T-3's
+`infeasible` count (27314) is statistically unchanged from the
+pre-Task-C baseline (27036, same test, prior commit) — the huge count is
+a pre-existing property of the bounded 200×2ms retry loop under this
+specific 2-chunk-budget storm, not a regression from retention. T-6/T-7
+both clean (0 mismatches, all 8 threads joined within T-7's 120s
+watchdog) even with `prefetch_depth` defaulting to 1 chunk of the 2-chunk
+budget permanently retainable — a real, meaningful stress test of the
+pin-break override under contention, not just a smoke test.
+
+**Sweep C:** arm E, `--prefetch-retention` {none,pinned} × 3 ratios ×
+depth {2,4} × n=3, `--driver-threads 8`, `--fetch-workers 4`, 36 runs,
+`results/task_d_sweep_c.csv`. Of 4 pre-registered expectations: **3
+held; 1 partially held; 2 and 4 did not.** Hit rate rose under `pinned`
+relative to `none` at **12/12** (ratio, depth) reps compared directly
+within this sweep (e.g. r=0.75/d4: 0.32→0.46; r=0.5/d2: 0.11→0.27), and
+clearly exceeded item 10b's original 14-27% ceiling at 2 of 6 (ratio,
+depth) cells (r=0.75/d2: 0.32, r=0.75/d4: 0.46) — expectation 1 is a
+genuine, disclosed partial hold, not glossed into a clean win: at the two
+tighter ratios (0.25, 0.5) `pinned`'s hit rate mostly lands at or just
+inside the old band (0.23-0.27), not above it. `read_bytes` did NOT
+consistently fall (fell in 3/6 (ratio,depth) cells, rose in 3/6) and arm E
+still exceeds arm D's read_bytes at r=0.25 under `pinned` at every depth
+(12.2G/14.4G vs D's 9.26G) — expectation 2 does not hold, the second
+attempt (after item 10c's admission rule) at the same outcome via a
+different mechanism, reported as such. `stat_pin_broken` is non-zero at
+r=0.25 as predicted (depth=2: 4-9 per run; depth=4: 23-29 per run,
+alongside a real infeasible count of 38-44 — the tightest cell genuinely
+strains the budget) and exactly zero at r=0.5/r=0.75 (never needed) —
+expectation 3 holds cleanly. Demand fault count did NOT consistently fall
+(fell in 2/6 cells, rose in 4/6) — expectation 4 does not hold.
+
+Two process notes: both Sweep B (72 runs) and Sweep C (36 runs) completed
+within a single background-task invocation each (no 10-minute cap hit this
+time, unlike item 10c's Sweep 2/3); machine exclusivity checked clean
+before and after both.
+
 **ITEM 10c Task A — async dispatch-only handler (in progress; Task B/C and
 `results/ASYNC_REPORT.md` not yet done as of this entry).** Direct
 consequence of item 10b Task C's finding: `dedup_fetching` wasn't just

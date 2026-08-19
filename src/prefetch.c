@@ -85,7 +85,16 @@ void maybe_prefetch(region_t *r, chunk_t *just_resident) {
     commit_reserved(r, target->len); // moves the ensure_budget() reservation into resident_bytes
     target->state = CHUNK_RESIDENT;
     r->stat_bytes_fetched += target->len; // Defect 3: pager's own byte accounting
-    target->pin--;
+    // item 10d Task C (A-9): mirrors prefetch_pool.c's do_one_prefetch --
+    // under --prefetch-retention pinned (default), keep target pinned via
+    // the retention FIFO instead of unpinning immediately.
+    if (r->prefetch_retention_pinned) {
+        pthread_mutex_lock(&r->budget_lock);
+        prefetch_retain_on_resident(r, target);
+        pthread_mutex_unlock(&r->budget_lock);
+    } else {
+        target->pin--;
+    }
     r->stat_prefetches++;
     if (r->policy->on_resident) r->policy->on_resident(r, target);
     // No recursive maybe_prefetch() here -- "one outstanding prefetch maximum."

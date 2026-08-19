@@ -20,6 +20,18 @@ typedef struct {
     uint32_t pin;             // >0 => never evict (I-4)
     pthread_mutex_t lock;     // guards state + fetch (I-6)
     pthread_cond_t cv;        // for waiters on FETCHING (item 2)
+
+    // item 10d Task B: diagnostic-only, populated by handle_absent_dispatch()
+    // (async handler) immediately before enqueueing this chunk to the fetch
+    // pool, consumed by whichever worker picks it up to fill the
+    // --fetch-trace record's dispatch-latency fields. Stays 0 under
+    // --sync-handler (no separate dispatch phase to measure there) or when
+    // --fetch-trace isn't requested. Safe without extra locking: only one
+    // dispatch can be in flight for a given chunk at a time (it's
+    // CHUNK_FETCHING the whole window between the write here and the read in
+    // prefetch_pool.c's do_one_demand()), and both sides hold c->lock.
+    uint64_t diag_dispatch_entry_ns;
+    uint64_t diag_dispatch_enqueue_ns;
 } chunk_t;
 
 // Forward-declared; concrete definitions live in trace.h / metrics.h / a
@@ -135,6 +147,33 @@ typedef struct {
     // is dropped instead of forced. true (--prefetch-admission always):
     // restores the original unconditional-eviction behavior for comparison.
     bool prefetch_admission_always;
+
+    // item 10d Task C (A-9): bounded retention of speculative fetch targets.
+    // Supersedes item 10c's admission rule as the mechanism actually
+    // targeting the 14-27% prefetch hit-rate ceiling (see
+    // results/ASYNC_REPORT.md's traced explanation: admission gating never
+    // declined anything because layer_order's own select_victim already
+    // avoids evicting something closer than a prefetch target -- the real
+    // waste was a prefetched chunk being evicted by a LATER fetch before its
+    // own turn ever came, which admission gating never checked). A prefetch
+    // target stays pinned (I-4) from the moment it becomes CHUNK_RESIDENT
+    // until either the workload signals it was consumed
+    // (pager_notify_access(), pager.h) or it falls off this bounded FIFO
+    // once prefetch_depth NEWER targets have been pinned ("it has waited
+    // longest and is most likely stale"). Guarded by budget_lock, same as
+    // every other pin mutation in this codebase (commit_reserved_and_pin,
+    // unpin_chunk).
+    uint32_t *pinned_prefetch_queue; // ring buffer, capacity == pinned_prefetch_cap
+    uint32_t pinned_prefetch_cap, pinned_prefetch_head, pinned_prefetch_len;
+    uint64_t stat_pin_broken; // a demand fetch found no unpinned victim and had
+                               // to break the coldest pinned prefetch target's
+                               // pin instead of going infeasible -- "a
+                               // speculative chunk must never starve a real
+                               // one" (A-9).
+    bool prefetch_retention_pinned; // true (default, --prefetch-retention
+                                     // pinned) or false (--prefetch-retention
+                                     // none, item 10c's immediate-unpin
+                                     // behavior).
 } region_t;
 
 // Startup configuration. Everything the caller must supply to region_startup().
@@ -164,6 +203,10 @@ typedef struct {
                                      // (--prefetch-admission guarded); true => always
                                      // (--prefetch-admission always, item 10b's original
                                      // unconditional-eviction behavior).
+    bool prefetch_retention_none;   // item 10d Task C: false (default) => pinned
+                                     // retention (--prefetch-retention pinned); true =>
+                                     // --prefetch-retention none, item 10c's original
+                                     // immediate-unpin-after-fetch behavior.
 } region_config_t;
 
 // Run manifest, written once per run per §4 step 11.

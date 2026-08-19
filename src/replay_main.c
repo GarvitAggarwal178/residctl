@@ -33,6 +33,16 @@
 //     guarded: a prefetch that would need to evict a chunk needed sooner
 //     than its own target is dropped, not forced. "always" restores item
 //     10b's original unconditional-eviction behavior, for comparison.
+//   --driver-threads N: item 10d Task A. Default 1 (replay_cyclic(),
+//     unchanged). N>1 uses replay_cyclic_mt(): N threads collectively
+//     execute the SAME reference sequence, partitioned within each chunk's
+//     page range with a barrier at chunk boundaries -- models parallel
+//     compute over one layer, then advancing together.
+//   --prefetch-retention {none,pinned}: item 10d Task C. Default pinned: a
+//     prefetch target stays pinned from arrival until consumed
+//     (pager_notify_access()) or it falls off the bounded prefetch_depth
+//     FIFO. "none" restores item 10c's immediate-unpin-after-fetch
+//     behavior, for comparison.
 #define _GNU_SOURCE
 #include "region.h"
 #include "pager.h"
@@ -84,6 +94,8 @@ int main(int argc, char **argv) {
     int sync_handler = 0;        // item 10c
     uint32_t fetch_workers = 0;  // item 10c: 0 => region_startup's default (4)
     int prefetch_admission_always = 0; // item 10c Task B: 0 => guarded (default)
+    uint32_t driver_threads = 1; // item 10d Task A: default 1 (replay_cyclic(), unchanged)
+    int prefetch_retention_none = 0; // item 10d Task C: 0 => pinned (default)
     int nargs = 0;
     char *args[16];
     for (int i = 1; i < argc && nargs < 16; i++) {
@@ -110,6 +122,20 @@ int main(int argc, char **argv) {
             if (strcmp(mode, "always") == 0) prefetch_admission_always = 1;
             else if (strcmp(mode, "guarded") == 0) prefetch_admission_always = 0;
             else { fprintf(stderr, "--prefetch-admission must be 'always' or 'guarded', got '%s'\n", mode); return 2; }
+            continue;
+        }
+        if (strcmp(argv[i], "--driver-threads") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--driver-threads requires a number\n"); return 2; }
+            driver_threads = (uint32_t)strtoul(argv[++i], NULL, 10);
+            if (driver_threads == 0) { fprintf(stderr, "--driver-threads must be >= 1\n"); return 2; }
+            continue;
+        }
+        if (strcmp(argv[i], "--prefetch-retention") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--prefetch-retention requires none|pinned\n"); return 2; }
+            const char *mode = argv[++i];
+            if (strcmp(mode, "none") == 0) prefetch_retention_none = 1;
+            else if (strcmp(mode, "pinned") == 0) prefetch_retention_none = 0;
+            else { fprintf(stderr, "--prefetch-retention must be 'none' or 'pinned', got '%s'\n", mode); return 2; }
             continue;
         }
         args[nargs++] = argv[i];
@@ -149,6 +175,7 @@ int main(int argc, char **argv) {
         .sync_handler = sync_handler,                    // item 10c
         .fetch_workers = fetch_workers,                  // item 10c: 0 => region_startup's default (4)
         .prefetch_admission_always = prefetch_admission_always, // item 10c Task B
+        .prefetch_retention_none = prefetch_retention_none, // item 10d Task C
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
@@ -197,12 +224,13 @@ int main(int argc, char **argv) {
 
     printf("region_startup OK: n_chunks=%u chunk_size=%llu budget_bytes=%llu (%.1f chunks) "
            "policy=%s prefetch=%s reconcile_interval=%u prefetch_depth=%u "
-           "handler=%s fetch_workers=%u\n",
+           "handler=%s fetch_workers=%u driver_threads=%u prefetch_retention=%s\n",
            g_r.n_chunks, (unsigned long long)g_r.chunks[0].len,
            (unsigned long long)g_r.budget_bytes,
            (double)g_r.budget_bytes / (double)g_r.chunks[0].len, policy_name, prefetch_arg,
            g_r.reconcile_interval, g_r.prefetch_depth,
-           g_r.async_handler ? "async" : "sync", g_r.fetch_workers);
+           g_r.async_handler ? "async" : "sync", g_r.fetch_workers, driver_threads,
+           g_r.prefetch_retention_pinned ? "pinned" : "none");
 
     uint64_t io_before = read_io_read_bytes();
 
@@ -211,7 +239,12 @@ int main(int argc, char **argv) {
     pager_args_t pager_args = { &g_r, &stop };
     pthread_create(&pager_thread, NULL, pager_trampoline, &pager_args);
 
-    replay_result_t res = replay_cyclic(&g_r, n_passes, ref_trace);
+    // item 10d Task A: driver_threads<=1 uses the ORIGINAL, unmodified
+    // replay_cyclic() -- not replay_cyclic_mt() special-cased to N=1 -- so
+    // the default preserves current behaviour byte-for-byte, per spec.
+    replay_result_t res = (driver_threads <= 1)
+        ? replay_cyclic(&g_r, n_passes, ref_trace)
+        : replay_cyclic_mt(&g_r, n_passes, ref_trace, driver_threads);
 
     stop = 1;
     pthread_join(pager_thread, NULL);
@@ -252,6 +285,8 @@ int main(int argc, char **argv) {
     printf("  prefetch_admission=%s prefetch_infeasible=%llu prefetch_declined=%llu\n",
            g_r.prefetch_admission_always ? "always" : "guarded",
            (unsigned long long)g_r.stat_prefetch_infeasible, (unsigned long long)g_r.stat_prefetch_declined);
+    printf("  prefetch_retention=%s stat_pin_broken=%llu\n",
+           g_r.prefetch_retention_pinned ? "pinned" : "none", (unsigned long long)g_r.stat_pin_broken);
     printf("  handler_latency: count=%llu min_ns=%llu p50_ns=%llu p99_ns=%llu max_ns=%llu\n",
            (unsigned long long)metrics.handler_latency.count,
            (unsigned long long)metrics.handler_latency.min_ns,
@@ -287,7 +322,8 @@ int main(int argc, char **argv) {
     printf("ARM_CSV,policy=%s,prefetch=%s,budget_bytes=%llu,touches=%u,bytes_touched=%llu,wall_ns=%llu,"
            "absent_handled=%llu,evictions=%llu,infeasible=%llu,prefetches=%llu,"
            "pager_bytes_fetched=%llu,io_read_bytes_delta=%llu,dedup_resident=%llu,dedup_fetching=%llu,"
-           "handler=%s,fetch_workers=%u,prefetch_admission=%s,prefetch_declined=%llu\n",
+           "handler=%s,fetch_workers=%u,prefetch_admission=%s,prefetch_declined=%llu,"
+           "driver_threads=%u,prefetch_retention=%s,pin_broken=%llu\n",
            policy_name, prefetch_arg, (unsigned long long)budget_bytes, res.n_touches,
            (unsigned long long)res.bytes_touched, (unsigned long long)res.wall_ns,
            (unsigned long long)g_r.stat_absent_handled, (unsigned long long)g_r.stat_evictions,
@@ -295,7 +331,9 @@ int main(int argc, char **argv) {
            (unsigned long long)g_r.stat_bytes_fetched, io_delta == UINT64_MAX ? 0 : (unsigned long long)io_delta,
            (unsigned long long)g_r.stat_dedup_resident, (unsigned long long)g_r.stat_dedup_fetching,
            g_r.async_handler ? "async" : "sync", g_r.fetch_workers,
-           g_r.prefetch_admission_always ? "always" : "guarded", (unsigned long long)g_r.stat_prefetch_declined);
+           g_r.prefetch_admission_always ? "always" : "guarded", (unsigned long long)g_r.stat_prefetch_declined,
+           driver_threads, g_r.prefetch_retention_pinned ? "pinned" : "none",
+           (unsigned long long)g_r.stat_pin_broken);
 
     if (g_r.resident_bytes > g_r.budget_bytes) {
         fprintf(stderr, "FAIL: resident_bytes exceeded budget_bytes -- I-4/§7 violated\n");

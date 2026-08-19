@@ -158,6 +158,7 @@ static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
 // design) and lets pager_run() read the next uffd message immediately
 // instead of sitting behind one blocking pread.
 static void handle_absent_dispatch(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
+    uint64_t t_entry = now_ns(); // item 10d Task B: dispatch latency, entry to enqueue (diagnostic)
     c->state = CHUNK_FETCHING;
     uint64_t seq = __sync_add_and_fetch(&r->fault_seq, 1); // shared with fetch-pool workers; see budget.c note
     c->last_fault_seq = seq;
@@ -178,6 +179,12 @@ static void handle_absent_dispatch(region_t *r, chunk_t *c, uint8_t trace_fault_
     // worker picks this job up issues UFFDIO_CONTINUE; that's the kernel's
     // job, not this dispatcher's.
     prefetch_pool_enqueue_demand(r->prefetch_pool_handle, (uint32_t)(c - r->chunks));
+    // item 10d Task B: stamped AFTER enqueue, still under c->lock (held by
+    // handle_fault throughout) -- the worker that eventually picks this
+    // chunk up re-locks c->lock before reading these, so there's no race
+    // despite the lock being released and reacquired in between.
+    c->diag_dispatch_entry_ns = t_entry;
+    c->diag_dispatch_enqueue_ns = now_ns();
 }
 
 static void wake_range(region_t *r, chunk_t *c) {
@@ -289,4 +296,11 @@ void pager_run(region_t *r, volatile sig_atomic_t *stop, int poll_timeout_ms) {
         prefetch_pool_stop(r->prefetch_pool_handle);
         r->prefetch_pool_handle = NULL;
     }
+}
+
+void pager_notify_access(region_t *r, chunk_t *c) {
+    if (!r->prefetch_retention_pinned) return; // --prefetch-retention none: nothing is ever retained, always a no-op
+    pthread_mutex_lock(&r->budget_lock);
+    prefetch_retain_release(r, (uint32_t)(c - r->chunks));
+    pthread_mutex_unlock(&r->budget_lock);
 }

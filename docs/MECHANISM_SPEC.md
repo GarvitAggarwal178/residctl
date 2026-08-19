@@ -437,6 +437,75 @@ before; only speculative fetches are gated. `--prefetch-admission
 behavior (`always`) and this rule (`guarded`, the default). `victim` and
 `target` are compared via `policy->next_use_distance` (§8, Amendment A-6).
 
+**Amendment A-6 is SUPERSEDED as the primary mechanism targeting the
+prefetch hit-rate ceiling, kept above as a recorded negative result, not
+deleted.** Item 10c Task C's Sweep 3 measured `stat_prefetch_declined = 0`
+in 36/36 cells despite 30-100+ evictions per run, and traced why: under
+`layer_order`, `select_victim()` already picks the single chunk with the
+*largest* `next_use_distance` among residents — by construction the
+farthest, coldest thing resident. A prefetch's own target is, by
+construction, a *near* successor (distance 1..depth from "now"). For the
+admission check above to ever decline, some resident chunk would have to
+be simultaneously `select_victim()`'s own top pick (farthest) and closer
+than a near-term prefetch target — a contradiction under normal occupancy.
+The guard is close to redundant with what `layer_order`'s existing victim
+selection already guarantees for this workload, and item 10b's original
+14-27% hit-rate ceiling has a different primary cause than "the evicted
+victim was needed sooner than the prefetch target."
+
+**Amendment A-9 (item 10d Task C) — prefetch target retention.** The
+report identified the real cause the admission rule never addressed: a
+prefetch target `depth` hops ahead can itself be evicted by a *later*
+fetch (demand or prefetch) before its own turn ever comes — nothing
+protects a chunk between the moment it arrives (`CHUNK_RESIDENT`) and the
+moment it's actually used. Admission gating only ever asks "is the victim
+colder than *this* target," never "will *this* target itself survive to be
+used" — a question about a DIFFERENT chunk's future, which no eviction-time
+check on the current candidate can answer.
+
+The fix extends the existing prefetch pin (I-4) past the fetch itself:
+
+```
+on prefetch target becoming CHUNK_RESIDENT (retention == pinned, the default):
+    keep target pinned (do NOT release the fetch-time pin)
+    push target onto a bounded FIFO, capacity == prefetch_depth
+    if this exceeds capacity:
+        pop the OLDEST entry, release ITS pin  # "waited longest, most likely stale"
+
+on the workload accessing chunk C (pager_notify_access(), fired whether or
+not the access faults — a hit generates no uffd event at all, so this is
+the only way to observe "consumed"):
+    if C is in the pinned-retention set: remove it, release its pin
+
+ensure_budget()'s eviction loop (DEMAND FETCHES ONLY — never
+ensure_budget_prefetch()), when select_victim() finds no RESIDENT+unpinned
+chunk:
+    if retention == pinned and the pinned-retention set is non-empty:
+        break the COLDEST pinned target's pin (by next_use_distance,
+        falling back to oldest-in-FIFO), evict it, count stat_pin_broken
+    else:
+        infeasible, as before
+```
+
+"A prefetched chunk becomes an eligible victim the moment it lands" is no
+longer true under `pinned`: it stays protected until either the workload
+signals it was used, or `prefetch_depth` newer targets have since been
+pinned ahead of it. **Demand fetches must never starve behind a
+speculative chunk** — the pin-break override above is the enforcement:
+`ensure_budget()` (demand only) is explicitly permitted to break a
+retained prefetch's pin rather than fail, counted as `stat_pin_broken`.
+`--prefetch-retention {none,pinned}` selects between item 10c's original
+immediate-unpin-after-fetch behavior (`none`) and this one (`pinned`, the
+new default).
+
+I-4 is extended, not weakened: a chunk is still never punched while
+`FETCHING`, and never punched while pinned UNLESS the eviction is
+specifically the demand-fetch override above, which always releases the
+pin itself (via the same code path that removes the entry from the
+retention set) before `evict_chunk()`'s own `pin == 0` assertion runs — the
+assertion in `evict_chunk()` is unchanged and unweakened; the exception
+lives entirely in the caller that decides whether to break a pin at all.
+
 ---
 
 ## 7. EVICTION AND BUDGET
@@ -663,6 +732,57 @@ same reads; the only difference between arms is who owns the replacement
 decision. Verify the read loop is not compiler-elided (accumulate into a
 `volatile` sink; confirm via `objdump` or timing) — a silently-elided loop
 reproduces this exact defect invisibly.
+
+**Amendment A-8 (item 10d Task A) — the replay driver is multi-threaded.**
+Item 10c Task C's Sweep 1 measured device-busy fraction flat at 0.82-0.86
+regardless of `--fetch-workers`, and traced the cause correctly: the
+driver built for item 6/item 10 issues one touch at a time, strictly
+sequentially, on a single thread — so there is never more than one
+outstanding demand fault for extra fetch workers to overlap with. That is
+a property of the *driver*, not of the mechanism, and it does not match
+real inference workloads: a real engine runs many compute threads over one
+layer's weights in parallel (llama.cpp defaults to multiple threads; this
+spec's own §13 storm test already uses 8), then moves to the next layer
+together.
+
+`--driver-threads N` (default 1, byte-for-byte identical to the original
+single-threaded driver) adds this. N threads collectively execute the SAME
+reference sequence as N=1 — this is essential, since the reference trace
+(and therefore §10's OPT bound) is a function of that sequence and must
+stay comparable across thread counts. Partitioning is WITHIN a chunk's
+page range, never across chunks: all N threads work on the current chunk
+simultaneously (a disjoint stride of pages each), then a barrier holds all
+N threads until every one of them has finished that chunk before any of
+them starts the next. This models parallel compute over one layer, then
+advancing together — not N independent workers racing ahead on different
+chunks. The reference trace is still emitted once per (pass, chunk) by a
+single coordinating thread, in the same order as the N=1 case, so it is a
+mechanical guarantee (not merely an observed result) that the emitted
+sequence — and therefore OPT — is thread-count-invariant.
+
+A direct, traced consequence of this same barrier requirement (see item
+10d Task B's Sweep B discussion, `results/CONCURRENCY_REPORT.md`): because
+all N driver threads are always working on the SAME chunk at any instant,
+more driver threads create more CONCURRENT DEMAND FOR THE SAME CHUNK
+(observable as `stat_dedup_fetching` rising with N, exactly as I-8's dedup
+path is designed to handle), but never concurrent demand for DIFFERENT
+chunks — there is still only ever at most one chunk's fetch in flight at a
+time on arm D (prefetch off), regardless of N. Device-busy fraction (which
+measures whether the FETCH PATH has more than one outstanding I/O to
+overlap) is therefore not expected to rise with `--driver-threads` on arm
+D even under the async handler — this is a structural property of the
+barrier design this amendment requires, not a defect in the async
+architecture itself (item 10c's T-3/T-6/T-7 storms, which are NOT
+barrier-synchronized and DO generate genuine cross-chunk concurrent
+demand, are where the async handler's throughput benefit is actually
+observable).
+
+Amendment A-4's requirement (full-chunk consumption, `volatile` sink,
+`objdump`-verified survival of `-O2`) applies identically to the
+multi-threaded driver; the per-page reads into the shared sink are
+combined via an atomic add (`__sync_fetch_and_add`) once more than one
+thread can execute them concurrently, not a plain `+=` (which would be a
+genuine data race under N>1, not merely a hypothetical one).
 
 ---
 

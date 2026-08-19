@@ -38,11 +38,50 @@ typedef struct {
 //
 // Caller must have already run region_startup() and started the pager
 // thread; this function only issues the touches and times them.
+//
+// item 10d Task A (A-8): this is the N=1 path, UNCHANGED, kept as its own
+// function specifically so --driver-threads 1 (the default) preserves
+// current behaviour byte-for-byte -- not reimplemented as a trivial case of
+// replay_cyclic_mt() below, which spawns threads and uses a barrier even at
+// N=1 would need special-casing to behave identically.
 replay_result_t replay_cyclic(region_t *r, uint32_t n_passes, trace_t *ref_trace);
+
+// item 10d Task A (A-8): multi-threaded cyclic replay. n_threads threads
+// collectively execute the SAME reference sequence as replay_cyclic() above
+// -- partitioned WITHIN each chunk's page range (a stride of pages per
+// thread), never across chunks, with a barrier at every chunk boundary so
+// all n_threads threads finish chunk i before any of them starts chunk i+1.
+// This models parallel compute over one layer's weights, then advancing to
+// the next layer together -- e.g. llama.cpp's default multi-threaded matmul
+// over one tensor at a time -- not n_threads independent workers running
+// ahead on different chunks.
+//
+// The reference trace is emitted ONCE per (pass, chunk) by the coordinating
+// thread (tid 0) only, in the same chunk-by-chunk order as replay_cyclic(),
+// so the emitted TRACE_TYPE_REFERENCE sequence (chunk_id per record, in
+// order) is IDENTICAL regardless of n_threads -- verified by the item 10d
+// Task A gate (trace/byte/OPT identity at n_threads in {1,8}). Total bytes
+// read is also identical: the stride partition covers every page exactly
+// once, by exactly one thread, with no overlap.
+//
+// Also fires pager_notify_access() once per (pass, chunk) reference (Task
+// C, A-9's "consumed" signal) -- same call, same point in the loop, as
+// replay_cyclic() above, so this doesn't change Task A's identity gate
+// (notify_access only touches internal pin/retention bookkeeping, never
+// g_replay_sink, bytes_touched, or the reference trace).
+//
+// n_threads must be >= 2 (replay_main.c routes n_threads<=1 to
+// replay_cyclic() instead). Caller must have already run region_startup()
+// and started the pager thread.
+replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_trace, uint32_t n_threads);
 
 // Elision-guard accumulator (Defect 2): callers should print this and
 // confirm it's nonzero and varies run to run, as one piece of evidence the
-// full-chunk read loop actually executed and wasn't optimized away.
+// full-chunk read loop actually executed and wasn't optimized away. Shared
+// by both replay_cyclic() and replay_cyclic_mt() (the latter accumulates
+// into it from multiple threads -- `volatile`, not atomic, since exact
+// interleaving doesn't matter here, only "was this loop provably executed,"
+// which a nonzero, run-varying value already demonstrates).
 uint64_t replay_sink_value(void);
 
 #endif

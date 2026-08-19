@@ -23,6 +23,14 @@ typedef struct {
     uint64_t t_continue_end_ns;
     uint64_t t_handler_exit_ns;
     uint64_t bytes_read;
+    // item 10d Task B: dispatch latency (dispatcher entry to enqueue),
+    // demand records only (was_prefetch==0) under the async handler. 0 for
+    // prefetch records (no separate dispatch phase -- prefetch_pool_top_up()
+    // enqueues directly from a worker thread) and for every record under
+    // --sync-handler (no separate dispatch phase exists there either: the
+    // handler thread does dispatch and fetch as one inline call).
+    uint64_t t_dispatch_entry_ns;
+    uint64_t t_dispatch_enqueue_ns;
 } __attribute__((packed)) fetch_trace_record_t;
 
 // Tag must be `fetch_trace` to match region.h's forward declaration

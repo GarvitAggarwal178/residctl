@@ -144,6 +144,23 @@ int ensure_budget(region_t *r, uint64_t need) {
     while (r->resident_bytes + r->reserved_bytes + need > r->budget_bytes) {
         uint32_t victim_idx = r->policy ? r->policy->select_victim(r) : default_select_victim(r);
         if (victim_idx == CHUNK_NONE) {
+            // item 10d Task C (A-9): before giving up, this is a DEMAND
+            // fetch (ensure_budget_prefetch() has its own, separate gate and
+            // never reaches this function) -- "a speculative chunk must
+            // never starve a real one." If everything RESIDENT is pinned
+            // because it's a retained prefetch target, break the coldest
+            // one's pin and evict it instead of failing.
+            if (r->prefetch_retention_pinned) {
+                uint32_t pin_victim = pin_break_select_victim(r);
+                if (pin_victim != CHUNK_NONE) {
+                    prefetch_retain_release(r, pin_victim); // drops the retention pin; I-4's pin==0 still holds by the time evict_chunk() checks it
+                    r->stat_pin_broken++;
+                    evict_chunk(r, &r->chunks[pin_victim]);
+                    reconcile(r);
+                    r->fetches_since_reconcile = 0;
+                    continue;
+                }
+            }
             // Infeasible: no evictable victim (e.g. everything left is
             // pinned). Not forced -- per Task B's explicit instruction, a
             // prefetch that would need to evict a pinned chunk is dropped,
@@ -240,4 +257,69 @@ void unpin_chunk(region_t *r, chunk_t *c) {
     pthread_mutex_lock(&r->budget_lock);
     c->pin--;
     pthread_mutex_unlock(&r->budget_lock);
+}
+
+void pin_chunk(region_t *r, chunk_t *c) {
+    pthread_mutex_lock(&r->budget_lock);
+    c->pin++;
+    pthread_mutex_unlock(&r->budget_lock);
+}
+
+// item 10d Task C (A-9). Caller holds budget_lock.
+void prefetch_retain_on_resident(region_t *r, chunk_t *target) {
+    uint32_t idx = (uint32_t)(target - r->chunks);
+    if (r->pinned_prefetch_len >= r->pinned_prefetch_cap) {
+        // Cap reached: unpin+drop the OLDEST entry first ("it has waited
+        // longest and is most likely stale," per §6.3 Amendment A-9).
+        uint32_t oldest_idx = r->pinned_prefetch_queue[r->pinned_prefetch_head];
+        r->pinned_prefetch_head = (r->pinned_prefetch_head + 1) % r->pinned_prefetch_cap;
+        r->pinned_prefetch_len--;
+        r->chunks[oldest_idx].pin--;
+    }
+    r->pinned_prefetch_queue[(r->pinned_prefetch_head + r->pinned_prefetch_len) % r->pinned_prefetch_cap] = idx;
+    r->pinned_prefetch_len++;
+    // target->pin is NOT incremented here -- the pre-fetch pin++ the caller
+    // already did (I-4, protects the in-flight fetch itself) is repurposed
+    // as this chunk's retention pin. The caller must not also unpin.
+}
+
+// item 10d Task C (A-9). Caller holds budget_lock.
+void prefetch_retain_release(region_t *r, uint32_t chunk_idx) {
+    for (uint32_t i = 0; i < r->pinned_prefetch_len; i++) {
+        uint32_t pos = (r->pinned_prefetch_head + i) % r->pinned_prefetch_cap;
+        if (r->pinned_prefetch_queue[pos] != chunk_idx) continue;
+        // Remove by shifting the tail down -- the queue is bounded at
+        // prefetch_depth entries (small), so this is cheap.
+        for (uint32_t j = i; j + 1 < r->pinned_prefetch_len; j++) {
+            uint32_t from = (r->pinned_prefetch_head + j + 1) % r->pinned_prefetch_cap;
+            uint32_t to = (r->pinned_prefetch_head + j) % r->pinned_prefetch_cap;
+            r->pinned_prefetch_queue[to] = r->pinned_prefetch_queue[from];
+        }
+        r->pinned_prefetch_len--;
+        r->chunks[chunk_idx].pin--;
+        return;
+    }
+    // Not in the pinned set -- expected the vast majority of the time (most
+    // references aren't to a currently-retained prefetch target). Not an
+    // error.
+}
+
+// item 10d Task C (A-9). Caller holds budget_lock.
+uint32_t pin_break_select_victim(region_t *r) {
+    if (r->pinned_prefetch_len == 0) return CHUNK_NONE;
+    uint32_t best = CHUNK_NONE;
+    int64_t best_dist = -1;
+    for (uint32_t i = 0; i < r->pinned_prefetch_len; i++) {
+        uint32_t pos = (r->pinned_prefetch_head + i) % r->pinned_prefetch_cap;
+        uint32_t idx = r->pinned_prefetch_queue[pos];
+        chunk_t *c = &r->chunks[idx];
+        if (c->state != CHUNK_RESIDENT) continue; // defensive; shouldn't happen
+        int64_t d = (r->policy && r->policy->next_use_distance) ? r->policy->next_use_distance(r, c) : INT64_MAX;
+        if (best == CHUNK_NONE || d > best_dist) { best = idx; best_dist = d; }
+        // ties (including "no policy distance, everything INT64_MAX") keep
+        // the FIRST (oldest, per FIFO order) entry found -- a reasonable
+        // fallback to "oldest" per the same "most likely stale" reasoning
+        // the cap-eviction rule uses.
+    }
+    return best;
 }
