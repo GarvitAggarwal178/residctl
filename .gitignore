@@ -11,6 +11,8 @@ results/*.csv
 !results/task_c_sweep3.csv
 !results/task_d_sweep_b.csv
 !results/task_d_sweep_c.csv
+!results/task_e_sweep_b.csv
+!results/task_e_sweep_c.csv
 results/*.log
 !results/.gitkeep
 src/test_startup

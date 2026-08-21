@@ -46,34 +46,55 @@ typedef struct {
 // N=1 would need special-casing to behave identically.
 replay_result_t replay_cyclic(region_t *r, uint32_t n_passes, trace_t *ref_trace);
 
-// item 10d Task A (A-8): multi-threaded cyclic replay. n_threads threads
-// collectively execute the SAME reference sequence as replay_cyclic() above
-// -- partitioned WITHIN each chunk's page range (a stride of pages per
-// thread), never across chunks, with a barrier at every chunk boundary so
-// all n_threads threads finish chunk i before any of them starts chunk i+1.
-// This models parallel compute over one layer's weights, then advancing to
-// the next layer together -- e.g. llama.cpp's default multi-threaded matmul
-// over one tensor at a time -- not n_threads independent workers running
-// ahead on different chunks.
+// item 10d Task A (A-8), superseded by item 10e Task A (A-10): multi-threaded
+// cyclic replay. n_threads threads collectively execute the SAME reference
+// sequence as replay_cyclic() above -- partitioned WITHIN each chunk's page
+// range (a stride of pages per thread), never across chunks. Not n_threads
+// independent workers running ahead on different chunks: this models
+// parallel compute over one layer's weights, then advancing to later layers
+// -- e.g. llama.cpp's default multi-threaded matmul over one tensor at a
+// time, with pipelined overlap into the next layer's weights.
 //
-// The reference trace is emitted ONCE per (pass, chunk) by the coordinating
-// thread (tid 0) only, in the same chunk-by-chunk order as replay_cyclic(),
-// so the emitted TRACE_TYPE_REFERENCE sequence (chunk_id per record, in
-// order) is IDENTICAL regardless of n_threads -- verified by the item 10d
-// Task A gate (trace/byte/OPT identity at n_threads in {1,8}). Total bytes
-// read is also identical: the stride partition covers every page exactly
-// once, by exactly one thread, with no overlap.
+// item 10e (A-10): A-8's original hard barrier (window==0 conceptually, but
+// literally a pthread_barrier_t -- "all N threads finish chunk i before any
+// starts chunk i+1") is REPLACED by a bounded lookahead window: thread t may
+// begin chunk i+1 once ALL threads have completed chunk (i - window). At
+// most window+1 chunks may be in flight at any moment (see the proof in
+// replay.c's comment above lookahead_wait_to_start()). window==0 reproduces
+// the old hard-barrier semantic exactly (data-identical: same reference
+// trace content, same bytes read, same pager-observable fault/eviction
+// counts -- see the item 10e Task A verification gate; NOT claimed to be
+// identical in wall-clock scheduling, the same "byte-identical" standard
+// item 10d already established when comparing traces across thread counts).
 //
-// Also fires pager_notify_access() once per (pass, chunk) reference (Task
-// C, A-9's "consumed" signal) -- same call, same point in the loop, as
-// replay_cyclic() above, so this doesn't change Task A's identity gate
-// (notify_access only touches internal pin/retention bookkeeping, never
-// g_replay_sink, bytes_touched, or the reference trace).
+// Implemented with a counting mechanism (a per-GLOBAL-STEP completion
+// counter, condition-variable-gated), not a weakened/racy approximation of
+// the barrier -- see lookahead_wait_to_start()/lookahead_mark_done() in
+// replay.c. "Global step" = pass*n_chunks + chunk_index, so the gate is
+// well-defined across pass boundaries too (chunk ids alone repeat every
+// pass and would be ambiguous).
+//
+// The reference trace is still emitted ONCE per (pass, chunk) by the
+// coordinating thread (tid 0) only, in the same chunk-by-chunk, pass-by-pass
+// order as replay_cyclic() -- tid 0 waits for a step's FULL completion
+// (all n_threads) before emitting that step's record, and per-thread
+// progression is strictly sequential by step, so this is provably in order
+// regardless of window size (see replay.c). Total bytes read is identical
+// regardless of window: the stride partition covers every page exactly
+// once, by exactly one thread, with no overlap -- window only changes how
+// much chunk-to-chunk overlap is PERMITTED, never what gets read or the
+// order chunks are visited in.
+//
+// Also fires pager_notify_access() once per (pass, chunk) reference (item
+// 10d Task C, A-9's "consumed" signal) -- same call, same point in the
+// loop (before that step's read), as replay_cyclic() above.
 //
 // n_threads must be >= 2 (replay_main.c routes n_threads<=1 to
-// replay_cyclic() instead). Caller must have already run region_startup()
-// and started the pager thread.
-replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_trace, uint32_t n_threads);
+// replay_cyclic() instead, where "lookahead window" has no meaning -- there
+// is only one thread, nothing to overlap with). Caller must have already
+// run region_startup() and started the pager thread.
+replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_trace,
+                                  uint32_t n_threads, uint32_t window);
 
 // Elision-guard accumulator (Defect 2): callers should print this and
 // confirm it's nonzero and varies run to run, as one piece of evidence the

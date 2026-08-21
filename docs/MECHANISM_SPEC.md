@@ -506,6 +506,50 @@ retention set) before `evict_chunk()`'s own `pin == 0` assertion runs — the
 assertion in `evict_chunk()` is unchanged and unweakened; the exception
 lives entirely in the caller that decides whether to break a pin at all.
 
+**Amendment A-11 (item 10e Task C) — retention's effect is
+regime-dependent, not uniformly beneficial.** Item 10d's own sweep
+(barrier-driven, effectively no cross-chunk overlap) found `read_bytes`
+fell under `pinned` in 3 of 6 (ratio, depth) cells and rose in the other
+3, scored as "did not hold" — but the split tracked budget tightness, not
+noise: bytes fell where `stat_pin_broken` was 0 (the retained set fit
+comfortably), rose where it fired repeatedly (the retained set didn't
+fit). `stat_pin_broken` is therefore the load-bearing DIAGNOSTIC for which
+regime a run is in, not just a counter of a fallback path:
+
+```
+stat_pin_broken == 0 at ratio r  =>  retention's FIFO fits inside budget r; no forced pin-breaks
+stat_pin_broken  > 0 at ratio r  =>  retention is contending with demand for the same budget
+```
+
+The boundary ratio `r_c` below which `stat_pin_broken` starts firing is
+**depth-dependent, not a single project-wide constant** — a deeper
+`prefetch_depth` retains more chunks at once, so it needs more budget
+headroom before the retained set stops contending with demand. Item 10e
+Task C's five-ratio sweep (0.25/0.375/0.5/0.625/0.75), run WITH real
+cross-chunk overlap (`--lookahead-window 1`, Amendment A-10) rather than
+item 10d's barrier, located: `r_c(depth=2)` between 0.25 and 0.375;
+`r_c(depth=4)` between 0.375 and 0.5 (to the resolution of this sweep;
+see `results/LOOKAHEAD_REPORT.md` for the raw numbers).
+
+**A genuine reversal from item 10d, disclosed as such, not smoothed
+over:** under real cross-chunk overlap, `pinned` read MORE bytes than
+`none` at every (ratio, depth) cell tested except one exact tie, including
+at ratios item 10d's barrier-driven sweep found retention to HELP at
+(e.g. r=0.5/depth=2, r=0.75/depth=4). The regime-boundary claim
+(`pin_broken` as the indicator, and a depth-dependent `r_c` existing at
+all) still holds — but "above `r_c`, retention reduces bytes" does NOT
+hold under genuine concurrency the way it appeared to under the barrier.
+The most likely mechanism, not independently isolated further: real
+overlap lets the workload's demand cursor advance faster relative to how
+long a retained prefetch waits to be used, so more retained bytes go
+stale before consumption regardless of whether the budget can technically
+hold them — but this is offered as the plausible explanation for what was
+measured, not verified beyond that. Hit rate under `pinned` still exceeds
+`none` at 9 of 10 (ratio, depth) cells (one exact tie), so retention still
+measurably helps AVOID some real faults; it does not follow that it
+reduces total bytes moved under real concurrency. Not chased into a
+further retention mechanism — reported as the finding.
+
 ---
 
 ## 7. EVICTION AND BUDGET
@@ -783,6 +827,65 @@ multi-threaded driver; the per-page reads into the shared sink are
 combined via an atomic add (`__sync_fetch_and_add`) once more than one
 thread can execute them concurrently, not a plain `+=` (which would be a
 genuine data race under N>1, not merely a hypothetical one).
+
+**A-8's hard barrier is SUPERSEDED by Amendment A-10 (item 10e Task A),
+kept above as a recorded record of the defect, not deleted.** A-8's own
+text already correctly named the consequence ("there is still only ever
+at most one chunk's fetch in flight at a time... regardless of N") but
+treated it as an expected, disclosed limitation of arm D's structure
+rather than what it actually was: a specification error. A hard barrier
+that admits exactly one chunk in flight makes the async fetch pool's
+whole reason for existing -- overlapping I/O across multiple outstanding
+fetches -- structurally impossible to exercise, no matter how the pool
+itself is built. Item 10d's own report (`results/CONCURRENCY_REPORT.md`)
+measured this precisely: expectation 3 ("device-busy under async rises
+with driver threads") was untestable by construction, not merely
+unconfirmed. The barrier is also a poor model of the workload it stands
+in for: attention and FFN sublayers within one transformer layer touch
+different tensors, and any pipelining begins work on layer N+1 before
+layer N fully retires -- a strict global barrier is the least concurrent
+thing real inference does.
+
+**Amendment A-10 (item 10e Task A) -- bounded lookahead window replaces
+the hard barrier.** `--lookahead-window W` (default 0, reproduces A-8's
+barrier exactly -- see the verification gate below): thread *t* may begin
+chunk *i+1* once all threads have completed chunk *(i − W)*. Equivalently,
+at most `W+1` chunks may be in flight at any moment. Nothing else about
+A-8 changes: the reference sequence is unchanged (chunks still visited in
+the same order, once per pass -- only the permitted overlap between
+adjacent chunks changes), every page is still read exactly once by
+exactly one thread per reference, and the reference trace is still
+emitted once per (pass, chunk) by the coordinating thread, in sequence
+order.
+
+Implemented with a counting mechanism, not a weakened approximation of the
+barrier: a shared array `completed[s]` indexed by GLOBAL step
+(`pass*n_chunks + chunk_index`, since chunk *index* alone repeats every
+pass and can't disambiguate which pass's chunk 3 a gate refers to) counts
+how many of the `n_threads` driver threads have finished step *s*; a
+thread beginning step *s* waits (condition variable, not a spin/poll) for
+`completed[s − W − 1] == n_threads` if that step exists. This provably
+bounds concurrent chunks in flight to `W+1` (not merely observed to,
+proven from each thread's own strictly sequential per-step progression --
+see `replay.c`'s `lookahead_wait_to_start()` comment for the argument in
+full), and provably keeps the coordinating thread's trace emission in
+strict step order regardless of `W` (full completion of step *s* is
+provably reached before full completion of step *s+1*, for the same
+reason).
+
+**Verification gate, required before Task B (item 10e):** at `W` in
+`{0, 1, 2}`, `--driver-threads 8`, identical parameters, confirm reference
+traces identical (`seq`, `chunk_id`, excluding `timestamp_ns` -- item
+10d's own disclosed interpretation of "byte-identical," reused here
+unchanged), `bytes_touched` identical, OPT `minimum_misses` and
+`minimum_bytes_fetched` identical, and that `W=0` reproduces item 10d's
+own gate numbers exactly. **"Byte-identical" at `W=0` means identical in
+every PAGER-OBSERVABLE quantity** (reference trace content, bytes moved,
+fault/eviction counts) -- not literal identical wall-clock scheduling,
+which the mechanism doesn't depend on and which item 10d's own reference-
+trace comparison already established isn't even a coherent target (the
+trace's `timestamp_ns` field is real wall-clock and can never be literally
+identical across separate process invocations, threaded or not).
 
 ---
 

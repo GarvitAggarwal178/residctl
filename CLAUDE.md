@@ -85,6 +85,166 @@ branches in `handle_fault()` have still never been observed to fire) is now
 backed by much stronger negative evidence and is being accepted as a known,
 understood limitation for v1 rather than chased further.
 
+**ITEM 10e — lookahead window driver + retention regime boundary. Full
+report: `results/LOOKAHEAD_REPORT.md`.** Task A fixes a spec defect
+introduced in item 10d (A-8's hard barrier made async's throughput benefit
+untestable by construction — item 10d's own report diagnosed this
+correctly but didn't yet have the fix). Task B follows up item 10d's Task
+C finding that retention's effect was regime-dependent (bytes fell in some
+cells, rose in others, tracking `stat_pin_broken`) rather than a clean
+"did not hold." Nothing from item 10d is retracted — its Task A
+verification gate, `dedup_fetching` scaling, and retention numbers all
+still stand as measurements of the barrier-driven driver they were taken
+under.
+
+**Task A (A-10, supersedes A-8's barrier) — bounded lookahead window.**
+`--lookahead-window W` (default 0) replaces the `pthread_barrier_t` with a
+global-step completion counter (condition-variable-gated, not a weakened
+approximation): thread *t* may begin chunk *i+1* once ALL threads have
+completed chunk *(i−W)*, provably bounding concurrent chunks in flight to
+`W+1` (proof in `replay.c`'s `lookahead_wait_to_start()` comment, from
+each thread's own strictly sequential per-step progression). Verification
+gate (`W` ∈ {0,1,2}, `--driver-threads 8`, ratio 0.5): reference traces
+identical across all three (80/80 records, `seq`/`chunk_id` match),
+`bytes_touched` identical (10,737,418,240), OPT identical
+(`minimum_misses=48`, `minimum_bytes_fetched=6,442,450,944`) — **PASS on
+all three**. `W=0` reproduces item 10d's own gate numbers EXACTLY
+(`pager_bytes_fetched=6,979,321,856 absent_handled=52 evictions=44`) —
+the required regression check, confirmed before proceeding to Task B.
+`objdump` on the new `replay_thread_main` confirms the read loop and its
+atomic sink-add (`lock add`) both survive `-O2`.
+
+**Task B — sync vs async with overlap actually possible.** Arm D, V2
+scale, 3 ratios × n=3 × `--lookahead-window` {0,1,2} × `--driver-threads`
+{1,8} × handler {sync, async}, 108 runs, `results/task_e_sweep_b.csv`. Of
+6 pre-registered expectations: **1 and 5 held; 6 held after investigation
+of an apparent violation; 3 held trivially; 2 and 4 did not hold as
+intended.** Expectation 1 (W=0 regression) holds exactly at all 12
+(ratio, threads, handler) combinations checked. Expectation 6 (`read_bytes`
+identical per ratio) initially looked violated (real variance appeared for
+the first time on arm D, e.g. r=0.25 spanning 9.26G–10.47G) — investigated
+per the spec's own stop-and-report instruction, not waved through: zero
+`DISCREPANCY`/`RECONCILE FAILED`/`FAIL` lines in the log, every value an
+exact integer multiple of one chunk-size apart from its neighbors, and
+critically **zero variance at `W=0` specifically** (exactly one value,
+matching item 10d), with variance growing monotonically with `W` (3
+distinct values at W=1, 5 at W=2) — traced to genuine timing-dependent
+eviction ordering from real cross-chunk concurrency (the same class of
+non-determinism item 10d's Anomalies section already disclosed for
+prefetch-enabled runs, now appearing on arm D itself for the first time,
+precisely because A-10 is what finally introduced real overlap to a
+previously fully-serialized driver). Not a bug; reported as investigated
+and cleared.
+
+The headline finding: **`stat_dedup_fetching` DID change with the window
+(confirming real cross-chunk contention now exists — e.g. r=0.25/threads=8/
+async: 379→125→136 medians at W=0/1/2, materially different fault-dedup
+behavior from a flat barrier), but the median number of CONCURRENTLY-
+OUTSTANDING FETCHES (computed directly from `--fetch-trace` read-interval
+overlap, new this item) was exactly 1.00 in EVERY one of the 36 (ratio,
+window, threads, handler) cells — including W=2/threads=8/async.**
+Expectation 2 (concurrently-outstanding rises with W under async, toward
+2 at W=1 and 3 at W=2) **did not hold — not partially, not at any cell.**
+Expectation 3 (sync stays ~1.0) holds, but non-distinguishingly: async
+ALSO stayed at exactly 1.0 throughout, so this isn't evidence of a
+handler-specific limitation. Device-busy fraction showed only a small,
+secondary rise with `W` under async at threads=8 (e.g. r=0.75: 0.834→
+0.843→0.851) — consistent with reduced dispatch-gap idle time between
+back-to-back fetches, not genuine I/O overlap (which concurrently-
+outstanding=1.0 rules out) — so expectation 4 did not hold as intended
+even though the raw busy-fraction number ticked up slightly. Wall-clock
+at W=2/threads=8 (expectation 5) held at 2 of 3 ratios (r=0.25:
+4.556s<4.642s; r=0.5: 3.931s<4.048s; r=0.75: 2.732s vs 2.713s, marginally
+higher). `fetch.c`'s `fetch_chunk()` was inspected as part of this finding
+(no lock of its own; a single, process-wide `r->model_fd` is shared by
+every fetch-pool worker, `pread()`-per-worker with explicit offsets) —
+consistent with, but not proof of, serialization somewhere below the
+dispatch layer (the WSL2 virtualized disk backend and/or `O_DIRECT`
+behavior on this specific filesystem are plausible candidates; not
+isolated further, per the spec's explicit instruction not to chase a
+further mechanism when the device ceiling looks genuinely hard).
+
+**Task C — retention regime boundary, five-ratio sweep
+(0.25/0.375/0.5/0.625/0.75), arm E, `--prefetch-retention` {none,pinned} ×
+depth {2,4}, n=3, async, `--fetch-workers 4`, `--driver-threads 8`,
+`--lookahead-window 1`, 75 runs, `results/task_e_sweep_c.csv`.** Of 4
+pre-registered expectations: **3 held (9/10 cells, one exact tie); 1
+held with a depth-dependent boundary rather than one project-wide `r_c`;
+4 mostly held with one small exception; 2 did NOT hold — a genuine
+reversal from item 10d, reported as such.**
+
+`stat_pin_broken` cleanly separates two regimes, but the boundary is
+**depth-dependent**: nonzero at r=0.25 for both depths, ALSO nonzero at
+r=0.375 for depth=4 specifically, zero everywhere else. So
+`r_c(depth=2)` falls between 0.25 and 0.375; `r_c(depth=4)` falls between
+0.375 and 0.5 — a deeper retained set needs more budget headroom before
+it stops contending with demand, which is the mechanism, not an
+anomaly. `infeasible` tracks the same depth-dependent boundary almost
+exactly (large counts, 19-44, at the cells where `pin_broken` fires at
+depth 4; one small exception — `infeasible=[0,1,1]` also appeared at
+r=0.25/depth=2, where `pin_broken` was firing too, so the "only at depth
+4" half of expectation 4 has one minor, disclosed exception, not a clean
+zero).
+
+**The reversal:** under item 10d's barrier-driven sweep, `pinned`'s
+`read_bytes` fell below `none`'s at ratios where `pin_broken` was 0 (the
+regime claim this item set out to confirm). Under real overlap
+(`--lookahead-window 1`), `pinned` read MORE bytes than `none` at every
+single (ratio, depth) cell tested except one exact tie (r=0.25/depth=2)
+— including at r=0.5/depth=2 and r=0.75/depth=4, the exact two cells item
+10d's report highlighted as retention "nearly eliminating prefetch's byte
+penalty." Verified not a bug (zero `DISCREPANCY`/`FAIL`/`RECONCILE
+FAILED` lines across all 75 runs) before reporting it as a real finding.
+Hit rate under `pinned` still exceeded `none` at 9 of 10 cells (one exact
+tie at r=0.375/depth=2, 0.25=0.25) — retention still measurably avoids
+real faults under real concurrency; it does not follow that it reduces
+total bytes moved once genuine cross-chunk overlap exists. Not chased
+into a further retention mechanism, per instruction — reported as the
+finding and stopped.
+
+**Concurrency bugs found, consolidated across items 10b-10e (per this
+item's own framing note — six bugs, one list, not scattered across four
+reports):**
+1. **Item 10b — false-positive `RECONCILE FAILED`.** In-flight `pwrite()`s
+   populated real shmem before `commit_reserved()` ran; fixed by widening
+   `reconcile()`'s check to a range
+   `[resident_bytes, resident_bytes+reserved_bytes]`.
+2. **Item 10b — deadlock from marking `RESIDENT` before the budget
+   reservation committed.** Made the chunk look evictable to a concurrent
+   `ensure_budget()` while still holding the chunk's own lock; fixed by
+   reordering commit-before-`RESIDENT` at all three fetch call sites.
+3. **Item 10b — flaky deadlock from pinning one step too late relative to
+   becoming visible as `RESIDENT`.** Fixed via `commit_reserved_and_pin()`,
+   landing the pin atomically with the commit under one `budget_lock`
+   critical section.
+4. **Item 10c — unlocked `latency_hist_record()`.** Only the single
+   synchronous handler thread ever called it before item 10c's async fetch
+   pool made it genuinely concurrent; fixed with an internal mutex on
+   `latency_hist_t`.
+5. **Item 10c — unlocked `region_t` stat counters** (`stat_bytes_fetched`,
+   `stat_absent_handled`, `stat_prefetches`, `stat_prefetch_infeasible`) in
+   `prefetch_pool.c`'s worker functions; fixed with `__sync_fetch_and_add`.
+6. **Item 10d — three unlocked `target->pin++`/`pin--` operations in
+   `prefetch_pool.c`'s `do_one_prefetch()`.** Harmless at item 10b's
+   original prefetch-only-pool scale, a real race once item 10c made
+   multiple prefetch workers run concurrently by default; fixed with the
+   existing `unpin_chunk()` and a new, symmetric `pin_chunk()`, both under
+   `budget_lock`.
+
+All six are the same class: **shared mutable state reached from a code
+path that was previously reachable from only one thread at a time**, made
+live by an architecture change elsewhere in the same or a later item (not
+by the fix that found them). Three of the six (4, 5, 6) were unreachable
+before item 10c's async architecture existed at all. All six were found
+by code inspection before a test failure revealed them, not by
+reproduction of an observed hang or corruption (unlike 1-3, which item
+10b found via actual reproduced deadlocks). Item 10e itself introduced no
+new bugs of this class — Task A's lookahead window was built with an
+explicit boundedness proof (not just tested for absence of hangs) and
+Task C added no new code (pure sweep over item 10d's existing retention
+mechanism); 183 sweep runs plus the gate's 3 runs, zero hangs, zero
+`DISCREPANCY`/`FAIL`/`RECONCILE FAILED` lines.
+
 **ITEM 10d — concurrent demand workload + prefetch target retention. Full
 report: `results/CONCURRENCY_REPORT.md`.** Item 10c produced two null
 results, both correctly explained, and both explanations pointed at a

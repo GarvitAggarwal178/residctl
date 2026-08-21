@@ -1,0 +1,1387 @@
+=== resource headroom check ===
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       1.0Gi       6.3Gi        45Mi       596Mi       6.6Gi
+Swap:          2.0Gi        62Mi       1.9Gi
+=== machine exclusivity check (before) ===
+ 15:24:04 up 1 day,  2:29,  1 user,  load average: 0.03, 0.47, 0.40
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           7  0.0  0.0   4512  2328 ?        Sl   Aug20   0:16 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  5000 ?        Ss   Aug20   0:08 /usr/lib/systemd/systemd-udevd
+root         156  0.0  0.1  34244 10492 ?        S<s  Aug20   0:06 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  9448 ?        Ss   Aug20   0:05 /sbin/init
+root       12530  0.0  0.2 1246960 19628 pts/0   Ssl+ 00:07   0:02 /mnt/wsl/docker-desktop/docker-desktop-user-distro proxy --distro-name Ubuntu --docker-desktop-root /mnt/wsl/docker-desktop C:\Program Files\Docker\Docker\resources
+polkitd      880  0.0  0.0 306444  3536 ?        Ssl  Aug20   0:02 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+_chrony      368  0.0  0.0  23872  3152 ?        S    Aug20   0:01 /usr/sbin/chronyd -n -F 1 -x
+
+############################################################
+# ratio=0.25 budget_bytes=536870912
+############################################################
+--- ratio=0.25 arm=D retention=n/a depth=n/a rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4247867825 (4.248s) touches/sec=18.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=269 fault_minor=1 dedup_resident=69 dedup_fetching=130
+  absent_handled=71 evictions=67 bytes_punched=8992587776 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=71 min_ns=50363732 p50_ns=67108863 p99_ns=134217727 max_ns=87326096
+  queue_depth_high_water=6
+  pager_bytes_fetched=9529458688 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9529458688
+  byte accounting cross-check: pager (9529458688) vs io_read_bytes_delta (9529458688) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4247867825,absent_handled=71,evictions=67,infeasible=0,prefetches=0,pager_bytes_fetched=9529458688,io_read_bytes_delta=9529458688,dedup_resident=69,dedup_fetching=130,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.25 arm=D retention=n/a depth=n/a rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4097867343 (4.098s) touches/sec=19.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=260 fault_minor=0 dedup_resident=68 dedup_fetching=123
+  absent_handled=69 evictions=65 bytes_punched=8724152320 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=69 min_ns=40314650 p50_ns=67108863 p99_ns=67108863 max_ns=69659335
+  queue_depth_high_water=8
+  pager_bytes_fetched=9261023232 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9261023232
+  byte accounting cross-check: pager (9261023232) vs io_read_bytes_delta (9261023232) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4097867343,absent_handled=69,evictions=65,infeasible=0,prefetches=0,pager_bytes_fetched=9261023232,io_read_bytes_delta=9261023232,dedup_resident=68,dedup_fetching=123,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.25 arm=D retention=n/a depth=n/a rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4154430354 (4.154s) touches/sec=19.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=275 fault_minor=4 dedup_resident=68 dedup_fetching=140
+  absent_handled=71 evictions=67 bytes_punched=8992587776 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=71 min_ns=42808994 p50_ns=67108863 p99_ns=134217727 max_ns=81595611
+  queue_depth_high_water=8
+  pager_bytes_fetched=9529458688 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9529458688
+  byte accounting cross-check: pager (9529458688) vs io_read_bytes_delta (9529458688) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4154430354,absent_handled=71,evictions=67,infeasible=0,prefetches=0,pager_bytes_fetched=9529458688,io_read_bytes_delta=9529458688,dedup_resident=68,dedup_fetching=140,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.25 arm=E retention=none depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 98 records to /root/residctl/scratch/sweepec_none_d2_r0.25_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4315381760 (4.315s) touches/sec=18.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=252 fault_minor=8 dedup_resident=45 dedup_fetching=160
+  absent_handled=55 evictions=94 bytes_punched=12616466432 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=2
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=55 min_ns=46244414 p50_ns=67108863 p99_ns=134217727 max_ns=103632410
+  queue_depth_high_water=12
+  pager_bytes_fetched=13153337344 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=13153337344
+  byte accounting cross-check: pager (13153337344) vs io_read_bytes_delta (13153337344) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4315381760,absent_handled=55,evictions=94,infeasible=0,prefetches=43,pager_bytes_fetched=13153337344,io_read_bytes_delta=13153337344,dedup_resident=45,dedup_fetching=160,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.25 arm=E retention=none depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 94 records to /root/residctl/scratch/sweepec_none_d2_r0.25_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4047147830 (4.047s) touches/sec=19.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=225 fault_minor=8 dedup_resident=52 dedup_fetching=127
+  absent_handled=54 evictions=90 bytes_punched=12079595520 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=54 min_ns=46968001 p50_ns=67108863 p99_ns=134217727 max_ns=104821234
+  queue_depth_high_water=9
+  pager_bytes_fetched=12616466432 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=12616466432
+  byte accounting cross-check: pager (12616466432) vs io_read_bytes_delta (12616466432) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4047147830,absent_handled=54,evictions=90,infeasible=0,prefetches=40,pager_bytes_fetched=12616466432,io_read_bytes_delta=12616466432,dedup_resident=52,dedup_fetching=127,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.25 arm=E retention=none depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 94 records to /root/residctl/scratch/sweepec_none_d2_r0.25_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4209032651 (4.209s) touches/sec=19.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=227 fault_minor=13 dedup_resident=52 dedup_fetching=136
+  absent_handled=52 evictions=90 bytes_punched=12079595520 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=52 min_ns=45641902 p50_ns=67108863 p99_ns=134217727 max_ns=101220166
+  queue_depth_high_water=9
+  pager_bytes_fetched=12616466432 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=12616466432
+  byte accounting cross-check: pager (12616466432) vs io_read_bytes_delta (12616466432) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4209032651,absent_handled=52,evictions=90,infeasible=0,prefetches=42,pager_bytes_fetched=12616466432,io_read_bytes_delta=12616466432,dedup_resident=52,dedup_fetching=136,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.25 arm=E retention=pinned depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 94 records to /root/residctl/scratch/sweepec_pinned_d2_r0.25_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4043985244 (4.044s) touches/sec=19.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=195 fault_minor=19 dedup_resident=53 dedup_fetching=106
+  absent_handled=55 evictions=90 bytes_punched=12079595520 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=2
+  prefetch_retention=pinned stat_pin_broken=9
+  handler_latency: count=55 min_ns=40902284 p50_ns=67108863 p99_ns=134217727 max_ns=128887040
+  queue_depth_high_water=8
+  pager_bytes_fetched=12616466432 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=12616466432
+  byte accounting cross-check: pager (12616466432) vs io_read_bytes_delta (12616466432) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4043985244,absent_handled=55,evictions=90,infeasible=0,prefetches=39,pager_bytes_fetched=12616466432,io_read_bytes_delta=12616466432,dedup_resident=53,dedup_fetching=106,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=9
+PASS
+--- ratio=0.25 arm=E retention=pinned depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 95 records to /root/residctl/scratch/sweepec_pinned_d2_r0.25_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4268434863 (4.268s) touches/sec=18.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=187 fault_minor=15 dedup_resident=53 dedup_fetching=95
+  absent_handled=54 evictions=91 bytes_punched=12213813248 infeasible=1
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=10
+  handler_latency: count=54 min_ns=45980393 p50_ns=67108863 p99_ns=134217727 max_ns=124063108
+  queue_depth_high_water=8
+  pager_bytes_fetched=12750684160 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=12750684160
+  byte accounting cross-check: pager (12750684160) vs io_read_bytes_delta (12750684160) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4268434863,absent_handled=54,evictions=91,infeasible=1,prefetches=41,pager_bytes_fetched=12750684160,io_read_bytes_delta=12750684160,dedup_resident=53,dedup_fetching=95,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=10
+PASS
+--- ratio=0.25 arm=E retention=pinned depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 91 records to /root/residctl/scratch/sweepec_pinned_d2_r0.25_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3891726071 (3.892s) touches/sec=20.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=194 fault_minor=14 dedup_resident=50 dedup_fetching=106
+  absent_handled=52 evictions=87 bytes_punched=11676942336 infeasible=1
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=6
+  handler_latency: count=52 min_ns=42466423 p50_ns=67108863 p99_ns=134217727 max_ns=111356928
+  queue_depth_high_water=9
+  pager_bytes_fetched=12213813248 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=12213813248
+  byte accounting cross-check: pager (12213813248) vs io_read_bytes_delta (12213813248) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=3891726071,absent_handled=52,evictions=87,infeasible=1,prefetches=39,pager_bytes_fetched=12213813248,io_read_bytes_delta=12213813248,dedup_resident=50,dedup_fetching=106,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=6
+PASS
+--- ratio=0.25 arm=E retention=none depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 108 records to /root/residctl/scratch/sweepec_none_d4_r0.25_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4291544022 (4.292s) touches/sec=18.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=205 fault_minor=20 dedup_resident=64 dedup_fetching=121
+  absent_handled=40 evictions=104 bytes_punched=13958643712 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=4 prefetch_declined=4
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=40 min_ns=43180784 p50_ns=67108863 p99_ns=134217727 max_ns=114683119
+  queue_depth_high_water=8
+  pager_bytes_fetched=14495514624 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=14495514624
+  byte accounting cross-check: pager (14495514624) vs io_read_bytes_delta (14495514624) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4291544022,absent_handled=40,evictions=104,infeasible=0,prefetches=68,pager_bytes_fetched=14495514624,io_read_bytes_delta=14495514624,dedup_resident=64,dedup_fetching=121,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=4,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.25 arm=E retention=none depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 109 records to /root/residctl/scratch/sweepec_none_d4_r0.25_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4311394374 (4.311s) touches/sec=18.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=175 fault_minor=18 dedup_resident=61 dedup_fetching=90
+  absent_handled=42 evictions=105 bytes_punched=14092861440 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=2
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=42 min_ns=41012181 p50_ns=67108863 p99_ns=134217727 max_ns=102330139
+  queue_depth_high_water=8
+  pager_bytes_fetched=14629732352 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=14629732352
+  byte accounting cross-check: pager (14629732352) vs io_read_bytes_delta (14629732352) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4311394374,absent_handled=42,evictions=105,infeasible=0,prefetches=67,pager_bytes_fetched=14629732352,io_read_bytes_delta=14629732352,dedup_resident=61,dedup_fetching=90,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.25 arm=E retention=none depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 128 records to /root/residctl/scratch/sweepec_none_d4_r0.25_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4801664367 (4.802s) touches/sec=16.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=209 fault_minor=20 dedup_resident=57 dedup_fetching=127
+  absent_handled=45 evictions=124 bytes_punched=16642998272 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=2
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=45 min_ns=40870987 p50_ns=67108863 p99_ns=134217727 max_ns=158466117
+  queue_depth_high_water=9
+  pager_bytes_fetched=17179869184 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=17179869184
+  byte accounting cross-check: pager (17179869184) vs io_read_bytes_delta (17179869184) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4801664367,absent_handled=45,evictions=124,infeasible=0,prefetches=83,pager_bytes_fetched=17179869184,io_read_bytes_delta=17179869184,dedup_resident=57,dedup_fetching=127,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.25 arm=E retention=pinned depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 113 records to /root/residctl/scratch/sweepec_pinned_d4_r0.25_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4173048524 (4.173s) touches/sec=19.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=214 fault_minor=20 dedup_resident=42 dedup_fetching=128
+  absent_handled=64 evictions=109 bytes_punched=14629732352 infeasible=41
+  prefetch_admission=guarded prefetch_infeasible=43 prefetch_declined=2
+  prefetch_retention=pinned stat_pin_broken=33
+  handler_latency: count=64 min_ns=42546080 p50_ns=67108863 p99_ns=134217727 max_ns=127862295
+  queue_depth_high_water=9
+  pager_bytes_fetched=15166603264 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=15166603264
+  byte accounting cross-check: pager (15166603264) vs io_read_bytes_delta (15166603264) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4173048524,absent_handled=64,evictions=109,infeasible=41,prefetches=49,pager_bytes_fetched=15166603264,io_read_bytes_delta=15166603264,dedup_resident=42,dedup_fetching=128,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=33
+PASS
+--- ratio=0.25 arm=E retention=pinned depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 105 records to /root/residctl/scratch/sweepec_pinned_d4_r0.25_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4155222370 (4.155s) touches/sec=19.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=210 fault_minor=12 dedup_resident=42 dedup_fetching=120
+  absent_handled=60 evictions=101 bytes_punched=13555990528 infeasible=44
+  prefetch_admission=guarded prefetch_infeasible=45 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=31
+  handler_latency: count=60 min_ns=40194056 p50_ns=67108863 p99_ns=134217727 max_ns=136279950
+  queue_depth_high_water=9
+  pager_bytes_fetched=14092861440 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=14092861440
+  byte accounting cross-check: pager (14092861440) vs io_read_bytes_delta (14092861440) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=4155222370,absent_handled=60,evictions=101,infeasible=44,prefetches=45,pager_bytes_fetched=14092861440,io_read_bytes_delta=14092861440,dedup_resident=42,dedup_fetching=120,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=31
+PASS
+--- ratio=0.25 arm=E retention=pinned depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 105 records to /root/residctl/scratch/sweepec_pinned_d4_r0.25_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=536870912 (4.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3866658847 (3.867s) touches/sec=20.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=536870912 budget_bytes=536870912
+  fault_missing=227 fault_minor=19 dedup_resident=39 dedup_fetching=147
+  absent_handled=60 evictions=101 bytes_punched=13555990528 infeasible=36
+  prefetch_admission=guarded prefetch_infeasible=39 prefetch_declined=3
+  prefetch_retention=pinned stat_pin_broken=23
+  handler_latency: count=60 min_ns=40514125 p50_ns=134217727 p99_ns=134217727 max_ns=103895249
+  queue_depth_high_water=9
+  pager_bytes_fetched=14092861440 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=14092861440
+  byte accounting cross-check: pager (14092861440) vs io_read_bytes_delta (14092861440) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=536870912,touches=80,bytes_touched=10737418240,wall_ns=3866658847,absent_handled=60,evictions=101,infeasible=36,prefetches=45,pager_bytes_fetched=14092861440,io_read_bytes_delta=14092861440,dedup_resident=39,dedup_fetching=147,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=3,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=23
+PASS
+
+############################################################
+# ratio=0.375 budget_bytes=805306368
+############################################################
+--- ratio=0.375 arm=D retention=n/a depth=n/a rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3682080541 (3.682s) touches/sec=21.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=225 fault_minor=4 dedup_resident=63 dedup_fetching=103
+  absent_handled=63 evictions=57 bytes_punched=7650410496 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=63 min_ns=41006793 p50_ns=67108863 p99_ns=134217727 max_ns=91443644
+  queue_depth_high_water=6
+  pager_bytes_fetched=8455716864 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8455716864
+  byte accounting cross-check: pager (8455716864) vs io_read_bytes_delta (8455716864) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3682080541,absent_handled=63,evictions=57,infeasible=0,prefetches=0,pager_bytes_fetched=8455716864,io_read_bytes_delta=8455716864,dedup_resident=63,dedup_fetching=103,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.375 arm=D retention=n/a depth=n/a rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3626678444 (3.627s) touches/sec=22.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=244 fault_minor=2 dedup_resident=62 dedup_fetching=121
+  absent_handled=63 evictions=57 bytes_punched=7650410496 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=63 min_ns=41551819 p50_ns=67108863 p99_ns=134217727 max_ns=86040405
+  queue_depth_high_water=8
+  pager_bytes_fetched=8455716864 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8455716864
+  byte accounting cross-check: pager (8455716864) vs io_read_bytes_delta (8455716864) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3626678444,absent_handled=63,evictions=57,infeasible=0,prefetches=0,pager_bytes_fetched=8455716864,io_read_bytes_delta=8455716864,dedup_resident=62,dedup_fetching=121,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.375 arm=D retention=n/a depth=n/a rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3640802468 (3.641s) touches/sec=22.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=227 fault_minor=4 dedup_resident=63 dedup_fetching=105
+  absent_handled=63 evictions=57 bytes_punched=7650410496 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=63 min_ns=40567573 p50_ns=67108863 p99_ns=67108863 max_ns=74319897
+  queue_depth_high_water=6
+  pager_bytes_fetched=8455716864 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8455716864
+  byte accounting cross-check: pager (8455716864) vs io_read_bytes_delta (8455716864) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3640802468,absent_handled=63,evictions=57,infeasible=0,prefetches=0,pager_bytes_fetched=8455716864,io_read_bytes_delta=8455716864,dedup_resident=63,dedup_fetching=105,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=none depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 75 records to /root/residctl/scratch/sweepec_none_d2_r0.375_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3537870531 (3.538s) touches/sec=22.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=201 fault_minor=12 dedup_resident=57 dedup_fetching=111
+  absent_handled=45 evictions=69 bytes_punched=9261023232 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=45 min_ns=40753587 p50_ns=67108863 p99_ns=134217727 max_ns=94801830
+  queue_depth_high_water=8
+  pager_bytes_fetched=10066329600 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10066329600
+  byte accounting cross-check: pager (10066329600) vs io_read_bytes_delta (10066329600) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3537870531,absent_handled=45,evictions=69,infeasible=0,prefetches=30,pager_bytes_fetched=10066329600,io_read_bytes_delta=10066329600,dedup_resident=57,dedup_fetching=111,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=none depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 75 records to /root/residctl/scratch/sweepec_none_d2_r0.375_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3488739475 (3.489s) touches/sec=22.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=199 fault_minor=10 dedup_resident=57 dedup_fetching=107
+  absent_handled=45 evictions=69 bytes_punched=9261023232 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=45 min_ns=42661208 p50_ns=67108863 p99_ns=134217727 max_ns=98149046
+  queue_depth_high_water=8
+  pager_bytes_fetched=10066329600 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10066329600
+  byte accounting cross-check: pager (10066329600) vs io_read_bytes_delta (10066329600) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3488739475,absent_handled=45,evictions=69,infeasible=0,prefetches=30,pager_bytes_fetched=10066329600,io_read_bytes_delta=10066329600,dedup_resident=57,dedup_fetching=107,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=none depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 75 records to /root/residctl/scratch/sweepec_none_d2_r0.375_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3704106084 (3.704s) touches/sec=21.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=173 fault_minor=10 dedup_resident=57 dedup_fetching=82
+  absent_handled=44 evictions=69 bytes_punched=9261023232 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=44 min_ns=43932134 p50_ns=67108863 p99_ns=134217727 max_ns=98564816
+  queue_depth_high_water=9
+  pager_bytes_fetched=10066329600 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10066329600
+  byte accounting cross-check: pager (10066329600) vs io_read_bytes_delta (10066329600) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3704106084,absent_handled=44,evictions=69,infeasible=0,prefetches=31,pager_bytes_fetched=10066329600,io_read_bytes_delta=10066329600,dedup_resident=57,dedup_fetching=82,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=pinned depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 82 records to /root/residctl/scratch/sweepec_pinned_d2_r0.375_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3890465314 (3.890s) touches/sec=20.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=214 fault_minor=15 dedup_resident=48 dedup_fetching=132
+  absent_handled=49 evictions=76 bytes_punched=10200547328 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=49 min_ns=44030316 p50_ns=67108863 p99_ns=134217727 max_ns=129073848
+  queue_depth_high_water=9
+  pager_bytes_fetched=11005853696 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11005853696
+  byte accounting cross-check: pager (11005853696) vs io_read_bytes_delta (11005853696) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3890465314,absent_handled=49,evictions=76,infeasible=0,prefetches=33,pager_bytes_fetched=11005853696,io_read_bytes_delta=11005853696,dedup_resident=48,dedup_fetching=132,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=pinned depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 90 records to /root/residctl/scratch/sweepec_pinned_d2_r0.375_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4063033952 (4.063s) touches/sec=19.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=210 fault_minor=14 dedup_resident=52 dedup_fetching=120
+  absent_handled=52 evictions=84 bytes_punched=11274289152 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=52 min_ns=42588406 p50_ns=67108863 p99_ns=134217727 max_ns=119091832
+  queue_depth_high_water=9
+  pager_bytes_fetched=12079595520 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=12079595520
+  byte accounting cross-check: pager (12079595520) vs io_read_bytes_delta (12079595520) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=4063033952,absent_handled=52,evictions=84,infeasible=0,prefetches=38,pager_bytes_fetched=12079595520,io_read_bytes_delta=12079595520,dedup_resident=52,dedup_fetching=120,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=pinned depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 83 records to /root/residctl/scratch/sweepec_pinned_d2_r0.375_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3846758363 (3.847s) touches/sec=20.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=203 fault_minor=10 dedup_resident=52 dedup_fetching=111
+  absent_handled=50 evictions=77 bytes_punched=10334765056 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=50 min_ns=39320666 p50_ns=67108863 p99_ns=134217727 max_ns=127021878
+  queue_depth_high_water=9
+  pager_bytes_fetched=11140071424 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11140071424
+  byte accounting cross-check: pager (11140071424) vs io_read_bytes_delta (11140071424) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3846758363,absent_handled=50,evictions=77,infeasible=0,prefetches=33,pager_bytes_fetched=11140071424,io_read_bytes_delta=11140071424,dedup_resident=52,dedup_fetching=111,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=none depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 87 records to /root/residctl/scratch/sweepec_none_d4_r0.375_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3642297030 (3.642s) touches/sec=22.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=169 fault_minor=22 dedup_resident=62 dedup_fetching=93
+  absent_handled=36 evictions=81 bytes_punched=10871635968 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=36 min_ns=38915810 p50_ns=67108863 p99_ns=134217727 max_ns=103869467
+  queue_depth_high_water=9
+  pager_bytes_fetched=11676942336 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11676942336
+  byte accounting cross-check: pager (11676942336) vs io_read_bytes_delta (11676942336) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3642297030,absent_handled=36,evictions=81,infeasible=0,prefetches=51,pager_bytes_fetched=11676942336,io_read_bytes_delta=11676942336,dedup_resident=62,dedup_fetching=93,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=none depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 88 records to /root/residctl/scratch/sweepec_none_d4_r0.375_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3701257265 (3.701s) touches/sec=21.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=180 fault_minor=20 dedup_resident=59 dedup_fetching=105
+  absent_handled=36 evictions=82 bytes_punched=11005853696 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=36 min_ns=44118860 p50_ns=67108863 p99_ns=134217727 max_ns=91881887
+  queue_depth_high_water=9
+  pager_bytes_fetched=11811160064 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11811160064
+  byte accounting cross-check: pager (11811160064) vs io_read_bytes_delta (11811160064) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3701257265,absent_handled=36,evictions=82,infeasible=0,prefetches=52,pager_bytes_fetched=11811160064,io_read_bytes_delta=11811160064,dedup_resident=59,dedup_fetching=105,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=none depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 87 records to /root/residctl/scratch/sweepec_none_d4_r0.375_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3743503597 (3.744s) touches/sec=21.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=190 fault_minor=18 dedup_resident=59 dedup_fetching=106
+  absent_handled=43 evictions=81 bytes_punched=10871635968 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=43 min_ns=39712734 p50_ns=67108863 p99_ns=134217727 max_ns=112245139
+  queue_depth_high_water=9
+  pager_bytes_fetched=11676942336 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11676942336
+  byte accounting cross-check: pager (11676942336) vs io_read_bytes_delta (11676942336) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3743503597,absent_handled=43,evictions=81,infeasible=0,prefetches=44,pager_bytes_fetched=11676942336,io_read_bytes_delta=11676942336,dedup_resident=59,dedup_fetching=106,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.375 arm=E retention=pinned depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 100 records to /root/residctl/scratch/sweepec_pinned_d4_r0.375_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=4046561077 (4.047s) touches/sec=19.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=214 fault_minor=15 dedup_resident=43 dedup_fetching=134
+  absent_handled=52 evictions=94 bytes_punched=12616466432 infeasible=19
+  prefetch_admission=guarded prefetch_infeasible=27 prefetch_declined=8
+  prefetch_retention=pinned stat_pin_broken=13
+  handler_latency: count=52 min_ns=44720388 p50_ns=134217727 p99_ns=134217727 max_ns=123977602
+  queue_depth_high_water=9
+  pager_bytes_fetched=13421772800 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=13421772800
+  byte accounting cross-check: pager (13421772800) vs io_read_bytes_delta (13421772800) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=4046561077,absent_handled=52,evictions=94,infeasible=19,prefetches=48,pager_bytes_fetched=13421772800,io_read_bytes_delta=13421772800,dedup_resident=43,dedup_fetching=134,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=8,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=13
+PASS
+--- ratio=0.375 arm=E retention=pinned depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 97 records to /root/residctl/scratch/sweepec_pinned_d4_r0.375_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3987393260 (3.987s) touches/sec=20.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=211 fault_minor=15 dedup_resident=49 dedup_fetching=126
+  absent_handled=51 evictions=91 bytes_punched=12213813248 infeasible=22
+  prefetch_admission=guarded prefetch_infeasible=30 prefetch_declined=8
+  prefetch_retention=pinned stat_pin_broken=8
+  handler_latency: count=51 min_ns=41926637 p50_ns=67108863 p99_ns=134217727 max_ns=109181675
+  queue_depth_high_water=9
+  pager_bytes_fetched=13019119616 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=13019119616
+  byte accounting cross-check: pager (13019119616) vs io_read_bytes_delta (13019119616) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3987393260,absent_handled=51,evictions=91,infeasible=22,prefetches=46,pager_bytes_fetched=13019119616,io_read_bytes_delta=13019119616,dedup_resident=49,dedup_fetching=126,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=8,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=8
+PASS
+--- ratio=0.375 arm=E retention=pinned depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 97 records to /root/residctl/scratch/sweepec_pinned_d4_r0.375_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=805306368 (6.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3913982188 (3.914s) touches/sec=20.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=805306368 budget_bytes=805306368
+  fault_missing=207 fault_minor=16 dedup_resident=48 dedup_fetching=126
+  absent_handled=49 evictions=91 bytes_punched=12213813248 infeasible=23
+  prefetch_admission=guarded prefetch_infeasible=26 prefetch_declined=3
+  prefetch_retention=pinned stat_pin_broken=12
+  handler_latency: count=49 min_ns=39697258 p50_ns=67108863 p99_ns=134217727 max_ns=110667402
+  queue_depth_high_water=9
+  pager_bytes_fetched=13019119616 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=13019119616
+  byte accounting cross-check: pager (13019119616) vs io_read_bytes_delta (13019119616) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=805306368,touches=80,bytes_touched=10737418240,wall_ns=3913982188,absent_handled=49,evictions=91,infeasible=23,prefetches=48,pager_bytes_fetched=13019119616,io_read_bytes_delta=13019119616,dedup_resident=48,dedup_fetching=126,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=3,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=12
+PASS
+
+############################################################
+# ratio=0.5 budget_bytes=1073741824
+############################################################
+--- ratio=0.5 arm=D retention=n/a depth=n/a rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3714362716 (3.714s) touches/sec=21.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=222 fault_minor=4 dedup_resident=56 dedup_fetching=112
+  absent_handled=58 evictions=50 bytes_punched=6710886400 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=58 min_ns=41999613 p50_ns=67108863 p99_ns=134217727 max_ns=120027219
+  queue_depth_high_water=8
+  pager_bytes_fetched=7784628224 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7784628224
+  byte accounting cross-check: pager (7784628224) vs io_read_bytes_delta (7784628224) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3714362716,absent_handled=58,evictions=50,infeasible=0,prefetches=0,pager_bytes_fetched=7784628224,io_read_bytes_delta=7784628224,dedup_resident=56,dedup_fetching=112,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.5 arm=D retention=n/a depth=n/a rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3559448919 (3.559s) touches/sec=22.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=226 fault_minor=1 dedup_resident=56 dedup_fetching=113
+  absent_handled=58 evictions=50 bytes_punched=6710886400 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=58 min_ns=39881349 p50_ns=67108863 p99_ns=134217727 max_ns=75514848
+  queue_depth_high_water=8
+  pager_bytes_fetched=7784628224 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7784628224
+  byte accounting cross-check: pager (7784628224) vs io_read_bytes_delta (7784628224) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3559448919,absent_handled=58,evictions=50,infeasible=0,prefetches=0,pager_bytes_fetched=7784628224,io_read_bytes_delta=7784628224,dedup_resident=56,dedup_fetching=113,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.5 arm=D retention=n/a depth=n/a rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3529208867 (3.529s) touches/sec=22.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=201 fault_minor=2 dedup_resident=56 dedup_fetching=90
+  absent_handled=57 evictions=49 bytes_punched=6576668672 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=57 min_ns=40980184 p50_ns=67108863 p99_ns=134217727 max_ns=79070675
+  queue_depth_high_water=8
+  pager_bytes_fetched=7650410496 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7650410496
+  byte accounting cross-check: pager (7650410496) vs io_read_bytes_delta (7650410496) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3529208867,absent_handled=57,evictions=49,infeasible=0,prefetches=0,pager_bytes_fetched=7650410496,io_read_bytes_delta=7650410496,dedup_resident=56,dedup_fetching=90,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=none depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 71 records to /root/residctl/scratch/sweepec_none_d2_r0.5_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3754896012 (3.755s) touches/sec=21.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=196 fault_minor=9 dedup_resident=49 dedup_fetching=113
+  absent_handled=43 evictions=63 bytes_punched=8455716864 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=43 min_ns=40453537 p50_ns=67108863 p99_ns=134217727 max_ns=100228579
+  queue_depth_high_water=8
+  pager_bytes_fetched=9529458688 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9529458688
+  byte accounting cross-check: pager (9529458688) vs io_read_bytes_delta (9529458688) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3754896012,absent_handled=43,evictions=63,infeasible=0,prefetches=28,pager_bytes_fetched=9529458688,io_read_bytes_delta=9529458688,dedup_resident=49,dedup_fetching=113,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=none depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 69 records to /root/residctl/scratch/sweepec_none_d2_r0.5_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3435223487 (3.435s) touches/sec=23.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=221 fault_minor=4 dedup_resident=43 dedup_fetching=136
+  absent_handled=46 evictions=61 bytes_punched=8187281408 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=2
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=46 min_ns=41392620 p50_ns=67108863 p99_ns=134217727 max_ns=100000265
+  queue_depth_high_water=9
+  pager_bytes_fetched=9261023232 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9261023232
+  byte accounting cross-check: pager (9261023232) vs io_read_bytes_delta (9261023232) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3435223487,absent_handled=46,evictions=61,infeasible=0,prefetches=23,pager_bytes_fetched=9261023232,io_read_bytes_delta=9261023232,dedup_resident=43,dedup_fetching=136,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=none depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 68 records to /root/residctl/scratch/sweepec_none_d2_r0.5_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3283042178 (3.283s) touches/sec=24.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=197 fault_minor=10 dedup_resident=47 dedup_fetching=119
+  absent_handled=41 evictions=60 bytes_punched=8053063680 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=41 min_ns=41088165 p50_ns=67108863 p99_ns=134217727 max_ns=104278639
+  queue_depth_high_water=8
+  pager_bytes_fetched=9126805504 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9126805504
+  byte accounting cross-check: pager (9126805504) vs io_read_bytes_delta (9126805504) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3283042178,absent_handled=41,evictions=60,infeasible=0,prefetches=27,pager_bytes_fetched=9126805504,io_read_bytes_delta=9126805504,dedup_resident=47,dedup_fetching=119,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=pinned depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 79 records to /root/residctl/scratch/sweepec_pinned_d2_r0.5_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3793504626 (3.794s) touches/sec=21.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=200 fault_minor=15 dedup_resident=53 dedup_fetching=115
+  absent_handled=47 evictions=71 bytes_punched=9529458688 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=2
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=47 min_ns=40863215 p50_ns=67108863 p99_ns=134217727 max_ns=140358584
+  queue_depth_high_water=8
+  pager_bytes_fetched=10603200512 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10603200512
+  byte accounting cross-check: pager (10603200512) vs io_read_bytes_delta (10603200512) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3793504626,absent_handled=47,evictions=71,infeasible=0,prefetches=32,pager_bytes_fetched=10603200512,io_read_bytes_delta=10603200512,dedup_resident=53,dedup_fetching=115,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=pinned depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 75 records to /root/residctl/scratch/sweepec_pinned_d2_r0.5_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3661079888 (3.661s) touches/sec=21.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=202 fault_minor=16 dedup_resident=53 dedup_fetching=118
+  absent_handled=47 evictions=67 bytes_punched=8992587776 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=2
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=47 min_ns=40540889 p50_ns=67108863 p99_ns=134217727 max_ns=133105056
+  queue_depth_high_water=8
+  pager_bytes_fetched=10066329600 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10066329600
+  byte accounting cross-check: pager (10066329600) vs io_read_bytes_delta (10066329600) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3661079888,absent_handled=47,evictions=67,infeasible=0,prefetches=28,pager_bytes_fetched=10066329600,io_read_bytes_delta=10066329600,dedup_resident=53,dedup_fetching=118,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=pinned depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 82 records to /root/residctl/scratch/sweepec_pinned_d2_r0.5_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3841106386 (3.841s) touches/sec=20.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=224 fault_minor=12 dedup_resident=49 dedup_fetching=133
+  absent_handled=54 evictions=74 bytes_punched=9932111872 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=4 prefetch_declined=4
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=54 min_ns=41903310 p50_ns=67108863 p99_ns=134217727 max_ns=115853975
+  queue_depth_high_water=9
+  pager_bytes_fetched=11005853696 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11005853696
+  byte accounting cross-check: pager (11005853696) vs io_read_bytes_delta (11005853696) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3841106386,absent_handled=54,evictions=74,infeasible=0,prefetches=28,pager_bytes_fetched=11005853696,io_read_bytes_delta=11005853696,dedup_resident=49,dedup_fetching=133,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=4,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=none depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 76 records to /root/residctl/scratch/sweepec_none_d4_r0.5_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3727113824 (3.727s) touches/sec=21.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=179 fault_minor=17 dedup_resident=54 dedup_fetching=103
+  absent_handled=39 evictions=68 bytes_punched=9126805504 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=3 prefetch_declined=3
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=39 min_ns=42171092 p50_ns=67108863 p99_ns=134217727 max_ns=124028077
+  queue_depth_high_water=8
+  pager_bytes_fetched=10200547328 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10200547328
+  byte accounting cross-check: pager (10200547328) vs io_read_bytes_delta (10200547328) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3727113824,absent_handled=39,evictions=68,infeasible=0,prefetches=37,pager_bytes_fetched=10200547328,io_read_bytes_delta=10200547328,dedup_resident=54,dedup_fetching=103,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=3,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=none depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 77 records to /root/residctl/scratch/sweepec_none_d4_r0.5_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3756621420 (3.757s) touches/sec=21.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=178 fault_minor=15 dedup_resident=55 dedup_fetching=98
+  absent_handled=40 evictions=69 bytes_punched=9261023232 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=4 prefetch_declined=4
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=40 min_ns=44367403 p50_ns=67108863 p99_ns=134217727 max_ns=111112988
+  queue_depth_high_water=8
+  pager_bytes_fetched=10334765056 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10334765056
+  byte accounting cross-check: pager (10334765056) vs io_read_bytes_delta (10334765056) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3756621420,absent_handled=40,evictions=69,infeasible=0,prefetches=37,pager_bytes_fetched=10334765056,io_read_bytes_delta=10334765056,dedup_resident=55,dedup_fetching=98,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=4,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=none depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 80 records to /root/residctl/scratch/sweepec_none_d4_r0.5_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3556428180 (3.556s) touches/sec=22.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=170 fault_minor=19 dedup_resident=56 dedup_fetching=97
+  absent_handled=36 evictions=72 bytes_punched=9663676416 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=36 min_ns=39980858 p50_ns=67108863 p99_ns=134217727 max_ns=110898044
+  queue_depth_high_water=9
+  pager_bytes_fetched=10737418240 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=10737418240
+  byte accounting cross-check: pager (10737418240) vs io_read_bytes_delta (10737418240) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3556428180,absent_handled=36,evictions=72,infeasible=0,prefetches=44,pager_bytes_fetched=10737418240,io_read_bytes_delta=10737418240,dedup_resident=56,dedup_fetching=97,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=pinned depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 90 records to /root/residctl/scratch/sweepec_pinned_d4_r0.5_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3982755308 (3.983s) touches/sec=20.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=169 fault_minor=20 dedup_resident=55 dedup_fetching=95
+  absent_handled=39 evictions=82 bytes_punched=11005853696 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=4 prefetch_declined=4
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=39 min_ns=45042850 p50_ns=134217727 p99_ns=134217727 max_ns=107056627
+  queue_depth_high_water=9
+  pager_bytes_fetched=12079595520 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=12079595520
+  byte accounting cross-check: pager (12079595520) vs io_read_bytes_delta (12079595520) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3982755308,absent_handled=39,evictions=82,infeasible=0,prefetches=51,pager_bytes_fetched=12079595520,io_read_bytes_delta=12079595520,dedup_resident=55,dedup_fetching=95,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=4,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=pinned depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 85 records to /root/residctl/scratch/sweepec_pinned_d4_r0.5_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3828969696 (3.829s) touches/sec=20.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=200 fault_minor=15 dedup_resident=52 dedup_fetching=119
+  absent_handled=44 evictions=77 bytes_punched=10334765056 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=3 prefetch_declined=3
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=44 min_ns=40721726 p50_ns=67108863 p99_ns=134217727 max_ns=124891064
+  queue_depth_high_water=8
+  pager_bytes_fetched=11408506880 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11408506880
+  byte accounting cross-check: pager (11408506880) vs io_read_bytes_delta (11408506880) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3828969696,absent_handled=44,evictions=77,infeasible=0,prefetches=41,pager_bytes_fetched=11408506880,io_read_bytes_delta=11408506880,dedup_resident=52,dedup_fetching=119,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=3,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.5 arm=E retention=pinned depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 88 records to /root/residctl/scratch/sweepec_pinned_d4_r0.5_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1073741824 (8.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3944563728 (3.945s) touches/sec=20.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1073741824 budget_bytes=1073741824
+  fault_missing=201 fault_minor=16 dedup_resident=55 dedup_fetching=117
+  absent_handled=45 evictions=80 bytes_punched=10737418240 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=3 prefetch_declined=3
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=45 min_ns=45723297 p50_ns=67108863 p99_ns=134217727 max_ns=130571933
+  queue_depth_high_water=9
+  pager_bytes_fetched=11811160064 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=11811160064
+  byte accounting cross-check: pager (11811160064) vs io_read_bytes_delta (11811160064) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3944563728,absent_handled=45,evictions=80,infeasible=0,prefetches=43,pager_bytes_fetched=11811160064,io_read_bytes_delta=11811160064,dedup_resident=55,dedup_fetching=117,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=3,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+
+############################################################
+# ratio=0.625 budget_bytes=1342177280
+############################################################
+--- ratio=0.625 arm=D retention=n/a depth=n/a rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3322353158 (3.322s) touches/sec=24.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=178 fault_minor=8 dedup_resident=51 dedup_fetching=84
+  absent_handled=51 evictions=41 bytes_punched=5502926848 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=51 min_ns=44025831 p50_ns=67108863 p99_ns=134217727 max_ns=154225974
+  queue_depth_high_water=7
+  pager_bytes_fetched=6845104128 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6845104128
+  byte accounting cross-check: pager (6845104128) vs io_read_bytes_delta (6845104128) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3322353158,absent_handled=51,evictions=41,infeasible=0,prefetches=0,pager_bytes_fetched=6845104128,io_read_bytes_delta=6845104128,dedup_resident=51,dedup_fetching=84,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.625 arm=D retention=n/a depth=n/a rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3345615399 (3.346s) touches/sec=23.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=187 fault_minor=3 dedup_resident=50 dedup_fetching=88
+  absent_handled=52 evictions=42 bytes_punched=5637144576 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=52 min_ns=47656138 p50_ns=67108863 p99_ns=134217727 max_ns=106394139
+  queue_depth_high_water=8
+  pager_bytes_fetched=6979321856 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6979321856
+  byte accounting cross-check: pager (6979321856) vs io_read_bytes_delta (6979321856) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3345615399,absent_handled=52,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6979321856,io_read_bytes_delta=6979321856,dedup_resident=50,dedup_fetching=88,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.625 arm=D retention=n/a depth=n/a rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3377868790 (3.378s) touches/sec=23.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=175 fault_minor=4 dedup_resident=51 dedup_fetching=77
+  absent_handled=51 evictions=41 bytes_punched=5502926848 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=51 min_ns=48134801 p50_ns=67108863 p99_ns=134217727 max_ns=97530433
+  queue_depth_high_water=7
+  pager_bytes_fetched=6845104128 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6845104128
+  byte accounting cross-check: pager (6845104128) vs io_read_bytes_delta (6845104128) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3377868790,absent_handled=51,evictions=41,infeasible=0,prefetches=0,pager_bytes_fetched=6845104128,io_read_bytes_delta=6845104128,dedup_resident=51,dedup_fetching=77,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=none depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 53 records to /root/residctl/scratch/sweepec_none_d2_r0.625_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3006652439 (3.007s) touches/sec=26.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=142 fault_minor=9 dedup_resident=47 dedup_fetching=68
+  absent_handled=36 evictions=43 bytes_punched=5771362304 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=36 min_ns=47801340 p50_ns=67108863 p99_ns=134217727 max_ns=99055585
+  queue_depth_high_water=8
+  pager_bytes_fetched=7113539584 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7113539584
+  byte accounting cross-check: pager (7113539584) vs io_read_bytes_delta (7113539584) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3006652439,absent_handled=36,evictions=43,infeasible=0,prefetches=17,pager_bytes_fetched=7113539584,io_read_bytes_delta=7113539584,dedup_resident=47,dedup_fetching=68,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=none depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 53 records to /root/residctl/scratch/sweepec_none_d2_r0.625_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2921238366 (2.921s) touches/sec=27.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=140 fault_minor=14 dedup_resident=49 dedup_fetching=69
+  absent_handled=36 evictions=43 bytes_punched=5771362304 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=36 min_ns=46792262 p50_ns=67108863 p99_ns=134217727 max_ns=99969394
+  queue_depth_high_water=6
+  pager_bytes_fetched=7113539584 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7113539584
+  byte accounting cross-check: pager (7113539584) vs io_read_bytes_delta (7113539584) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=2921238366,absent_handled=36,evictions=43,infeasible=0,prefetches=17,pager_bytes_fetched=7113539584,io_read_bytes_delta=7113539584,dedup_resident=49,dedup_fetching=69,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=none depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 62 records to /root/residctl/scratch/sweepec_none_d2_r0.625_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3282896512 (3.283s) touches/sec=24.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=164 fault_minor=14 dedup_resident=49 dedup_fetching=89
+  absent_handled=40 evictions=52 bytes_punched=6979321856 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=40 min_ns=48972360 p50_ns=67108863 p99_ns=134217727 max_ns=107170704
+  queue_depth_high_water=9
+  pager_bytes_fetched=8321499136 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8321499136
+  byte accounting cross-check: pager (8321499136) vs io_read_bytes_delta (8321499136) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3282896512,absent_handled=40,evictions=52,infeasible=0,prefetches=22,pager_bytes_fetched=8321499136,io_read_bytes_delta=8321499136,dedup_resident=49,dedup_fetching=89,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=pinned depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 62 records to /root/residctl/scratch/sweepec_pinned_d2_r0.625_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3247283017 (3.247s) touches/sec=24.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=167 fault_minor=14 dedup_resident=48 dedup_fetching=91
+  absent_handled=42 evictions=52 bytes_punched=6979321856 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=2
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=42 min_ns=46571325 p50_ns=67108863 p99_ns=134217727 max_ns=93322918
+  queue_depth_high_water=9
+  pager_bytes_fetched=8321499136 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8321499136
+  byte accounting cross-check: pager (8321499136) vs io_read_bytes_delta (8321499136) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3247283017,absent_handled=42,evictions=52,infeasible=0,prefetches=20,pager_bytes_fetched=8321499136,io_read_bytes_delta=8321499136,dedup_resident=48,dedup_fetching=91,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=pinned depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 67 records to /root/residctl/scratch/sweepec_pinned_d2_r0.625_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3504693863 (3.505s) touches/sec=22.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=173 fault_minor=9 dedup_resident=50 dedup_fetching=89
+  absent_handled=43 evictions=57 bytes_punched=7650410496 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=43 min_ns=42361368 p50_ns=67108863 p99_ns=134217727 max_ns=107111652
+  queue_depth_high_water=8
+  pager_bytes_fetched=8992587776 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8992587776
+  byte accounting cross-check: pager (8992587776) vs io_read_bytes_delta (8992587776) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3504693863,absent_handled=43,evictions=57,infeasible=0,prefetches=24,pager_bytes_fetched=8992587776,io_read_bytes_delta=8992587776,dedup_resident=50,dedup_fetching=89,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=pinned depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 63 records to /root/residctl/scratch/sweepec_pinned_d2_r0.625_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3700331829 (3.700s) touches/sec=21.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=162 fault_minor=13 dedup_resident=49 dedup_fetching=84
+  absent_handled=42 evictions=53 bytes_punched=7113539584 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=42 min_ns=48245168 p50_ns=134217727 p99_ns=134217727 max_ns=184490860
+  queue_depth_high_water=7
+  pager_bytes_fetched=8455716864 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8455716864
+  byte accounting cross-check: pager (8455716864) vs io_read_bytes_delta (8455716864) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3700331829,absent_handled=42,evictions=53,infeasible=0,prefetches=21,pager_bytes_fetched=8455716864,io_read_bytes_delta=8455716864,dedup_resident=49,dedup_fetching=84,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=none depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 57 records to /root/residctl/scratch/sweepec_none_d4_r0.625_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3134447804 (3.134s) touches/sec=25.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=145 fault_minor=16 dedup_resident=45 dedup_fetching=85
+  absent_handled=31 evictions=47 bytes_punched=6308233216 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=31 min_ns=42441383 p50_ns=134217727 p99_ns=134217727 max_ns=102499676
+  queue_depth_high_water=8
+  pager_bytes_fetched=7650410496 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7650410496
+  byte accounting cross-check: pager (7650410496) vs io_read_bytes_delta (7650410496) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3134447804,absent_handled=31,evictions=47,infeasible=0,prefetches=26,pager_bytes_fetched=7650410496,io_read_bytes_delta=7650410496,dedup_resident=45,dedup_fetching=85,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=none depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 60 records to /root/residctl/scratch/sweepec_none_d4_r0.625_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2975118492 (2.975s) touches/sec=26.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=157 fault_minor=12 dedup_resident=48 dedup_fetching=86
+  absent_handled=35 evictions=50 bytes_punched=6710886400 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=35 min_ns=42420233 p50_ns=67108863 p99_ns=134217727 max_ns=110614511
+  queue_depth_high_water=8
+  pager_bytes_fetched=8053063680 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8053194752
+  byte accounting cross-check: pager (8053063680) vs io_read_bytes_delta (8053194752) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=2975118492,absent_handled=35,evictions=50,infeasible=0,prefetches=25,pager_bytes_fetched=8053063680,io_read_bytes_delta=8053194752,dedup_resident=48,dedup_fetching=86,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=none depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 58 records to /root/residctl/scratch/sweepec_none_d4_r0.625_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2887369143 (2.887s) touches/sec=27.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=138 fault_minor=17 dedup_resident=51 dedup_fetching=72
+  absent_handled=32 evictions=48 bytes_punched=6442450944 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=3 prefetch_declined=3
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=32 min_ns=40864887 p50_ns=67108863 p99_ns=134217727 max_ns=77956989
+  queue_depth_high_water=7
+  pager_bytes_fetched=7784628224 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7784628224
+  byte accounting cross-check: pager (7784628224) vs io_read_bytes_delta (7784628224) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=2887369143,absent_handled=32,evictions=48,infeasible=0,prefetches=26,pager_bytes_fetched=7784628224,io_read_bytes_delta=7784628224,dedup_resident=51,dedup_fetching=72,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=3,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=pinned depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 64 records to /root/residctl/scratch/sweepec_pinned_d4_r0.625_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3161515474 (3.162s) touches/sec=25.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=140 fault_minor=11 dedup_resident=47 dedup_fetching=69
+  absent_handled=35 evictions=54 bytes_punched=7247757312 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=35 min_ns=42550144 p50_ns=67108863 p99_ns=134217727 max_ns=112374444
+  queue_depth_high_water=8
+  pager_bytes_fetched=8589934592 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=8589934592
+  byte accounting cross-check: pager (8589934592) vs io_read_bytes_delta (8589934592) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3161515474,absent_handled=35,evictions=54,infeasible=0,prefetches=29,pager_bytes_fetched=8589934592,io_read_bytes_delta=8589934592,dedup_resident=47,dedup_fetching=69,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=pinned depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 68 records to /root/residctl/scratch/sweepec_pinned_d4_r0.625_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3096668749 (3.097s) touches/sec=25.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=156 fault_minor=15 dedup_resident=47 dedup_fetching=86
+  absent_handled=38 evictions=58 bytes_punched=7784628224 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=38 min_ns=41507039 p50_ns=67108863 p99_ns=134217727 max_ns=119252689
+  queue_depth_high_water=8
+  pager_bytes_fetched=9126805504 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9126805504
+  byte accounting cross-check: pager (9126805504) vs io_read_bytes_delta (9126805504) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3096668749,absent_handled=38,evictions=58,infeasible=0,prefetches=30,pager_bytes_fetched=9126805504,io_read_bytes_delta=9126805504,dedup_resident=47,dedup_fetching=86,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.625 arm=E retention=pinned depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 70 records to /root/residctl/scratch/sweepec_pinned_d4_r0.625_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1342177280 (10.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3487694741 (3.488s) touches/sec=22.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1342177280 budget_bytes=1342177280
+  fault_missing=145 fault_minor=13 dedup_resident=51 dedup_fetching=69
+  absent_handled=38 evictions=60 bytes_punched=8053063680 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=38 min_ns=39805420 p50_ns=67108863 p99_ns=134217727 max_ns=109924678
+  queue_depth_high_water=7
+  pager_bytes_fetched=9395240960 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=9395240960
+  byte accounting cross-check: pager (9395240960) vs io_read_bytes_delta (9395240960) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1342177280,touches=80,bytes_touched=10737418240,wall_ns=3487694741,absent_handled=38,evictions=60,infeasible=0,prefetches=32,pager_bytes_fetched=9395240960,io_read_bytes_delta=9395240960,dedup_resident=51,dedup_fetching=69,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+
+############################################################
+# ratio=0.75 budget_bytes=1610612736
+############################################################
+--- ratio=0.75 arm=D retention=n/a depth=n/a rep=1 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2702100805 (2.702s) touches/sec=29.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=167 fault_minor=3 dedup_resident=40 dedup_fetching=89
+  absent_handled=41 evictions=29 bytes_punched=3892314112 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=41 min_ns=41104629 p50_ns=67108863 p99_ns=134217727 max_ns=100188882
+  queue_depth_high_water=8
+  pager_bytes_fetched=5502926848 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5502926848
+  byte accounting cross-check: pager (5502926848) vs io_read_bytes_delta (5502926848) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2702100805,absent_handled=41,evictions=29,infeasible=0,prefetches=0,pager_bytes_fetched=5502926848,io_read_bytes_delta=5502926848,dedup_resident=40,dedup_fetching=89,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.75 arm=D retention=n/a depth=n/a rep=2 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2523489179 (2.523s) touches/sec=31.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=143 fault_minor=6 dedup_resident=41 dedup_fetching=67
+  absent_handled=41 evictions=29 bytes_punched=3892314112 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=41 min_ns=41048050 p50_ns=67108863 p99_ns=134217727 max_ns=78746207
+  queue_depth_high_water=7
+  pager_bytes_fetched=5502926848 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5502926848
+  byte accounting cross-check: pager (5502926848) vs io_read_bytes_delta (5502926848) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2523489179,absent_handled=41,evictions=29,infeasible=0,prefetches=0,pager_bytes_fetched=5502926848,io_read_bytes_delta=5502926848,dedup_resident=41,dedup_fetching=67,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.75 arm=D retention=n/a depth=n/a rep=3 rc=0 ---
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=off reconcile_interval=16 prefetch_depth=1 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2627356683 (2.627s) touches/sec=30.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=152 fault_minor=7 dedup_resident=40 dedup_fetching=78
+  absent_handled=41 evictions=29 bytes_punched=3892314112 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=41 min_ns=42232921 p50_ns=67108863 p99_ns=134217727 max_ns=106426450
+  queue_depth_high_water=8
+  pager_bytes_fetched=5502926848 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5502926848
+  byte accounting cross-check: pager (5502926848) vs io_read_bytes_delta (5502926848) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=off,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2627356683,absent_handled=41,evictions=29,infeasible=0,prefetches=0,pager_bytes_fetched=5502926848,io_read_bytes_delta=5502926848,dedup_resident=40,dedup_fetching=78,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=none depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 46 records to /root/residctl/scratch/sweepec_none_d2_r0.75_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2483880503 (2.484s) touches/sec=32.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=129 fault_minor=10 dedup_resident=37 dedup_fetching=70
+  absent_handled=32 evictions=34 bytes_punched=4563402752 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=32 min_ns=39791890 p50_ns=67108863 p99_ns=134217727 max_ns=111927992
+  queue_depth_high_water=9
+  pager_bytes_fetched=6174015488 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6174015488
+  byte accounting cross-check: pager (6174015488) vs io_read_bytes_delta (6174015488) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2483880503,absent_handled=32,evictions=34,infeasible=0,prefetches=14,pager_bytes_fetched=6174015488,io_read_bytes_delta=6174015488,dedup_resident=37,dedup_fetching=70,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=none depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 46 records to /root/residctl/scratch/sweepec_none_d2_r0.75_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2493173013 (2.493s) touches/sec=32.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=138 fault_minor=10 dedup_resident=38 dedup_fetching=78
+  absent_handled=32 evictions=34 bytes_punched=4563402752 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=32 min_ns=42690318 p50_ns=67108863 p99_ns=134217727 max_ns=102191703
+  queue_depth_high_water=8
+  pager_bytes_fetched=6174015488 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6174015488
+  byte accounting cross-check: pager (6174015488) vs io_read_bytes_delta (6174015488) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2493173013,absent_handled=32,evictions=34,infeasible=0,prefetches=14,pager_bytes_fetched=6174015488,io_read_bytes_delta=6174015488,dedup_resident=38,dedup_fetching=78,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=none depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 44 records to /root/residctl/scratch/sweepec_none_d2_r0.75_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3054162764 (3.054s) touches/sec=26.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=140 fault_minor=7 dedup_resident=37 dedup_fetching=76
+  absent_handled=34 evictions=32 bytes_punched=4294967296 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=34 min_ns=39338086 p50_ns=67108863 p99_ns=268435455 max_ns=331006257
+  queue_depth_high_water=8
+  pager_bytes_fetched=5905580032 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5905580032
+  byte accounting cross-check: pager (5905580032) vs io_read_bytes_delta (5905580032) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=3054162764,absent_handled=34,evictions=32,infeasible=0,prefetches=10,pager_bytes_fetched=5905580032,io_read_bytes_delta=5905580032,dedup_resident=37,dedup_fetching=76,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=pinned depth=2 rep=1 rc=0 ---
+fetch_trace: wrote 54 records to /root/residctl/scratch/sweepec_pinned_d2_r0.75_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2978296089 (2.978s) touches/sec=26.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=166 fault_minor=11 dedup_resident=50 dedup_fetching=90
+  absent_handled=37 evictions=42 bytes_punched=5637144576 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=37 min_ns=38875715 p50_ns=67108863 p99_ns=134217727 max_ns=103669896
+  queue_depth_high_water=7
+  pager_bytes_fetched=7247757312 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7247757312
+  byte accounting cross-check: pager (7247757312) vs io_read_bytes_delta (7247757312) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2978296089,absent_handled=37,evictions=42,infeasible=0,prefetches=17,pager_bytes_fetched=7247757312,io_read_bytes_delta=7247757312,dedup_resident=50,dedup_fetching=90,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=pinned depth=2 rep=2 rc=0 ---
+fetch_trace: wrote 54 records to /root/residctl/scratch/sweepec_pinned_d2_r0.75_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3480306853 (3.480s) touches/sec=23.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=149 fault_minor=9 dedup_resident=50 dedup_fetching=71
+  absent_handled=37 evictions=42 bytes_punched=5637144576 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=37 min_ns=38467365 p50_ns=67108863 p99_ns=536870911 max_ns=294224405
+  queue_depth_high_water=7
+  pager_bytes_fetched=7247757312 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7247757312
+  byte accounting cross-check: pager (7247757312) vs io_read_bytes_delta (7247757312) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=3480306853,absent_handled=37,evictions=42,infeasible=0,prefetches=17,pager_bytes_fetched=7247757312,io_read_bytes_delta=7247757312,dedup_resident=50,dedup_fetching=71,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=pinned depth=2 rep=3 rc=0 ---
+fetch_trace: wrote 54 records to /root/residctl/scratch/sweepec_pinned_d2_r0.75_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=2 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=3179610580 (3.180s) touches/sec=25.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=144 fault_minor=12 dedup_resident=48 dedup_fetching=71
+  absent_handled=37 evictions=42 bytes_punched=5637144576 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=0 prefetch_declined=0
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=37 min_ns=46052151 p50_ns=67108863 p99_ns=134217727 max_ns=99429013
+  queue_depth_high_water=8
+  pager_bytes_fetched=7247757312 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=7247757312
+  byte accounting cross-check: pager (7247757312) vs io_read_bytes_delta (7247757312) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=3179610580,absent_handled=37,evictions=42,infeasible=0,prefetches=17,pager_bytes_fetched=7247757312,io_read_bytes_delta=7247757312,dedup_resident=48,dedup_fetching=71,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=none depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 47 records to /root/residctl/scratch/sweepec_none_d4_r0.75_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2346317376 (2.346s) touches/sec=34.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=108 fault_minor=18 dedup_resident=41 dedup_fetching=56
+  absent_handled=29 evictions=35 bytes_punched=4697620480 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=2 prefetch_declined=2
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=29 min_ns=39135016 p50_ns=67108863 p99_ns=134217727 max_ns=106537893
+  queue_depth_high_water=8
+  pager_bytes_fetched=6308233216 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6308233216
+  byte accounting cross-check: pager (6308233216) vs io_read_bytes_delta (6308233216) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2346317376,absent_handled=29,evictions=35,infeasible=0,prefetches=18,pager_bytes_fetched=6308233216,io_read_bytes_delta=6308233216,dedup_resident=41,dedup_fetching=56,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=2,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=none depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 44 records to /root/residctl/scratch/sweepec_none_d4_r0.75_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2452982582 (2.453s) touches/sec=32.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=123 fault_minor=11 dedup_resident=37 dedup_fetching=68
+  absent_handled=29 evictions=32 bytes_punched=4294967296 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=29 min_ns=45694015 p50_ns=67108863 p99_ns=134217727 max_ns=99094764
+  queue_depth_high_water=8
+  pager_bytes_fetched=5905580032 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5905580032
+  byte accounting cross-check: pager (5905580032) vs io_read_bytes_delta (5905580032) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2452982582,absent_handled=29,evictions=32,infeasible=0,prefetches=15,pager_bytes_fetched=5905580032,io_read_bytes_delta=5905580032,dedup_resident=37,dedup_fetching=68,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=none depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 44 records to /root/residctl/scratch/sweepec_none_d4_r0.75_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=none
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2321401173 (2.321s) touches/sec=34.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=123 fault_minor=12 dedup_resident=37 dedup_fetching=69
+  absent_handled=29 evictions=32 bytes_punched=4294967296 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=none stat_pin_broken=0
+  handler_latency: count=29 min_ns=42220877 p50_ns=67108863 p99_ns=134217727 max_ns=108446567
+  queue_depth_high_water=8
+  pager_bytes_fetched=5905580032 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5905580032
+  byte accounting cross-check: pager (5905580032) vs io_read_bytes_delta (5905580032) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2321401173,absent_handled=29,evictions=32,infeasible=0,prefetches=15,pager_bytes_fetched=5905580032,io_read_bytes_delta=5905580032,dedup_resident=37,dedup_fetching=69,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=none,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=pinned depth=4 rep=1 rc=0 ---
+fetch_trace: wrote 45 records to /root/residctl/scratch/sweepec_pinned_d4_r0.75_rep1.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2277201566 (2.277s) touches/sec=35.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=114 fault_minor=18 dedup_resident=43 dedup_fetching=61
+  absent_handled=28 evictions=33 bytes_punched=4429185024 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=28 min_ns=42016722 p50_ns=67108863 p99_ns=134217727 max_ns=108469202
+  queue_depth_high_water=7
+  pager_bytes_fetched=6039797760 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6039797760
+  byte accounting cross-check: pager (6039797760) vs io_read_bytes_delta (6039797760) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2277201566,absent_handled=28,evictions=33,infeasible=0,prefetches=17,pager_bytes_fetched=6039797760,io_read_bytes_delta=6039797760,dedup_resident=43,dedup_fetching=61,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=pinned depth=4 rep=2 rc=0 ---
+fetch_trace: wrote 45 records to /root/residctl/scratch/sweepec_pinned_d4_r0.75_rep2.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2453832859 (2.454s) touches/sec=32.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=123 fault_minor=17 dedup_resident=41 dedup_fetching=71
+  absent_handled=28 evictions=33 bytes_punched=4429185024 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=28 min_ns=39142456 p50_ns=67108863 p99_ns=134217727 max_ns=113143344
+  queue_depth_high_water=9
+  pager_bytes_fetched=6039797760 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=6039797760
+  byte accounting cross-check: pager (6039797760) vs io_read_bytes_delta (6039797760) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2453832859,absent_handled=28,evictions=33,infeasible=0,prefetches=17,pager_bytes_fetched=6039797760,io_read_bytes_delta=6039797760,dedup_resident=41,dedup_fetching=71,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+--- ratio=0.75 arm=E retention=pinned depth=4 rep=3 rc=0 ---
+fetch_trace: wrote 41 records to /root/residctl/scratch/sweepec_pinned_d4_r0.75_rep3.fetchtrace
+region_startup OK: n_chunks=16 chunk_size=134217728 budget_bytes=1610612736 (12.0 chunks) policy=layer_order prefetch=on reconcile_interval=16 prefetch_depth=4 handler=async fetch_workers=4 driver_threads=8 lookahead_window=1 prefetch_retention=pinned
+REPLAY SUMMARY
+  passes=5 touches=80 bytes_touched=10737418240 wall_ns=2368895409 (2.369s) touches/sec=33.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  resident_bytes=1610612736 budget_bytes=1610612736
+  fault_missing=131 fault_minor=11 dedup_resident=36 dedup_fetching=76
+  absent_handled=30 evictions=29 bytes_punched=3892314112 infeasible=0
+  prefetch_admission=guarded prefetch_infeasible=1 prefetch_declined=1
+  prefetch_retention=pinned stat_pin_broken=0
+  handler_latency: count=30 min_ns=38649344 p50_ns=67108863 p99_ns=134217727 max_ns=143098138
+  queue_depth_high_water=8
+  pager_bytes_fetched=5502926848 (own accounting: sum of c->len over every successful fetch)
+  io_read_bytes_delta=5503066112
+  byte accounting cross-check: pager (5502926848) vs io_read_bytes_delta (5503066112) agree within one chunk
+ARM_CSV,policy=layer_order,prefetch=on,budget_bytes=1610612736,touches=80,bytes_touched=10737418240,wall_ns=2368895409,absent_handled=30,evictions=29,infeasible=0,prefetches=11,pager_bytes_fetched=5502926848,io_read_bytes_delta=5503066112,dedup_resident=36,dedup_fetching=76,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=1,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0
+PASS
+
+=== machine exclusivity check (after) ===
+ 15:28:47 up 1 day,  2:33,  1 user,  load average: 1.21, 1.07, 0.69
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       32151  200  0.0   7212  4440 pts/3    R+   15:28   0:00 ps aux --sort=-%cpu
+root       26984  0.1  0.0   5080  3752 pts/3    Ss+  15:24   0:00 bash /root/residctl/src/run_task_e_sweep_c.sh
+root       27357  0.0  0.1 1866032 15260 ?       Ssl  15:24   0:00 /usr/libexec/wsl-pro-service
+root           7  0.0  0.0   4368  2224 ?        Sl   Aug20   0:16 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  5000 ?        Ss   Aug20   0:08 /usr/lib/systemd/systemd-udevd
+root         156  0.0  0.1  34244 10504 ?        S<s  Aug20   0:06 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  9448 ?        Ss   Aug20   0:05 /sbin/init
+
+=== free memory (after) ===
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       1.0Gi       6.1Gi        45Mi       742Mi       6.6Gi
+Swap:          2.0Gi        62Mi       1.9Gi
+
+=== Sweep C (item 10e) complete, results in /root/residctl/results/task_e_sweep_c.csv ===
