@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
     pager_args_t pager_args = { &g_r, &stop };
     pthread_create(&pager_thread, NULL, pager_trampoline, &pager_args);
 
-    replay_result_t res = replay_cyclic(&g_r, N_PASSES, NULL); // no ground-truth reference trace needed for this test
+    replay_result_t res = replay_cyclic(&g_r, N_PASSES, NULL, 0); // no ground-truth reference trace needed; compute_ns_per_mib=0 (Campaign 11 Phase 2), unchanged
 
     stop = 1;
     pthread_join(pager_thread, NULL);

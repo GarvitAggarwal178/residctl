@@ -102,6 +102,7 @@ int main(int argc, char **argv) {
     uint32_t driver_threads = 1; // item 10d Task A: default 1 (replay_cyclic(), unchanged)
     int prefetch_retention_none = 0; // item 10d Task C: 0 => pinned (default)
     uint32_t lookahead_window = 0; // item 10e Task A: default 0 => item 10d's hard-barrier behavior exactly
+    uint64_t compute_ns_per_mib = 0; // Campaign 11 Phase 2: default 0 => no compute phase, unchanged
     int nargs = 0;
     char *args[16];
     for (int i = 1; i < argc && nargs < 16; i++) {
@@ -147,6 +148,11 @@ int main(int argc, char **argv) {
         if (strcmp(argv[i], "--lookahead-window") == 0) {
             if (i + 1 >= argc) { fprintf(stderr, "--lookahead-window requires a number\n"); return 2; }
             lookahead_window = (uint32_t)strtoul(argv[++i], NULL, 10);
+            continue;
+        }
+        if (strcmp(argv[i], "--compute-ns-per-mib") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--compute-ns-per-mib requires a number\n"); return 2; }
+            compute_ns_per_mib = strtoull(argv[++i], NULL, 10);
             continue;
         }
         args[nargs++] = argv[i];
@@ -243,6 +249,12 @@ int main(int argc, char **argv) {
            g_r.async_handler ? "async" : "sync", g_r.fetch_workers, driver_threads, lookahead_window,
            g_r.prefetch_retention_pinned ? "pinned" : "none");
 
+    // Campaign 11 Phase 2: calibrate the compute-phase loop once, before any
+    // driver thread starts, regardless of whether compute_ns_per_mib is
+    // nonzero (cheap -- 50 fixed-size units -- and keeps the calibration
+    // path exercised/verifiable even at 0, where it's simply never used).
+    replay_calibrate_compute();
+
     uint64_t io_before = read_io_read_bytes();
 
     volatile sig_atomic_t stop = 0;
@@ -254,8 +266,8 @@ int main(int argc, char **argv) {
     // replay_cyclic() -- not replay_cyclic_mt() special-cased to N=1 -- so
     // the default preserves current behaviour byte-for-byte, per spec.
     replay_result_t res = (driver_threads <= 1)
-        ? replay_cyclic(&g_r, n_passes, ref_trace)
-        : replay_cyclic_mt(&g_r, n_passes, ref_trace, driver_threads, lookahead_window);
+        ? replay_cyclic(&g_r, n_passes, ref_trace, compute_ns_per_mib)
+        : replay_cyclic_mt(&g_r, n_passes, ref_trace, driver_threads, lookahead_window, compute_ns_per_mib);
 
     stop = 1;
     pthread_join(pager_thread, NULL);
@@ -298,6 +310,8 @@ int main(int argc, char **argv) {
            (unsigned long long)g_r.stat_prefetch_infeasible, (unsigned long long)g_r.stat_prefetch_declined);
     printf("  prefetch_retention=%s stat_pin_broken=%llu\n",
            g_r.prefetch_retention_pinned ? "pinned" : "none", (unsigned long long)g_r.stat_pin_broken);
+    printf("  compute_ns_per_mib_requested=%llu compute_ns_per_mib_achieved=%.1f\n",
+           (unsigned long long)compute_ns_per_mib, replay_compute_achieved_ns_per_mib());
     printf("  handler_latency: count=%llu min_ns=%llu p50_ns=%llu p99_ns=%llu max_ns=%llu\n",
            (unsigned long long)metrics.handler_latency.count,
            (unsigned long long)metrics.handler_latency.min_ns,
@@ -334,7 +348,8 @@ int main(int argc, char **argv) {
            "absent_handled=%llu,evictions=%llu,infeasible=%llu,prefetches=%llu,"
            "pager_bytes_fetched=%llu,io_read_bytes_delta=%llu,dedup_resident=%llu,dedup_fetching=%llu,"
            "handler=%s,fetch_workers=%u,prefetch_admission=%s,prefetch_declined=%llu,"
-           "driver_threads=%u,lookahead_window=%u,prefetch_retention=%s,pin_broken=%llu\n",
+           "driver_threads=%u,lookahead_window=%u,prefetch_retention=%s,pin_broken=%llu,"
+           "compute_ns_per_mib=%llu,compute_achieved_ns_per_mib=%.1f\n",
            policy_name, prefetch_arg, (unsigned long long)budget_bytes, res.n_touches,
            (unsigned long long)res.bytes_touched, (unsigned long long)res.wall_ns,
            (unsigned long long)g_r.stat_absent_handled, (unsigned long long)g_r.stat_evictions,
@@ -344,7 +359,8 @@ int main(int argc, char **argv) {
            g_r.async_handler ? "async" : "sync", g_r.fetch_workers,
            g_r.prefetch_admission_always ? "always" : "guarded", (unsigned long long)g_r.stat_prefetch_declined,
            driver_threads, lookahead_window, g_r.prefetch_retention_pinned ? "pinned" : "none",
-           (unsigned long long)g_r.stat_pin_broken);
+           (unsigned long long)g_r.stat_pin_broken,
+           (unsigned long long)compute_ns_per_mib, replay_compute_achieved_ns_per_mib());
 
     if (g_r.resident_bytes > g_r.budget_bytes) {
         fprintf(stderr, "FAIL: resident_bytes exceeded budget_bytes -- I-4/§7 violated\n");

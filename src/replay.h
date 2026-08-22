@@ -39,12 +39,39 @@ typedef struct {
 // Caller must have already run region_startup() and started the pager
 // thread; this function only issues the touches and times them.
 //
-// item 10d Task A (A-8): this is the N=1 path, UNCHANGED, kept as its own
+// compute_ns_per_mib (Campaign 11 Phase 2): 0 (default) => unchanged from
+// every prior item. Non-zero => after reading each chunk's pages, runs a
+// real busy computation proportional to bytes just read -- see
+// replay_calibrate_compute() above.
+//
+// item 10d Task A (A-8): this is the N=1 path, UNCHANGED AT compute_ns_per_mib==0, kept as its own
 // function specifically so --driver-threads 1 (the default) preserves
 // current behaviour byte-for-byte -- not reimplemented as a trivial case of
 // replay_cyclic_mt() below, which spawns threads and uses a barrier even at
 // N=1 would need special-casing to behave identically.
-replay_result_t replay_cyclic(region_t *r, uint32_t n_passes, trace_t *ref_trace);
+replay_result_t replay_cyclic(region_t *r, uint32_t n_passes, trace_t *ref_trace, uint64_t compute_ns_per_mib);
+
+// Campaign 11 Phase 2: adds a compute phase to the driver. Default 0 (no
+// compute) reproduces prior behaviour byte-for-byte in every existing
+// caller. When non-zero, after a thread finishes reading its assigned
+// pages for a chunk, it performs a REAL arithmetic loop (not nanosleep --
+// a sleeping thread yields the CPU and does not model compute-bound work)
+// over the bytes it just read, proportional to compute_ns_per_mib
+// nanoseconds per MiB touched. The loop is calibrated: replay_calibrate_compute()
+// measures the loop's actual ns/unit-of-work once, and the requested
+// ns_per_mib is converted to a unit count via that calibration, not
+// assumed. Call once, before the first replay_cyclic()/replay_cyclic_mt()
+// call in a process (idempotent -- a second call re-calibrates and
+// replaces the stored constant; harmless, just wasted work).
+void replay_calibrate_compute(void);
+
+// After a run that used a non-zero compute_ns_per_mib, returns the
+// ACHIEVED ns/MiB (measured actual compute wall-time / bytes computed over,
+// not the requested value) -- this is what verifies the parameter rather
+// than assuming the calibration was accurate. Returns 0.0 if no compute
+// was ever performed (compute_ns_per_mib was 0 throughout, or this is
+// called before any run).
+double replay_compute_achieved_ns_per_mib(void);
 
 // item 10d Task A (A-8), superseded by item 10e Task A (A-10): multi-threaded
 // cyclic replay. n_threads threads collectively execute the SAME reference
@@ -94,7 +121,7 @@ replay_result_t replay_cyclic(region_t *r, uint32_t n_passes, trace_t *ref_trace
 // is only one thread, nothing to overlap with). Caller must have already
 // run region_startup() and started the pager thread.
 replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_trace,
-                                  uint32_t n_threads, uint32_t window);
+                                  uint32_t n_threads, uint32_t window, uint64_t compute_ns_per_mib);
 
 // Elision-guard accumulator (Defect 2): callers should print this and
 // confirm it's nonzero and varies run to run, as one piece of evidence the

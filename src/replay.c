@@ -27,7 +27,85 @@ static volatile uint64_t g_replay_sink = 0;
 
 uint64_t replay_sink_value(void) { return g_replay_sink; }
 
-replay_result_t replay_cyclic(region_t *r, uint32_t n_passes, trace_t *ref_trace) {
+// ---- Campaign 11 Phase 2: calibrated compute phase ------------------------
+//
+// A "unit" of compute work is a fixed-iteration-count arithmetic loop over
+// the bytes just read (wrapping with `% len` so it works for any len,
+// however small a single thread's share of a chunk is). The unit count is
+// fixed (COMPUTE_UNIT_OPS); what varies is how MANY units are run, decided
+// from the calibrated per-unit cost and the caller's requested ns/MiB. This
+// decouples "how much work" from "how big is the buffer," so calibration
+// (measured once, on a small fixed buffer) transfers correctly to chunks of
+// any size.
+#define COMPUTE_UNIT_OPS 65536
+
+static double g_ns_per_compute_unit = 0.0; // calibrated once by replay_calibrate_compute()
+static volatile uint64_t g_compute_sink = 0; // elision guard for the compute loop, separate from g_replay_sink
+static uint64_t g_compute_total_ns = 0;     // accumulated ACTUAL compute wall-time, for the achieved-rate report
+static uint64_t g_compute_total_bytes = 0;  // bytes the compute phase was "for" (proportionality basis), same purpose
+static pthread_mutex_t g_compute_stats_lock = PTHREAD_MUTEX_INITIALIZER; // guards the two totals above (multiple driver threads)
+
+static uint64_t compute_unit(const uint8_t *data, uint64_t len) {
+    uint64_t acc = 1;
+    for (uint64_t i = 0; i < COMPUTE_UNIT_OPS; i++) {
+        acc = acc * 2654435761ULL + data[i % len];
+        acc ^= acc >> 17;
+    }
+    return acc;
+}
+
+void replay_calibrate_compute(void) {
+    // Buffer size MUST be >= COMPUTE_UNIT_OPS: compute_unit()'s loop only
+    // ever touches indices [0, COMPUTE_UNIT_OPS) via `i % len` (i never
+    // reaches len when len >= COMPUTE_UNIT_OPS, so the modulo is a no-op
+    // and the access pattern is a plain linear scan of exactly
+    // COMPUTE_UNIT_OPS bytes, REGARDLESS of how much bigger the real
+    // buffer is -- every chunk this project ever computes over is >>
+    // COMPUTE_UNIT_OPS bytes). A smaller calibration buffer (originally
+    // 4096 bytes, still < 1/16th of COMPUTE_UNIT_OPS) wraps far more
+    // often and stays entirely in a smaller cache level than the real
+    // 64KB linear scan does -- measured directly: this under-calibrated
+    // the loop by ~2.6x (achieved 1,045,176 ns/MiB against a requested
+    // 400,000). Fixed by calibrating over the SAME footprint size
+    // production actually touches, not a discrepancy left unexamined.
+    static uint8_t buf[COMPUTE_UNIT_OPS];
+    for (int i = 0; i < COMPUTE_UNIT_OPS; i++) buf[i] = (uint8_t)(i * 37 + 11);
+    const int CAL_UNITS = 50;
+    uint64_t sink = 0;
+    uint64_t t0 = now_ns();
+    for (int i = 0; i < CAL_UNITS; i++) sink += compute_unit(buf, sizeof buf);
+    uint64_t t1 = now_ns();
+    g_compute_sink += sink; // fold into the elision guard so the calibration pass itself can't be elided either
+    g_ns_per_compute_unit = (double)(t1 - t0) / (double)CAL_UNITS;
+}
+
+double replay_compute_achieved_ns_per_mib(void) {
+    pthread_mutex_lock(&g_compute_stats_lock);
+    uint64_t ns = g_compute_total_ns, bytes = g_compute_total_bytes;
+    pthread_mutex_unlock(&g_compute_stats_lock);
+    if (bytes == 0) return 0.0;
+    return (double)ns / ((double)bytes / 1048576.0);
+}
+
+// Runs the busy computation for `len` bytes starting at `data`, proportional
+// to ns_per_mib (0 => immediate no-op, byte-for-byte unchanged from every
+// prior item's behaviour -- no extra reads, no extra time, nothing recorded).
+static void compute_busy(const uint8_t *data, uint64_t len, uint64_t ns_per_mib) {
+    if (ns_per_mib == 0 || len == 0) return;
+    double target_ns = (double)ns_per_mib * ((double)len / 1048576.0);
+    uint64_t units = (g_ns_per_compute_unit > 0.0) ? (uint64_t)(target_ns / g_ns_per_compute_unit) : 0;
+    uint64_t t0 = now_ns();
+    uint64_t sink = 0;
+    for (uint64_t u = 0; u < units; u++) sink += compute_unit(data, len);
+    uint64_t t1 = now_ns();
+    g_compute_sink += sink;
+    pthread_mutex_lock(&g_compute_stats_lock);
+    g_compute_total_ns += (t1 - t0);
+    g_compute_total_bytes += len;
+    pthread_mutex_unlock(&g_compute_stats_lock);
+}
+
+replay_result_t replay_cyclic(region_t *r, uint32_t n_passes, trace_t *ref_trace, uint64_t compute_ns_per_mib) {
     uint64_t t_start = now_ns();
     uint64_t ref_seq = 0;
     uint64_t bytes_touched = 0;
@@ -52,6 +130,10 @@ replay_result_t replay_cyclic(region_t *r, uint32_t n_passes, trace_t *ref_trace
                 g_replay_sink += r->map_a[c->region_off + off];
             }
             bytes_touched += c->len;
+
+            // Campaign 11 Phase 2: compute phase, AFTER the read, proportional
+            // to bytes just read. No-op at compute_ns_per_mib==0.
+            compute_busy(&r->map_a[c->region_off], c->len, compute_ns_per_mib);
 
             // Defect 1: the WORKLOAD emits the ground-truth reference
             // trace -- every access, in order, regardless of whether the
@@ -160,6 +242,7 @@ typedef struct {
     uint32_t n_passes;
     trace_t *ref_trace;
     lookahead_state_t *la;
+    uint64_t compute_ns_per_mib; // Campaign 11 Phase 2: 0 => unchanged from item 10e
     uint64_t bytes_touched; // written only by tid 0
     uint64_t ref_seq;       // written only by tid 0
 } replay_thread_ctx_t;
@@ -192,11 +275,26 @@ static void *replay_thread_main(void *argp) {
         // `+=` the single-threaded path uses (a genuine data race under
         // real concurrency, not merely hypothetical).
         uint64_t page_idx = 0;
+        uint64_t my_bytes = 0;
         for (uint64_t off = 0; off < c->len; off += RESIDCTL_ALIGN, page_idx++) {
             if ((page_idx % nt) == tid) {
                 __sync_fetch_and_add(&g_replay_sink, r->map_a[c->region_off + off]);
+                my_bytes += (c->len - off < RESIDCTL_ALIGN) ? (c->len - off) : RESIDCTL_ALIGN;
             }
         }
+
+        // Campaign 11 Phase 2: compute phase, AFTER this thread's own read
+        // stride, proportional to the bytes THIS thread just read (not the
+        // whole chunk) -- "after a thread finishes reading its page stride
+        // for a chunk, it performs a busy computation proportional to the
+        // bytes it read." No-op at compute_ns_per_mib==0. Deliberately
+        // BEFORE lookahead_mark_done(): this is what gives a window's worth
+        // of overlap something real to happen during, per Phase 2's own
+        // reasoning -- the compute phase extends how long this thread's
+        // step takes to fully complete, which is exactly the interval a
+        // concurrently-dispatched prefetch now has to land in.
+        if (my_bytes > 0)
+            compute_busy(&r->map_a[c->region_off], my_bytes, ctx->compute_ns_per_mib);
 
         lookahead_mark_done(ctx->la, s);
 
@@ -211,7 +309,7 @@ static void *replay_thread_main(void *argp) {
 }
 
 replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_trace,
-                                  uint32_t n_threads, uint32_t window) {
+                                  uint32_t n_threads, uint32_t window, uint64_t compute_ns_per_mib) {
     uint64_t t_start = now_ns();
 
     uint32_t total_steps = n_passes * r->n_chunks;
@@ -234,6 +332,7 @@ replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_tr
         ctxs[t].n_passes = n_passes;
         ctxs[t].ref_trace = ref_trace; // only tid 0 ever writes through this
         ctxs[t].la = &la;
+        ctxs[t].compute_ns_per_mib = compute_ns_per_mib;
         ctxs[t].bytes_touched = 0;
         ctxs[t].ref_seq = 0;
     }
