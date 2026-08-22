@@ -1,0 +1,1103 @@
+=== machine exclusivity check (before) ===
+ 06:39:06 up 1 day, 10:17,  1 user,  load average: 0.08, 0.29, 0.77
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       37916  0.1  0.1 1866288 15236 ?       Ssl  06:37   0:00 /usr/libexec/wsl-pro-service
+root           7  0.0  0.0   4392  2244 ?        Sl   Aug20   0:23 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  4700 ?        Ss   Aug20   0:11 /usr/lib/systemd/systemd-udevd
+root         156  0.0  0.1  34244  9584 ?        S<s  Aug20   0:08 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  7992 ?        Ss   Aug20   0:08 /sbin/init
+root       12530  0.0  0.1 1246960 10028 pts/0   Ssl+ Aug21   0:04 /mnt/wsl/docker-desktop/docker-desktop-user-distro proxy --distro-name Ubuntu --docker-desktop-root /mnt/wsl/docker-desktop C:\Program Files\Docker\Docker\resources
+polkitd      880  0.0  0.0 306444  3320 ?        Ssl  Aug20   0:03 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=495073585,wall_s=0.495074,agg_MiBps=2068.38,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=494798458 MiBps=2069.53
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=488952916,wall_s=0.488953,agg_MiBps=2094.27,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=488686176 MiBps=2095.41
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=458675929,wall_s=0.458676,agg_MiBps=2232.51,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=458408982 MiBps=2233.81
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=503066601,wall_s=0.503067,agg_MiBps=2035.52,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=502761588 MiBps=2036.75
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=476052720,wall_s=0.476053,agg_MiBps=2151.02,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=475712434 MiBps=2152.56
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=431664574,wall_s=0.431665,agg_MiBps=2372.21,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=431276660 MiBps=2374.35
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=97689122,wall_s=0.097689,agg_MiBps=10482.23,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=97328716 MiBps=10521.05
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=96186909,wall_s=0.096187,agg_MiBps=10645.94,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=95804782 MiBps=10688.40
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=90421655,wall_s=0.090422,agg_MiBps=11324.72,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=90100678 MiBps=11365.06
+3
+--- threads=1 bs=4194304 fdmode=shared-fd iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=90925758,wall_s=0.090926,agg_MiBps=11261.94,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=90499402 MiBps=11314.99
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=418579776,wall_s=0.418580,agg_MiBps=2446.37,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=418277784 MiBps=2448.13
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=391659123,wall_s=0.391659,agg_MiBps=2614.52,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=391305619 MiBps=2616.88
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=394530525,wall_s=0.394531,agg_MiBps=2595.49,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=394110175 MiBps=2598.26
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=408290575,wall_s=0.408291,agg_MiBps=2508.02,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=407730175 MiBps=2511.46
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=389308296,wall_s=0.389308,agg_MiBps=2630.31,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=388897808 MiBps=2633.08
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=155820187,wall_s=0.155820,agg_MiBps=6571.68,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=155433764 MiBps=6588.02
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=81136881,wall_s=0.081137,agg_MiBps=12620.65,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=80808378 MiBps=12671.95
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=78675119,wall_s=0.078675,agg_MiBps=13015.55,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=78353119 MiBps=13069.04
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=78695706,wall_s=0.078696,agg_MiBps=13012.15,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=78369546 MiBps=13066.30
+3
+--- threads=1 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=1,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=81257845,wall_s=0.081258,agg_MiBps=12601.86,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=80747338 MiBps=12681.53
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=459358964,wall_s=0.459359,agg_MiBps=2229.19,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=455999272 MiBps=2245.62
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=304837578,wall_s=0.304838,agg_MiBps=3359.17,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=301714549 MiBps=3393.94
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=323443824,wall_s=0.323444,agg_MiBps=3165.93,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=320049775 MiBps=3199.50
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=355438216,wall_s=0.355438,agg_MiBps=2880.95,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=351530424 MiBps=2912.98
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=309851105,wall_s=0.309851,agg_MiBps=3304.81,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=306168888 MiBps=3344.56
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=220153110,wall_s=0.220153,agg_MiBps=4651.31,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=216698074 MiBps=4725.47
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=158688364,wall_s=0.158688,agg_MiBps=6452.90,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=154932614 MiBps=6609.33
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=145438135,wall_s=0.145438,agg_MiBps=7040.79,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=140827235 MiBps=7271.32
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=140561636,wall_s=0.140562,agg_MiBps=7285.06,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=136811618 MiBps=7484.74
+3
+--- threads=1 bs=134217728 fdmode=shared-fd iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=142332276,wall_s=0.142332,agg_MiBps=7194.43,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=138847324 MiBps=7375.01
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=312269187,wall_s=0.312269,agg_MiBps=3279.22,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=308584862 MiBps=3318.37
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=300317567,wall_s=0.300318,agg_MiBps=3409.72,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=296614931 MiBps=3452.29
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=328963508,wall_s=0.328964,agg_MiBps=3112.81,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=325406965 MiBps=3146.83
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=316030994,wall_s=0.316031,agg_MiBps=3240.19,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=312152569 MiBps=3280.45
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=304238708,wall_s=0.304239,agg_MiBps=3365.78,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=300488960 MiBps=3407.78
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=165043131,wall_s=0.165043,agg_MiBps=6204.44,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=161309161 MiBps=6348.06
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=146220707,wall_s=0.146221,agg_MiBps=7003.11,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=142012172 MiBps=7210.65
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=150427026,wall_s=0.150427,agg_MiBps=6807.29,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=146725928 MiBps=6979.00
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=140452500,wall_s=0.140453,agg_MiBps=7290.72,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=136749275 MiBps=7488.16
+3
+--- threads=1 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=1,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=154485792,wall_s=0.154486,agg_MiBps=6628.44,sink=33423360
+  thread=0 bytes=1073741824 wall_ns=149237709 MiBps=6861.54
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=297428986,wall_s=0.297429,agg_MiBps=3442.84,sink=33423360
+  thread=0 bytes=536870912 wall_ns=297103449 MiBps=1723.31
+  thread=1 bytes=536870912 wall_ns=291597240 MiBps=1755.85
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=303265473,wall_s=0.303265,agg_MiBps=3376.58,sink=33423360
+  thread=0 bytes=536870912 wall_ns=293709746 MiBps=1743.22
+  thread=1 bytes=536870912 wall_ns=302978913 MiBps=1689.89
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=301444367,wall_s=0.301444,agg_MiBps=3396.98,sink=33423360
+  thread=0 bytes=536870912 wall_ns=300681387 MiBps=1702.80
+  thread=1 bytes=536870912 wall_ns=301207632 MiBps=1699.82
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=291281598,wall_s=0.291282,agg_MiBps=3515.50,sink=33423360
+  thread=0 bytes=536870912 wall_ns=284752059 MiBps=1798.06
+  thread=1 bytes=536870912 wall_ns=290824716 MiBps=1760.51
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=326542950,wall_s=0.326543,agg_MiBps=3135.88,sink=33423360
+  thread=0 bytes=536870912 wall_ns=302137993 MiBps=1694.59
+  thread=1 bytes=536870912 wall_ns=326289083 MiBps=1569.16
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=60880905,wall_s=0.060881,agg_MiBps=16819.72,sink=33423360
+  thread=0 bytes=536870912 wall_ns=58084240 MiBps=8814.78
+  thread=1 bytes=536870912 wall_ns=60501217 MiBps=8462.64
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=49169836,wall_s=0.049170,agg_MiBps=20825.78,sink=33423360
+  thread=0 bytes=536870912 wall_ns=48890205 MiBps=10472.45
+  thread=1 bytes=536870912 wall_ns=47643239 MiBps=10746.54
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=43876003,wall_s=0.043876,agg_MiBps=23338.50,sink=33423360
+  thread=0 bytes=536870912 wall_ns=43520487 MiBps=11764.57
+  thread=1 bytes=536870912 wall_ns=42865175 MiBps=11944.43
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=44470304,wall_s=0.044470,agg_MiBps=23026.60,sink=33423360
+  thread=0 bytes=536870912 wall_ns=44160653 MiBps=11594.03
+  thread=1 bytes=536870912 wall_ns=43792458 MiBps=11691.51
+3
+--- threads=2 bs=4194304 fdmode=shared-fd iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=47299928,wall_s=0.047300,agg_MiBps=21649.08,sink=33423360
+  thread=0 bytes=536870912 wall_ns=46963564 MiBps=10902.07
+  thread=1 bytes=536870912 wall_ns=45469543 MiBps=11260.28
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=320808167,wall_s=0.320808,agg_MiBps=3191.94,sink=33423360
+  thread=0 bytes=536870912 wall_ns=320534944 MiBps=1597.33
+  thread=1 bytes=536870912 wall_ns=295605412 MiBps=1732.04
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=314918948,wall_s=0.314919,agg_MiBps=3251.63,sink=33423360
+  thread=0 bytes=536870912 wall_ns=301544945 MiBps=1697.92
+  thread=1 bytes=536870912 wall_ns=314274445 MiBps=1629.15
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=250021098,wall_s=0.250021,agg_MiBps=4095.65,sink=33423360
+  thread=0 bytes=536870912 wall_ns=248788751 MiBps=2057.97
+  thread=1 bytes=536870912 wall_ns=249680443 MiBps=2050.62
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=303379893,wall_s=0.303380,agg_MiBps=3375.31,sink=33423360
+  thread=0 bytes=536870912 wall_ns=303137013 MiBps=1689.01
+  thread=1 bytes=536870912 wall_ns=301763093 MiBps=1696.70
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=317009969,wall_s=0.317010,agg_MiBps=3230.18,sink=33423360
+  thread=0 bytes=536870912 wall_ns=316640094 MiBps=1616.98
+  thread=1 bytes=536870912 wall_ns=311489655 MiBps=1643.71
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=51782127,wall_s=0.051782,agg_MiBps=19775.16,sink=33423360
+  thread=0 bytes=536870912 wall_ns=51447786 MiBps=9951.84
+  thread=1 bytes=536870912 wall_ns=46726709 MiBps=10957.33
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=43918095,wall_s=0.043918,agg_MiBps=23316.13,sink=33423360
+  thread=0 bytes=536870912 wall_ns=43644068 MiBps=11731.26
+  thread=1 bytes=536870912 wall_ns=43451186 MiBps=11783.34
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=46915679,wall_s=0.046916,agg_MiBps=21826.39,sink=33423360
+  thread=0 bytes=536870912 wall_ns=46600079 MiBps=10987.11
+  thread=1 bytes=536870912 wall_ns=45600393 MiBps=11227.97
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=46084991,wall_s=0.046085,agg_MiBps=22219.82,sink=33423360
+  thread=0 bytes=536870912 wall_ns=45520057 MiBps=11247.79
+  thread=1 bytes=536870912 wall_ns=45427566 MiBps=11270.69
+3
+--- threads=2 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=2,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=50725823,wall_s=0.050726,agg_MiBps=20186.96,sink=33423360
+  thread=0 bytes=536870912 wall_ns=50055222 MiBps=10228.70
+  thread=1 bytes=536870912 wall_ns=45605494 MiBps=11226.72
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=276415193,wall_s=0.276415,agg_MiBps=3704.57,sink=33423360
+  thread=0 bytes=536870912 wall_ns=272580905 MiBps=1878.34
+  thread=1 bytes=536870912 wall_ns=260489959 MiBps=1965.53
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=265793098,wall_s=0.265793,agg_MiBps=3852.62,sink=33423360
+  thread=0 bytes=536870912 wall_ns=228617052 MiBps=2239.55
+  thread=1 bytes=536870912 wall_ns=262528648 MiBps=1950.26
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=284146276,wall_s=0.284146,agg_MiBps=3603.78,sink=33423360
+  thread=0 bytes=536870912 wall_ns=262395211 MiBps=1951.26
+  thread=1 bytes=536870912 wall_ns=280842201 MiBps=1823.09
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=249627315,wall_s=0.249627,agg_MiBps=4102.12,sink=33423360
+  thread=0 bytes=536870912 wall_ns=233820110 MiBps=2189.72
+  thread=1 bytes=536870912 wall_ns=245704123 MiBps=2083.81
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=246396455,wall_s=0.246396,agg_MiBps=4155.90,sink=33423360
+  thread=0 bytes=536870912 wall_ns=225975363 MiBps=2265.73
+  thread=1 bytes=536870912 wall_ns=242904598 MiBps=2107.82
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=105639494,wall_s=0.105639,agg_MiBps=9693.34,sink=33423360
+  thread=0 bytes=536870912 wall_ns=102660464 MiBps=4987.31
+  thread=1 bytes=536870912 wall_ns=98083541 MiBps=5220.04
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=109718719,wall_s=0.109719,agg_MiBps=9332.96,sink=33423360
+  thread=0 bytes=536870912 wall_ns=103437780 MiBps=4949.84
+  thread=1 bytes=536870912 wall_ns=102631136 MiBps=4988.74
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=102427750,wall_s=0.102428,agg_MiBps=9997.29,sink=33423360
+  thread=0 bytes=536870912 wall_ns=96007541 MiBps=5332.91
+  thread=1 bytes=536870912 wall_ns=96065397 MiBps=5329.70
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=103355399,wall_s=0.103355,agg_MiBps=9907.56,sink=33423360
+  thread=0 bytes=536870912 wall_ns=97641531 MiBps=5243.67
+  thread=1 bytes=536870912 wall_ns=96858464 MiBps=5286.06
+3
+--- threads=2 bs=134217728 fdmode=shared-fd iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=105456450,wall_s=0.105456,agg_MiBps=9710.17,sink=33423360
+  thread=0 bytes=536870912 wall_ns=99687173 MiBps=5136.07
+  thread=1 bytes=536870912 wall_ns=98790218 MiBps=5182.70
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=254038342,wall_s=0.254038,agg_MiBps=4030.89,sink=33423360
+  thread=0 bytes=536870912 wall_ns=250996177 MiBps=2039.87
+  thread=1 bytes=536870912 wall_ns=233047636 MiBps=2196.98
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=260749605,wall_s=0.260750,agg_MiBps=3927.14,sink=33423360
+  thread=0 bytes=536870912 wall_ns=231345556 MiBps=2213.14
+  thread=1 bytes=536870912 wall_ns=257556702 MiBps=1987.91
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=246462348,wall_s=0.246462,agg_MiBps=4154.79,sink=33423360
+  thread=0 bytes=536870912 wall_ns=242893347 MiBps=2107.92
+  thread=1 bytes=536870912 wall_ns=210280619 MiBps=2434.84
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=252562786,wall_s=0.252563,agg_MiBps=4054.44,sink=33423360
+  thread=0 bytes=536870912 wall_ns=249204147 MiBps=2054.54
+  thread=1 bytes=536870912 wall_ns=227458223 MiBps=2250.96
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=251011193,wall_s=0.251011,agg_MiBps=4079.50,sink=33423360
+  thread=0 bytes=536870912 wall_ns=236445066 MiBps=2165.41
+  thread=1 bytes=536870912 wall_ns=247213027 MiBps=2071.09
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=102695578,wall_s=0.102696,agg_MiBps=9971.22,sink=33423360
+  thread=0 bytes=536870912 wall_ns=96253390 MiBps=5319.29
+  thread=1 bytes=536870912 wall_ns=96169708 MiBps=5323.92
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=105339277,wall_s=0.105339,agg_MiBps=9720.97,sink=33423360
+  thread=0 bytes=536870912 wall_ns=98659438 MiBps=5189.57
+  thread=1 bytes=536870912 wall_ns=101790392 MiBps=5029.94
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=104394641,wall_s=0.104395,agg_MiBps=9808.93,sink=33423360
+  thread=0 bytes=536870912 wall_ns=97826086 MiBps=5233.78
+  thread=1 bytes=536870912 wall_ns=96443762 MiBps=5308.79
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=107025289,wall_s=0.107025,agg_MiBps=9567.83,sink=33423360
+  thread=0 bytes=536870912 wall_ns=100247402 MiBps=5107.36
+  thread=1 bytes=536870912 wall_ns=99940584 MiBps=5123.04
+3
+--- threads=2 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=2,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=111315953,wall_s=0.111316,agg_MiBps=9199.04,sink=33423360
+  thread=0 bytes=536870912 wall_ns=103721128 MiBps=4936.31
+  thread=1 bytes=536870912 wall_ns=105295384 MiBps=4862.51
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=241576152,wall_s=0.241576,agg_MiBps=4238.83,sink=33423360
+  thread=0 bytes=268435456 wall_ns=240310847 MiBps=1065.29
+  thread=1 bytes=268435456 wall_ns=228204795 MiBps=1121.80
+  thread=2 bytes=268435456 wall_ns=227083904 MiBps=1127.34
+  thread=3 bytes=268435456 wall_ns=240301750 MiBps=1065.33
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=242148037,wall_s=0.242148,agg_MiBps=4228.82,sink=33423360
+  thread=0 bytes=268435456 wall_ns=211654980 MiBps=1209.52
+  thread=1 bytes=268435456 wall_ns=240472836 MiBps=1064.57
+  thread=2 bytes=268435456 wall_ns=239629410 MiBps=1068.32
+  thread=3 bytes=268435456 wall_ns=218516628 MiBps=1171.54
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=242138738,wall_s=0.242139,agg_MiBps=4228.98,sink=33423360
+  thread=0 bytes=268435456 wall_ns=239852381 MiBps=1067.32
+  thread=1 bytes=268435456 wall_ns=178107379 MiBps=1437.34
+  thread=2 bytes=268435456 wall_ns=240925096 MiBps=1062.57
+  thread=3 bytes=268435456 wall_ns=240127958 MiBps=1066.10
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=239797344,wall_s=0.239797,agg_MiBps=4270.27,sink=33423360
+  thread=0 bytes=268435456 wall_ns=238502637 MiBps=1073.36
+  thread=1 bytes=268435456 wall_ns=176852373 MiBps=1447.54
+  thread=2 bytes=268435456 wall_ns=237563578 MiBps=1077.61
+  thread=3 bytes=268435456 wall_ns=232658835 MiBps=1100.32
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=237552861,wall_s=0.237553,agg_MiBps=4310.62,sink=33423360
+  thread=0 bytes=268435456 wall_ns=237217156 MiBps=1079.18
+  thread=1 bytes=268435456 wall_ns=236707051 MiBps=1081.51
+  thread=2 bytes=268435456 wall_ns=218708224 MiBps=1170.51
+  thread=3 bytes=268435456 wall_ns=228355073 MiBps=1121.06
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=48724561,wall_s=0.048725,agg_MiBps=21016.09,sink=33423360
+  thread=0 bytes=268435456 wall_ns=45650527 MiBps=5607.82
+  thread=1 bytes=268435456 wall_ns=44126977 MiBps=5801.44
+  thread=2 bytes=268435456 wall_ns=40677145 MiBps=6293.46
+  thread=3 bytes=268435456 wall_ns=48249284 MiBps=5305.78
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=51645973,wall_s=0.051646,agg_MiBps=19827.30,sink=33423360
+  thread=0 bytes=268435456 wall_ns=51354864 MiBps=4984.92
+  thread=1 bytes=268435456 wall_ns=51010531 MiBps=5018.57
+  thread=2 bytes=268435456 wall_ns=49128947 MiBps=5210.78
+  thread=3 bytes=268435456 wall_ns=49153559 MiBps=5208.17
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=47109629,wall_s=0.047110,agg_MiBps=21736.53,sink=33423360
+  thread=0 bytes=268435456 wall_ns=43311436 MiBps=5910.68
+  thread=1 bytes=268435456 wall_ns=46794593 MiBps=5470.72
+  thread=2 bytes=268435456 wall_ns=45216811 MiBps=5661.61
+  thread=3 bytes=268435456 wall_ns=44897392 MiBps=5701.89
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=50374016,wall_s=0.050374,agg_MiBps=20327.94,sink=33423360
+  thread=0 bytes=268435456 wall_ns=50081369 MiBps=5111.68
+  thread=1 bytes=268435456 wall_ns=40684214 MiBps=6292.37
+  thread=2 bytes=268435456 wall_ns=49307684 MiBps=5191.89
+  thread=3 bytes=268435456 wall_ns=40524645 MiBps=6317.14
+3
+--- threads=4 bs=4194304 fdmode=shared-fd iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=50240045,wall_s=0.050240,agg_MiBps=20382.15,sink=33423360
+  thread=0 bytes=268435456 wall_ns=49913021 MiBps=5128.92
+  thread=1 bytes=268435456 wall_ns=42452172 MiBps=6030.32
+  thread=2 bytes=268435456 wall_ns=46014914 MiBps=5563.41
+  thread=3 bytes=268435456 wall_ns=45250512 MiBps=5657.39
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=247751161,wall_s=0.247751,agg_MiBps=4133.18,sink=33423360
+  thread=0 bytes=268435456 wall_ns=247464716 MiBps=1034.49
+  thread=1 bytes=268435456 wall_ns=229711861 MiBps=1114.44
+  thread=2 bytes=268435456 wall_ns=236604141 MiBps=1081.98
+  thread=3 bytes=268435456 wall_ns=224446885 MiBps=1140.58
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=253044473,wall_s=0.253044,agg_MiBps=4046.72,sink=33423360
+  thread=0 bytes=268435456 wall_ns=252776359 MiBps=1012.75
+  thread=1 bytes=268435456 wall_ns=226486860 MiBps=1130.31
+  thread=2 bytes=268435456 wall_ns=251285126 MiBps=1018.76
+  thread=3 bytes=268435456 wall_ns=225885553 MiBps=1133.32
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=260147582,wall_s=0.260148,agg_MiBps=3936.23,sink=33423360
+  thread=0 bytes=268435456 wall_ns=257737201 MiBps=993.26
+  thread=1 bytes=268435456 wall_ns=258255241 MiBps=991.27
+  thread=2 bytes=268435456 wall_ns=258814933 MiBps=989.12
+  thread=3 bytes=268435456 wall_ns=172130396 MiBps=1487.24
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=246802293,wall_s=0.246802,agg_MiBps=4149.07,sink=33423360
+  thread=0 bytes=268435456 wall_ns=245380647 MiBps=1043.28
+  thread=1 bytes=268435456 wall_ns=228787503 MiBps=1118.94
+  thread=2 bytes=268435456 wall_ns=244940949 MiBps=1045.15
+  thread=3 bytes=268435456 wall_ns=219649195 MiBps=1165.49
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=244250403,wall_s=0.244250,agg_MiBps=4192.42,sink=33423360
+  thread=0 bytes=268435456 wall_ns=243004207 MiBps=1053.48
+  thread=1 bytes=268435456 wall_ns=233729392 MiBps=1095.28
+  thread=2 bytes=268435456 wall_ns=242484918 MiBps=1055.74
+  thread=3 bytes=268435456 wall_ns=222005718 MiBps=1153.12
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=51271916,wall_s=0.051272,agg_MiBps=19971.95,sink=33423360
+  thread=0 bytes=268435456 wall_ns=50996577 MiBps=5019.94
+  thread=1 bytes=268435456 wall_ns=50728042 MiBps=5046.52
+  thread=2 bytes=268435456 wall_ns=50935377 MiBps=5025.98
+  thread=3 bytes=268435456 wall_ns=48223566 MiBps=5308.61
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=52221395,wall_s=0.052221,agg_MiBps=19608.82,sink=33423360
+  thread=0 bytes=268435456 wall_ns=51703995 MiBps=4951.26
+  thread=1 bytes=268435456 wall_ns=50927313 MiBps=5026.77
+  thread=2 bytes=268435456 wall_ns=50715208 MiBps=5047.80
+  thread=3 bytes=268435456 wall_ns=50350319 MiBps=5084.38
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=51436112,wall_s=0.051436,agg_MiBps=19908.19,sink=33423360
+  thread=0 bytes=268435456 wall_ns=47565578 MiBps=5382.04
+  thread=1 bytes=268435456 wall_ns=45187795 MiBps=5665.25
+  thread=2 bytes=268435456 wall_ns=50022033 MiBps=5117.74
+  thread=3 bytes=268435456 wall_ns=50501452 MiBps=5069.16
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=54271089,wall_s=0.054271,agg_MiBps=18868.24,sink=33423360
+  thread=0 bytes=268435456 wall_ns=47494638 MiBps=5390.08
+  thread=1 bytes=268435456 wall_ns=53478491 MiBps=4786.97
+  thread=2 bytes=268435456 wall_ns=45928946 MiBps=5573.83
+  thread=3 bytes=268435456 wall_ns=53479444 MiBps=4786.89
+3
+--- threads=4 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=4,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=48931441,wall_s=0.048931,agg_MiBps=20927.24,sink=33423360
+  thread=0 bytes=268435456 wall_ns=44139069 MiBps=5799.85
+  thread=1 bytes=268435456 wall_ns=43204108 MiBps=5925.36
+  thread=2 bytes=268435456 wall_ns=48533172 MiBps=5274.74
+  thread=3 bytes=268435456 wall_ns=47442618 MiBps=5395.99
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=267230069,wall_s=0.267230,agg_MiBps=3831.90,sink=33423360
+  thread=0 bytes=268435456 wall_ns=252176927 MiBps=1015.16
+  thread=1 bytes=268435456 wall_ns=248665383 MiBps=1029.50
+  thread=2 bytes=268435456 wall_ns=169503908 MiBps=1510.29
+  thread=3 bytes=268435456 wall_ns=259261393 MiBps=987.42
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=259207519,wall_s=0.259208,agg_MiBps=3950.50,sink=33423360
+  thread=0 bytes=268435456 wall_ns=255915920 MiBps=1000.33
+  thread=1 bytes=268435456 wall_ns=180912044 MiBps=1415.05
+  thread=2 bytes=268435456 wall_ns=239398657 MiBps=1069.35
+  thread=3 bytes=268435456 wall_ns=239340126 MiBps=1069.61
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=268961306,wall_s=0.268961,agg_MiBps=3807.24,sink=33423360
+  thread=0 bytes=268435456 wall_ns=257397392 MiBps=994.57
+  thread=1 bytes=268435456 wall_ns=264401391 MiBps=968.22
+  thread=2 bytes=268435456 wall_ns=182007748 MiBps=1406.53
+  thread=3 bytes=268435456 wall_ns=204914289 MiBps=1249.30
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=266960106,wall_s=0.266960,agg_MiBps=3835.78,sink=33423360
+  thread=0 bytes=268435456 wall_ns=262604726 MiBps=974.85
+  thread=1 bytes=268435456 wall_ns=240651351 MiBps=1063.78
+  thread=2 bytes=268435456 wall_ns=208938447 MiBps=1225.24
+  thread=3 bytes=268435456 wall_ns=223866410 MiBps=1143.54
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=252640719,wall_s=0.252641,agg_MiBps=4053.19,sink=33423360
+  thread=0 bytes=268435456 wall_ns=188162409 MiBps=1360.53
+  thread=1 bytes=268435456 wall_ns=244578699 MiBps=1046.70
+  thread=2 bytes=268435456 wall_ns=188743920 MiBps=1356.34
+  thread=3 bytes=268435456 wall_ns=243435833 MiBps=1051.61
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=86754527,wall_s=0.086755,agg_MiBps=11803.42,sink=33423360
+  thread=0 bytes=268435456 wall_ns=79368852 MiBps=3225.45
+  thread=1 bytes=268435456 wall_ns=79718866 MiBps=3211.29
+  thread=2 bytes=268435456 wall_ns=77164621 MiBps=3317.58
+  thread=3 bytes=268435456 wall_ns=70842359 MiBps=3613.66
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=88242715,wall_s=0.088243,agg_MiBps=11604.36,sink=33423360
+  thread=0 bytes=268435456 wall_ns=80944228 MiBps=3162.67
+  thread=1 bytes=268435456 wall_ns=75641202 MiBps=3384.40
+  thread=2 bytes=268435456 wall_ns=76919108 MiBps=3328.17
+  thread=3 bytes=268435456 wall_ns=74579072 MiBps=3432.60
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=91969241,wall_s=0.091969,agg_MiBps=11134.16,sink=33423360
+  thread=0 bytes=268435456 wall_ns=77544344 MiBps=3301.34
+  thread=1 bytes=268435456 wall_ns=82975853 MiBps=3085.23
+  thread=2 bytes=268435456 wall_ns=82676699 MiBps=3096.40
+  thread=3 bytes=268435456 wall_ns=79588065 MiBps=3216.56
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=90322667,wall_s=0.090323,agg_MiBps=11337.13,sink=33423360
+  thread=0 bytes=268435456 wall_ns=75662673 MiBps=3383.44
+  thread=1 bytes=268435456 wall_ns=79074738 MiBps=3237.44
+  thread=2 bytes=268435456 wall_ns=82792882 MiBps=3092.05
+  thread=3 bytes=268435456 wall_ns=80904706 MiBps=3164.22
+3
+--- threads=4 bs=134217728 fdmode=shared-fd iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=95219689,wall_s=0.095220,agg_MiBps=10754.08,sink=33423360
+  thread=0 bytes=268435456 wall_ns=92018840 MiBps=2782.04
+  thread=1 bytes=268435456 wall_ns=81574417 MiBps=3138.24
+  thread=2 bytes=268435456 wall_ns=76960014 MiBps=3326.40
+  thread=3 bytes=268435456 wall_ns=77947172 MiBps=3284.28
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=274257405,wall_s=0.274257,agg_MiBps=3733.72,sink=33423360
+  thread=0 bytes=268435456 wall_ns=271052293 MiBps=944.47
+  thread=1 bytes=268435456 wall_ns=197913352 MiBps=1293.50
+  thread=2 bytes=268435456 wall_ns=245391575 MiBps=1043.23
+  thread=3 bytes=268435456 wall_ns=215410837 MiBps=1188.43
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=271307996,wall_s=0.271308,agg_MiBps=3774.31,sink=33423360
+  thread=0 bytes=268435456 wall_ns=222805180 MiBps=1148.99
+  thread=1 bytes=268435456 wall_ns=265100216 MiBps=965.67
+  thread=2 bytes=268435456 wall_ns=252320368 MiBps=1014.58
+  thread=3 bytes=268435456 wall_ns=236265869 MiBps=1083.53
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=264606765,wall_s=0.264607,agg_MiBps=3869.89,sink=33423360
+  thread=0 bytes=268435456 wall_ns=246010191 MiBps=1040.61
+  thread=1 bytes=268435456 wall_ns=233891537 MiBps=1094.52
+  thread=2 bytes=268435456 wall_ns=244107812 MiBps=1048.72
+  thread=3 bytes=268435456 wall_ns=257621353 MiBps=993.71
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=271827031,wall_s=0.271827,agg_MiBps=3767.10,sink=33423360
+  thread=0 bytes=268435456 wall_ns=265085206 MiBps=965.73
+  thread=1 bytes=268435456 wall_ns=193677721 MiBps=1321.78
+  thread=2 bytes=268435456 wall_ns=261481143 MiBps=979.04
+  thread=3 bytes=268435456 wall_ns=251987244 MiBps=1015.92
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=306733556,wall_s=0.306734,agg_MiBps=3338.40,sink=33423360
+  thread=0 bytes=268435456 wall_ns=303273975 MiBps=844.12
+  thread=1 bytes=268435456 wall_ns=288905398 MiBps=886.10
+  thread=2 bytes=268435456 wall_ns=253012079 MiBps=1011.81
+  thread=3 bytes=268435456 wall_ns=235647720 MiBps=1086.37
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=104283878,wall_s=0.104284,agg_MiBps=9819.35,sink=33423360
+  thread=0 bytes=268435456 wall_ns=96699590 MiBps=2647.37
+  thread=1 bytes=268435456 wall_ns=90636859 MiBps=2824.46
+  thread=2 bytes=268435456 wall_ns=89861417 MiBps=2848.83
+  thread=3 bytes=268435456 wall_ns=98869865 MiBps=2589.26
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=93411722,wall_s=0.093412,agg_MiBps=10962.22,sink=33423360
+  thread=0 bytes=268435456 wall_ns=87040704 MiBps=2941.15
+  thread=1 bytes=268435456 wall_ns=89801324 MiBps=2850.74
+  thread=2 bytes=268435456 wall_ns=80678240 MiBps=3173.10
+  thread=3 bytes=268435456 wall_ns=72217635 MiBps=3544.84
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=90364997,wall_s=0.090365,agg_MiBps=11331.82,sink=33423360
+  thread=0 bytes=268435456 wall_ns=82625647 MiBps=3098.31
+  thread=1 bytes=268435456 wall_ns=70700175 MiBps=3620.92
+  thread=2 bytes=268435456 wall_ns=85970799 MiBps=2977.76
+  thread=3 bytes=268435456 wall_ns=76607741 MiBps=3341.70
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=86676974,wall_s=0.086677,agg_MiBps=11813.98,sink=33423360
+  thread=0 bytes=268435456 wall_ns=74183195 MiBps=3450.92
+  thread=1 bytes=268435456 wall_ns=72620713 MiBps=3525.17
+  thread=2 bytes=268435456 wall_ns=79815364 MiBps=3207.40
+  thread=3 bytes=268435456 wall_ns=81586397 MiBps=3137.78
+3
+--- threads=4 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=4,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=87527950,wall_s=0.087528,agg_MiBps=11699.12,sink=33423360
+  thread=0 bytes=268435456 wall_ns=77576613 MiBps=3299.96
+  thread=1 bytes=268435456 wall_ns=74734807 MiBps=3425.45
+  thread=2 bytes=268435456 wall_ns=76436869 MiBps=3349.17
+  thread=3 bytes=268435456 wall_ns=74266019 MiBps=3447.07
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=233260501,wall_s=0.233261,agg_MiBps=4389.94,sink=33423360
+  thread=0 bytes=134217728 wall_ns=233026847 MiBps=549.29
+  thread=1 bytes=134217728 wall_ns=227838497 MiBps=561.80
+  thread=2 bytes=134217728 wall_ns=199897965 MiBps=640.33
+  thread=3 bytes=134217728 wall_ns=201210389 MiBps=636.15
+  thread=4 bytes=134217728 wall_ns=224936015 MiBps=569.05
+  thread=5 bytes=134217728 wall_ns=226900384 MiBps=564.12
+  thread=6 bytes=134217728 wall_ns=224090558 MiBps=571.20
+  thread=7 bytes=134217728 wall_ns=221367200 MiBps=578.22
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=237157464,wall_s=0.237157,agg_MiBps=4317.81,sink=33423360
+  thread=0 bytes=134217728 wall_ns=219087443 MiBps=584.24
+  thread=1 bytes=134217728 wall_ns=224515572 MiBps=570.12
+  thread=2 bytes=134217728 wall_ns=228023888 MiBps=561.34
+  thread=3 bytes=134217728 wall_ns=235736574 MiBps=542.98
+  thread=4 bytes=134217728 wall_ns=210262203 MiBps=608.76
+  thread=5 bytes=134217728 wall_ns=230350364 MiBps=555.68
+  thread=6 bytes=134217728 wall_ns=230822089 MiBps=554.54
+  thread=7 bytes=134217728 wall_ns=212987078 MiBps=600.98
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=264587828,wall_s=0.264588,agg_MiBps=3870.17,sink=33423360
+  thread=0 bytes=134217728 wall_ns=240172453 MiBps=532.95
+  thread=1 bytes=134217728 wall_ns=252299144 MiBps=507.33
+  thread=2 bytes=134217728 wall_ns=259898882 MiBps=492.50
+  thread=3 bytes=134217728 wall_ns=206697356 MiBps=619.26
+  thread=4 bytes=134217728 wall_ns=207979019 MiBps=615.45
+  thread=5 bytes=134217728 wall_ns=256422232 MiBps=499.18
+  thread=6 bytes=134217728 wall_ns=253105892 MiBps=505.72
+  thread=7 bytes=134217728 wall_ns=259959446 MiBps=492.38
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=263830854,wall_s=0.263831,agg_MiBps=3881.27,sink=33423360
+  thread=0 bytes=134217728 wall_ns=256724243 MiBps=498.59
+  thread=1 bytes=134217728 wall_ns=254934105 MiBps=502.09
+  thread=2 bytes=134217728 wall_ns=257738719 MiBps=496.63
+  thread=3 bytes=134217728 wall_ns=257737036 MiBps=496.63
+  thread=4 bytes=134217728 wall_ns=258368731 MiBps=495.42
+  thread=5 bytes=134217728 wall_ns=214569059 MiBps=596.54
+  thread=6 bytes=134217728 wall_ns=258423086 MiBps=495.31
+  thread=7 bytes=134217728 wall_ns=243500181 MiBps=525.67
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=247849194,wall_s=0.247849,agg_MiBps=4131.54,sink=33423360
+  thread=0 bytes=134217728 wall_ns=242774931 MiBps=527.24
+  thread=1 bytes=134217728 wall_ns=229553823 MiBps=557.60
+  thread=2 bytes=134217728 wall_ns=232164198 MiBps=551.33
+  thread=3 bytes=134217728 wall_ns=128383555 MiBps=997.01
+  thread=4 bytes=134217728 wall_ns=240589543 MiBps=532.03
+  thread=5 bytes=134217728 wall_ns=235167325 MiBps=544.29
+  thread=6 bytes=134217728 wall_ns=243624131 MiBps=525.40
+  thread=7 bytes=134217728 wall_ns=239779037 MiBps=533.82
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=51089132,wall_s=0.051089,agg_MiBps=20043.40,sink=33423360
+  thread=0 bytes=134217728 wall_ns=42755805 MiBps=2993.75
+  thread=1 bytes=134217728 wall_ns=47077037 MiBps=2718.95
+  thread=2 bytes=134217728 wall_ns=49543662 MiBps=2583.58
+  thread=3 bytes=134217728 wall_ns=42759378 MiBps=2993.50
+  thread=4 bytes=134217728 wall_ns=45550452 MiBps=2810.07
+  thread=5 bytes=134217728 wall_ns=45112604 MiBps=2837.34
+  thread=6 bytes=134217728 wall_ns=48518299 MiBps=2638.18
+  thread=7 bytes=134217728 wall_ns=44212138 MiBps=2895.13
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=57442653,wall_s=0.057443,agg_MiBps=17826.47,sink=33423360
+  thread=0 bytes=134217728 wall_ns=55641065 MiBps=2300.46
+  thread=1 bytes=134217728 wall_ns=46513180 MiBps=2751.91
+  thread=2 bytes=134217728 wall_ns=54000595 MiBps=2370.34
+  thread=3 bytes=134217728 wall_ns=55909184 MiBps=2289.43
+  thread=4 bytes=134217728 wall_ns=47279023 MiBps=2707.33
+  thread=5 bytes=134217728 wall_ns=53258080 MiBps=2403.39
+  thread=6 bytes=134217728 wall_ns=47496578 MiBps=2694.93
+  thread=7 bytes=134217728 wall_ns=54780667 MiBps=2336.59
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=50382288,wall_s=0.050382,agg_MiBps=20324.60,sink=33423360
+  thread=0 bytes=134217728 wall_ns=50049808 MiBps=2557.45
+  thread=1 bytes=134217728 wall_ns=44097427 MiBps=2902.66
+  thread=2 bytes=134217728 wall_ns=48699796 MiBps=2628.35
+  thread=3 bytes=134217728 wall_ns=46853153 MiBps=2731.94
+  thread=4 bytes=134217728 wall_ns=49383748 MiBps=2591.95
+  thread=5 bytes=134217728 wall_ns=42225295 MiBps=3031.36
+  thread=6 bytes=134217728 wall_ns=48531492 MiBps=2637.46
+  thread=7 bytes=134217728 wall_ns=48345771 MiBps=2647.59
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=48374255,wall_s=0.048374,agg_MiBps=21168.28,sink=33423360
+  thread=0 bytes=134217728 wall_ns=44976460 MiBps=2845.93
+  thread=1 bytes=134217728 wall_ns=45673259 MiBps=2802.52
+  thread=2 bytes=134217728 wall_ns=46551168 MiBps=2749.66
+  thread=3 bytes=134217728 wall_ns=48027177 MiBps=2665.16
+  thread=4 bytes=134217728 wall_ns=42319819 MiBps=3024.59
+  thread=5 bytes=134217728 wall_ns=40100352 MiBps=3191.99
+  thread=6 bytes=134217728 wall_ns=47111664 MiBps=2716.95
+  thread=7 bytes=134217728 wall_ns=39679715 MiBps=3225.83
+3
+--- threads=8 bs=4194304 fdmode=shared-fd iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=49344355,wall_s=0.049344,agg_MiBps=20752.12,sink=33423360
+  thread=0 bytes=134217728 wall_ns=42718049 MiBps=2996.39
+  thread=1 bytes=134217728 wall_ns=44393274 MiBps=2883.32
+  thread=2 bytes=134217728 wall_ns=43600208 MiBps=2935.77
+  thread=3 bytes=134217728 wall_ns=43734816 MiBps=2926.73
+  thread=4 bytes=134217728 wall_ns=47386064 MiBps=2701.22
+  thread=5 bytes=134217728 wall_ns=47908512 MiBps=2671.76
+  thread=6 bytes=134217728 wall_ns=47940506 MiBps=2669.98
+  thread=7 bytes=134217728 wall_ns=47812120 MiBps=2677.15
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=249722001,wall_s=0.249722,agg_MiBps=4100.56,sink=33423360
+  thread=0 bytes=134217728 wall_ns=238696741 MiBps=536.25
+  thread=1 bytes=134217728 wall_ns=236054723 MiBps=542.25
+  thread=2 bytes=134217728 wall_ns=231071117 MiBps=553.94
+  thread=3 bytes=134217728 wall_ns=230165564 MiBps=556.12
+  thread=4 bytes=134217728 wall_ns=124879092 MiBps=1024.99
+  thread=5 bytes=134217728 wall_ns=239704506 MiBps=533.99
+  thread=6 bytes=134217728 wall_ns=244130882 MiBps=524.31
+  thread=7 bytes=134217728 wall_ns=244325172 MiBps=523.89
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=245278589,wall_s=0.245279,agg_MiBps=4174.84,sink=33423360
+  thread=0 bytes=134217728 wall_ns=242757638 MiBps=527.27
+  thread=1 bytes=134217728 wall_ns=229505254 MiBps=557.72
+  thread=2 bytes=134217728 wall_ns=238599006 MiBps=536.46
+  thread=3 bytes=134217728 wall_ns=220330199 MiBps=580.95
+  thread=4 bytes=134217728 wall_ns=242653831 MiBps=527.50
+  thread=5 bytes=134217728 wall_ns=231313827 MiBps=553.36
+  thread=6 bytes=134217728 wall_ns=129056745 MiBps=991.81
+  thread=7 bytes=134217728 wall_ns=241207839 MiBps=530.66
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=262098411,wall_s=0.262098,agg_MiBps=3906.93,sink=33423360
+  thread=0 bytes=134217728 wall_ns=247177250 MiBps=517.85
+  thread=1 bytes=134217728 wall_ns=253492976 MiBps=504.94
+  thread=2 bytes=134217728 wall_ns=245333691 MiBps=521.74
+  thread=3 bytes=134217728 wall_ns=258750453 MiBps=494.69
+  thread=4 bytes=134217728 wall_ns=192811977 MiBps=663.86
+  thread=5 bytes=134217728 wall_ns=259747148 MiBps=492.79
+  thread=6 bytes=134217728 wall_ns=145123889 MiBps=882.01
+  thread=7 bytes=134217728 wall_ns=256487268 MiBps=499.05
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=278212963,wall_s=0.278213,agg_MiBps=3680.63,sink=33423360
+  thread=0 bytes=134217728 wall_ns=266552225 MiBps=480.21
+  thread=1 bytes=134217728 wall_ns=254458554 MiBps=503.03
+  thread=2 bytes=134217728 wall_ns=262160826 MiBps=488.25
+  thread=3 bytes=134217728 wall_ns=257681758 MiBps=496.74
+  thread=4 bytes=134217728 wall_ns=274851681 MiBps=465.71
+  thread=5 bytes=134217728 wall_ns=272414038 MiBps=469.87
+  thread=6 bytes=134217728 wall_ns=263294076 MiBps=486.15
+  thread=7 bytes=134217728 wall_ns=273730373 MiBps=467.61
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=253750234,wall_s=0.253750,agg_MiBps=4035.46,sink=33423360
+  thread=0 bytes=134217728 wall_ns=237002779 MiBps=540.08
+  thread=1 bytes=134217728 wall_ns=245136648 MiBps=522.16
+  thread=2 bytes=134217728 wall_ns=243068992 MiBps=526.60
+  thread=3 bytes=134217728 wall_ns=247494686 MiBps=517.18
+  thread=4 bytes=134217728 wall_ns=248567023 MiBps=514.95
+  thread=5 bytes=134217728 wall_ns=249236505 MiBps=513.57
+  thread=6 bytes=134217728 wall_ns=240489238 MiBps=532.25
+  thread=7 bytes=134217728 wall_ns=248447835 MiBps=515.20
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=52718884,wall_s=0.052719,agg_MiBps=19423.78,sink=33423360
+  thread=0 bytes=134217728 wall_ns=46469367 MiBps=2754.50
+  thread=1 bytes=134217728 wall_ns=51111581 MiBps=2504.32
+  thread=2 bytes=134217728 wall_ns=52112831 MiBps=2456.21
+  thread=3 bytes=134217728 wall_ns=51764398 MiBps=2472.74
+  thread=4 bytes=134217728 wall_ns=44630484 MiBps=2867.99
+  thread=5 bytes=134217728 wall_ns=50487387 MiBps=2535.29
+  thread=6 bytes=134217728 wall_ns=47314172 MiBps=2705.32
+  thread=7 bytes=134217728 wall_ns=49201315 MiBps=2601.56
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=50314647,wall_s=0.050315,agg_MiBps=20351.93,sink=33423360
+  thread=0 bytes=134217728 wall_ns=45774832 MiBps=2796.30
+  thread=1 bytes=134217728 wall_ns=46552195 MiBps=2749.60
+  thread=2 bytes=134217728 wall_ns=42551146 MiBps=3008.14
+  thread=3 bytes=134217728 wall_ns=44704706 MiBps=2863.23
+  thread=4 bytes=134217728 wall_ns=49549457 MiBps=2583.28
+  thread=5 bytes=134217728 wall_ns=41956108 MiBps=3050.81
+  thread=6 bytes=134217728 wall_ns=45882797 MiBps=2789.72
+  thread=7 bytes=134217728 wall_ns=49217877 MiBps=2600.68
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=51280862,wall_s=0.051281,agg_MiBps=19968.46,sink=33423360
+  thread=0 bytes=134217728 wall_ns=48877103 MiBps=2618.81
+  thread=1 bytes=134217728 wall_ns=49816209 MiBps=2569.44
+  thread=2 bytes=134217728 wall_ns=47059278 MiBps=2719.97
+  thread=3 bytes=134217728 wall_ns=48649588 MiBps=2631.06
+  thread=4 bytes=134217728 wall_ns=42608588 MiBps=3004.09
+  thread=5 bytes=134217728 wall_ns=39382622 MiBps=3250.16
+  thread=6 bytes=134217728 wall_ns=50467220 MiBps=2536.30
+  thread=7 bytes=134217728 wall_ns=41141188 MiBps=3111.24
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=49799856,wall_s=0.049800,agg_MiBps=20562.31,sink=33423360
+  thread=0 bytes=134217728 wall_ns=43749319 MiBps=2925.76
+  thread=1 bytes=134217728 wall_ns=49233232 MiBps=2599.87
+  thread=2 bytes=134217728 wall_ns=40326115 MiBps=3174.12
+  thread=3 bytes=134217728 wall_ns=44132812 MiBps=2900.34
+  thread=4 bytes=134217728 wall_ns=40213391 MiBps=3183.02
+  thread=5 bytes=134217728 wall_ns=46448873 MiBps=2755.72
+  thread=6 bytes=134217728 wall_ns=48496607 MiBps=2639.36
+  thread=7 bytes=134217728 wall_ns=47185480 MiBps=2712.70
+3
+--- threads=8 bs=4194304 fdmode=fd-per-thread iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=8,block_size=4194304,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=48124910,wall_s=0.048125,agg_MiBps=21277.96,sink=33423360
+  thread=0 bytes=134217728 wall_ns=45655660 MiBps=2803.60
+  thread=1 bytes=134217728 wall_ns=43192206 MiBps=2963.50
+  thread=2 bytes=134217728 wall_ns=47102556 MiBps=2717.47
+  thread=3 bytes=134217728 wall_ns=39845898 MiBps=3212.38
+  thread=4 bytes=134217728 wall_ns=44236291 MiBps=2893.55
+  thread=5 bytes=134217728 wall_ns=44382435 MiBps=2884.02
+  thread=6 bytes=134217728 wall_ns=42816758 MiBps=2989.48
+  thread=7 bytes=134217728 wall_ns=44757203 MiBps=2859.87
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=293363216,wall_s=0.293363,agg_MiBps=3490.55,sink=33423360
+  thread=0 bytes=134217728 wall_ns=277762526 MiBps=460.83
+  thread=1 bytes=134217728 wall_ns=235246541 MiBps=544.11
+  thread=2 bytes=134217728 wall_ns=215647518 MiBps=593.56
+  thread=3 bytes=134217728 wall_ns=287455501 MiBps=445.29
+  thread=4 bytes=134217728 wall_ns=150237799 MiBps=851.98
+  thread=5 bytes=134217728 wall_ns=221683844 MiBps=577.40
+  thread=6 bytes=134217728 wall_ns=277520852 MiBps=461.23
+  thread=7 bytes=134217728 wall_ns=234274619 MiBps=546.37
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=303685893,wall_s=0.303686,agg_MiBps=3371.91,sink=33423360
+  thread=0 bytes=134217728 wall_ns=253587524 MiBps=504.76
+  thread=1 bytes=134217728 wall_ns=224719760 MiBps=569.60
+  thread=2 bytes=134217728 wall_ns=241559124 MiBps=529.89
+  thread=3 bytes=134217728 wall_ns=258617722 MiBps=494.94
+  thread=4 bytes=134217728 wall_ns=291483686 MiBps=439.13
+  thread=5 bytes=134217728 wall_ns=202779726 MiBps=631.23
+  thread=6 bytes=134217728 wall_ns=205617107 MiBps=622.52
+  thread=7 bytes=134217728 wall_ns=149872979 MiBps=854.06
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=298514265,wall_s=0.298514,agg_MiBps=3430.32,sink=33423360
+  thread=0 bytes=134217728 wall_ns=198788355 MiBps=643.90
+  thread=1 bytes=134217728 wall_ns=290876981 MiBps=440.05
+  thread=2 bytes=134217728 wall_ns=250576567 MiBps=510.82
+  thread=3 bytes=134217728 wall_ns=288753863 MiBps=443.28
+  thread=4 bytes=134217728 wall_ns=255964663 MiBps=500.07
+  thread=5 bytes=134217728 wall_ns=226932807 MiBps=564.04
+  thread=6 bytes=134217728 wall_ns=206834041 MiBps=618.85
+  thread=7 bytes=134217728 wall_ns=282911362 MiBps=452.44
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=306788957,wall_s=0.306789,agg_MiBps=3337.80,sink=33423360
+  thread=0 bytes=134217728 wall_ns=285992163 MiBps=447.56
+  thread=1 bytes=134217728 wall_ns=290535206 MiBps=440.57
+  thread=2 bytes=134217728 wall_ns=268351498 MiBps=476.99
+  thread=3 bytes=134217728 wall_ns=297498742 MiBps=430.25
+  thread=4 bytes=134217728 wall_ns=231707176 MiBps=552.42
+  thread=5 bytes=134217728 wall_ns=224581134 MiBps=569.95
+  thread=6 bytes=134217728 wall_ns=280641346 MiBps=456.10
+  thread=7 bytes=134217728 wall_ns=266800987 MiBps=479.76
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=1,total_bytes=1073741824,wall_ns=272136709,wall_s=0.272137,agg_MiBps=3762.81,sink=33423360
+  thread=0 bytes=134217728 wall_ns=169544780 MiBps=754.96
+  thread=1 bytes=134217728 wall_ns=250911914 MiBps=510.14
+  thread=2 bytes=134217728 wall_ns=261564031 MiBps=489.36
+  thread=3 bytes=134217728 wall_ns=241355634 MiBps=530.34
+  thread=4 bytes=134217728 wall_ns=164673746 MiBps=777.29
+  thread=5 bytes=134217728 wall_ns=260339892 MiBps=491.66
+  thread=6 bytes=134217728 wall_ns=258741336 MiBps=494.70
+  thread=7 bytes=134217728 wall_ns=184196343 MiBps=694.91
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=85102552,wall_s=0.085103,agg_MiBps=12032.54,sink=33423360
+  thread=0 bytes=134217728 wall_ns=58130939 MiBps=2201.93
+  thread=1 bytes=134217728 wall_ns=73204614 MiBps=1748.52
+  thread=2 bytes=134217728 wall_ns=77542841 MiBps=1650.70
+  thread=3 bytes=134217728 wall_ns=63749661 MiBps=2007.85
+  thread=4 bytes=134217728 wall_ns=75212126 MiBps=1701.85
+  thread=5 bytes=134217728 wall_ns=63093410 MiBps=2028.74
+  thread=6 bytes=134217728 wall_ns=59000442 MiBps=2169.48
+  thread=7 bytes=134217728 wall_ns=77288189 MiBps=1656.14
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=79791918,wall_s=0.079792,agg_MiBps=12833.38,sink=33423360
+  thread=0 bytes=134217728 wall_ns=55453729 MiBps=2308.23
+  thread=1 bytes=134217728 wall_ns=64772803 MiBps=1976.14
+  thread=2 bytes=134217728 wall_ns=55269652 MiBps=2315.92
+  thread=3 bytes=134217728 wall_ns=73247493 MiBps=1747.50
+  thread=4 bytes=134217728 wall_ns=64500564 MiBps=1984.48
+  thread=5 bytes=134217728 wall_ns=62094753 MiBps=2061.37
+  thread=6 bytes=134217728 wall_ns=64209578 MiBps=1993.47
+  thread=7 bytes=134217728 wall_ns=71824591 MiBps=1782.12
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=78723705,wall_s=0.078724,agg_MiBps=13007.52,sink=33423360
+  thread=0 bytes=134217728 wall_ns=75246517 MiBps=1701.08
+  thread=1 bytes=134217728 wall_ns=60189073 MiBps=2126.63
+  thread=2 bytes=134217728 wall_ns=60405660 MiBps=2119.01
+  thread=3 bytes=134217728 wall_ns=51117677 MiBps=2504.03
+  thread=4 bytes=134217728 wall_ns=70670284 MiBps=1811.23
+  thread=5 bytes=134217728 wall_ns=56483935 MiBps=2266.13
+  thread=6 bytes=134217728 wall_ns=60098638 MiBps=2129.83
+  thread=7 bytes=134217728 wall_ns=67247370 MiBps=1903.42
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=81612749,wall_s=0.081613,agg_MiBps=12547.06,sink=33423360
+  thread=0 bytes=134217728 wall_ns=61770967 MiBps=2072.17
+  thread=1 bytes=134217728 wall_ns=69273567 MiBps=1847.75
+  thread=2 bytes=134217728 wall_ns=54935124 MiBps=2330.02
+  thread=3 bytes=134217728 wall_ns=67629575 MiBps=1892.66
+  thread=4 bytes=134217728 wall_ns=63058900 MiBps=2029.85
+  thread=5 bytes=134217728 wall_ns=69137955 MiBps=1851.37
+  thread=6 bytes=134217728 wall_ns=78486796 MiBps=1630.85
+  thread=7 bytes=134217728 wall_ns=56450439 MiBps=2267.48
+3
+--- threads=8 bs=134217728 fdmode=shared-fd iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=1,direct=0,total_bytes=1073741824,wall_ns=80295318,wall_s=0.080295,agg_MiBps=12752.92,sink=33423360
+  thread=0 bytes=134217728 wall_ns=77354799 MiBps=1654.71
+  thread=1 bytes=134217728 wall_ns=64628264 MiBps=1980.56
+  thread=2 bytes=134217728 wall_ns=73484097 MiBps=1741.87
+  thread=3 bytes=134217728 wall_ns=64762926 MiBps=1976.44
+  thread=4 bytes=134217728 wall_ns=52106659 MiBps=2456.50
+  thread=5 bytes=134217728 wall_ns=56824912 MiBps=2252.53
+  thread=6 bytes=134217728 wall_ns=55985142 MiBps=2286.32
+  thread=7 bytes=134217728 wall_ns=61600916 MiBps=2077.89
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=direct rep=1 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=286761409,wall_s=0.286761,agg_MiBps=3570.91,sink=33423360
+  thread=0 bytes=134217728 wall_ns=228521445 MiBps=560.12
+  thread=1 bytes=134217728 wall_ns=241881485 MiBps=529.18
+  thread=2 bytes=134217728 wall_ns=207341397 MiBps=617.34
+  thread=3 bytes=134217728 wall_ns=225156149 MiBps=568.49
+  thread=4 bytes=134217728 wall_ns=270544265 MiBps=473.12
+  thread=5 bytes=134217728 wall_ns=219538851 MiBps=583.04
+  thread=6 bytes=134217728 wall_ns=264417627 MiBps=484.08
+  thread=7 bytes=134217728 wall_ns=273301073 MiBps=468.35
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=direct rep=2 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=283399177,wall_s=0.283399,agg_MiBps=3613.28,sink=33423360
+  thread=0 bytes=134217728 wall_ns=159351329 MiBps=803.26
+  thread=1 bytes=134217728 wall_ns=250122362 MiBps=511.75
+  thread=2 bytes=134217728 wall_ns=272045441 MiBps=470.51
+  thread=3 bytes=134217728 wall_ns=251505081 MiBps=508.94
+  thread=4 bytes=134217728 wall_ns=255586776 MiBps=500.81
+  thread=5 bytes=134217728 wall_ns=235342978 MiBps=543.89
+  thread=6 bytes=134217728 wall_ns=273246262 MiBps=468.44
+  thread=7 bytes=134217728 wall_ns=246405469 MiBps=519.47
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=direct rep=3 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=276998180,wall_s=0.276998,agg_MiBps=3696.78,sink=33423360
+  thread=0 bytes=134217728 wall_ns=222070853 MiBps=576.39
+  thread=1 bytes=134217728 wall_ns=262239046 MiBps=488.10
+  thread=2 bytes=134217728 wall_ns=262098862 MiBps=488.37
+  thread=3 bytes=134217728 wall_ns=267974151 MiBps=477.66
+  thread=4 bytes=134217728 wall_ns=227238285 MiBps=563.29
+  thread=5 bytes=134217728 wall_ns=265929287 MiBps=481.33
+  thread=6 bytes=134217728 wall_ns=238724106 MiBps=536.18
+  thread=7 bytes=134217728 wall_ns=262405192 MiBps=487.80
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=direct rep=4 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=277229939,wall_s=0.277230,agg_MiBps=3693.68,sink=33423360
+  thread=0 bytes=134217728 wall_ns=213440129 MiBps=599.70
+  thread=1 bytes=134217728 wall_ns=227281222 MiBps=563.18
+  thread=2 bytes=134217728 wall_ns=227049667 MiBps=563.75
+  thread=3 bytes=134217728 wall_ns=272827203 MiBps=469.16
+  thread=4 bytes=134217728 wall_ns=235973657 MiBps=542.43
+  thread=5 bytes=134217728 wall_ns=230170304 MiBps=556.11
+  thread=6 bytes=134217728 wall_ns=211653722 MiBps=604.76
+  thread=7 bytes=134217728 wall_ns=255049438 MiBps=501.86
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=direct rep=5 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=1,total_bytes=1073741824,wall_ns=272503261,wall_s=0.272503,agg_MiBps=3757.75,sink=33423360
+  thread=0 bytes=134217728 wall_ns=230824877 MiBps=554.53
+  thread=1 bytes=134217728 wall_ns=252208921 MiBps=507.52
+  thread=2 bytes=134217728 wall_ns=200222708 MiBps=639.29
+  thread=3 bytes=134217728 wall_ns=221325666 MiBps=578.33
+  thread=4 bytes=134217728 wall_ns=248278975 MiBps=515.55
+  thread=5 bytes=134217728 wall_ns=255643019 MiBps=500.70
+  thread=6 bytes=134217728 wall_ns=244120721 MiBps=524.33
+  thread=7 bytes=134217728 wall_ns=263384323 MiBps=485.98
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=1 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=85422258,wall_s=0.085422,agg_MiBps=11987.51,sink=33423360
+  thread=0 bytes=134217728 wall_ns=81345298 MiBps=1573.54
+  thread=1 bytes=134217728 wall_ns=63573383 MiBps=2013.42
+  thread=2 bytes=134217728 wall_ns=63287917 MiBps=2022.50
+  thread=3 bytes=134217728 wall_ns=72982533 MiBps=1753.84
+  thread=4 bytes=134217728 wall_ns=69918802 MiBps=1830.69
+  thread=5 bytes=134217728 wall_ns=57030886 MiBps=2244.40
+  thread=6 bytes=134217728 wall_ns=60849764 MiBps=2103.54
+  thread=7 bytes=134217728 wall_ns=75788603 MiBps=1688.91
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=2 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=84881011,wall_s=0.084881,agg_MiBps=12063.95,sink=33423360
+  thread=0 bytes=134217728 wall_ns=61934873 MiBps=2066.69
+  thread=1 bytes=134217728 wall_ns=54858113 MiBps=2333.29
+  thread=2 bytes=134217728 wall_ns=69578029 MiBps=1839.66
+  thread=3 bytes=134217728 wall_ns=66214446 MiBps=1933.11
+  thread=4 bytes=134217728 wall_ns=54332540 MiBps=2355.86
+  thread=5 bytes=134217728 wall_ns=61047684 MiBps=2096.72
+  thread=6 bytes=134217728 wall_ns=76503694 MiBps=1673.12
+  thread=7 bytes=134217728 wall_ns=80697503 MiBps=1586.17
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=3 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=81178558,wall_s=0.081179,agg_MiBps=12614.17,sink=33423360
+  thread=0 bytes=134217728 wall_ns=54834467 MiBps=2334.30
+  thread=1 bytes=134217728 wall_ns=66753179 MiBps=1917.51
+  thread=2 bytes=134217728 wall_ns=66896591 MiBps=1913.40
+  thread=3 bytes=134217728 wall_ns=53434760 MiBps=2395.44
+  thread=4 bytes=134217728 wall_ns=60151721 MiBps=2127.95
+  thread=5 bytes=134217728 wall_ns=59826309 MiBps=2139.53
+  thread=6 bytes=134217728 wall_ns=66022106 MiBps=1938.74
+  thread=7 bytes=134217728 wall_ns=77905877 MiBps=1643.01
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=4 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=81948245,wall_s=0.081948,agg_MiBps=12495.69,sink=33423360
+  thread=0 bytes=134217728 wall_ns=55100730 MiBps=2323.02
+  thread=1 bytes=134217728 wall_ns=58701182 MiBps=2180.54
+  thread=2 bytes=134217728 wall_ns=58836294 MiBps=2175.53
+  thread=3 bytes=134217728 wall_ns=62483105 MiBps=2048.55
+  thread=4 bytes=134217728 wall_ns=70531471 MiBps=1814.79
+  thread=5 bytes=134217728 wall_ns=68426831 MiBps=1870.61
+  thread=6 bytes=134217728 wall_ns=78354853 MiBps=1633.59
+  thread=7 bytes=134217728 wall_ns=61357798 MiBps=2086.12
+3
+--- threads=8 bs=134217728 fdmode=fd-per-thread iomode=buffered rep=5 rc=0 ---
+BENCH_RESULT,threads=8,block_size=134217728,shared_fd=0,direct=0,total_bytes=1073741824,wall_ns=82116381,wall_s=0.082116,agg_MiBps=12470.11,sink=33423360
+  thread=0 bytes=134217728 wall_ns=57637567 MiBps=2220.77
+  thread=1 bytes=134217728 wall_ns=64698941 MiBps=1978.39
+  thread=2 bytes=134217728 wall_ns=72665505 MiBps=1761.50
+  thread=3 bytes=134217728 wall_ns=55673163 MiBps=2299.13
+  thread=4 bytes=134217728 wall_ns=63987079 MiBps=2000.40
+  thread=5 bytes=134217728 wall_ns=60524251 MiBps=2114.85
+  thread=6 bytes=134217728 wall_ns=78314164 MiBps=1634.44
+  thread=7 bytes=134217728 wall_ns=62840737 MiBps=2036.90
+
+=== machine exclusivity check (after) ===
+ 06:39:40 up 1 day, 10:17,  1 user,  load average: 1.62, 0.63, 0.86
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       41649  100  0.0   7212  4428 pts/3    R+   06:39   0:00 ps aux --sort=-%cpu
+root       37985  1.4  0.0   5080  3724 pts/3    Ss+  06:39   0:00 bash /root/residctl/src/run_phase1_sweep.sh
+root       37916  0.0  0.1 1866288 15236 ?       Ssl  06:37   0:00 /usr/libexec/wsl-pro-service
+root           7  0.0  0.0   4540  2272 ?        Sl   Aug20   0:23 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  4700 ?        Ss   Aug20   0:11 /usr/lib/systemd/systemd-udevd
+root         156  0.0  0.1  34244  9584 ?        S<s  Aug20   0:08 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  7992 ?        Ss   Aug20   0:08 /sbin/init
+
+=== Phase 1 complete, results in /root/residctl/results/phase1_platform_io.csv ===

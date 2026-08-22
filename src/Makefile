@@ -5,7 +5,7 @@ LDFLAGS = -pthread
 CORE_SRC = pager.c fetch.c budget.c trace.c metrics.c cgroup_stat.c replay.c policy.c prefetch.c prefetch_pool.c fetch_trace.c region.c
 CORE_HDR = region.h pager.h fetch.h budget.h trace.h metrics.h cgroup_stat.h replay.h policy.h prefetch.h prefetch_pool.h fetch_trace.h
 
-all: test_startup test_pager test_eviction test_trace test_replay test_policy test_prefetch test_correctness test_storm test_t6 test_t7 replay_main belady_main baseline_main gen_pattern
+all: test_startup test_pager test_eviction test_trace test_replay test_policy test_prefetch test_correctness test_storm test_t6 test_t7 replay_main belady_main baseline_main gen_pattern bench_concurrent_read
 
 test_startup: test_startup.c region.c region.h
 	$(CC) $(CFLAGS) -o test_startup test_startup.c region.c $(LDFLAGS)
@@ -52,7 +52,10 @@ test_t7: test_t7.c $(CORE_SRC) $(CORE_HDR)
 gen_pattern: gen_pattern.c
 	$(CC) $(CFLAGS) -o gen_pattern gen_pattern.c
 
+bench_concurrent_read: bench_concurrent_read.c
+	$(CC) $(CFLAGS) -o bench_concurrent_read bench_concurrent_read.c $(LDFLAGS)
+
 clean:
-	rm -f test_startup test_pager test_eviction test_trace test_replay test_policy test_prefetch test_correctness test_storm test_t6 test_t7 replay_main belady_main baseline_main gen_pattern *.o
+	rm -f test_startup test_pager test_eviction test_trace test_replay test_policy test_prefetch test_correctness test_storm test_t6 test_t7 replay_main belady_main baseline_main gen_pattern bench_concurrent_read *.o
 
 .PHONY: all clean

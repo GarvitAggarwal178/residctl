@@ -13,6 +13,10 @@ results/*.csv
 !results/task_d_sweep_c.csv
 !results/task_e_sweep_b.csv
 !results/task_e_sweep_c.csv
+!results/phase1_platform_io.csv
+!results/phase2_compute.csv
+!results/phase3_chunk_size.csv
+!results/phase4_consolidated.csv
 results/*.log
 !results/.gitkeep
 src/test_startup
@@ -30,6 +34,7 @@ src/replay_main
 src/belady_main
 src/baseline_main
 src/gen_pattern
+src/bench_concurrent_read
 src/*_replay
 src/*_solver
 src/*_harness
