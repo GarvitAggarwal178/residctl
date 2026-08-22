@@ -85,6 +85,61 @@ branches in `handle_fault()` have still never been observed to fire) is now
 backed by much stronger negative evidence and is being accepted as a known,
 understood limitation for v1 rather than chased further.
 
+**CAMPAIGN 11 — five-phase closing session. Reports:
+`results/phase0_analysis.md`, `results/phase1_platform_io.md`,
+`results/phase2_compute.md`, `results/phase3_chunk_size.md`,
+`results/phase4_consolidated.md`, and `results/PROJECT_STATE.md` (the
+consolidated reference document — headline results, open questions,
+limitations, spec amendments A-1..A-11, and a superseded-results list,
+all in one place). Explicit brief: run every phase, decide nothing,
+report measurements only. No spec amendment produced (findings are
+measurements/reversals, not fixes).**
+
+Phase 0 (no new runs): arm E (prefetch on) DOES show real fetch overlap
+(median 1-3, unlike arm D's flat 1.00) — item 10e's null result was
+arm-D-specific. Item 10e's dramatic gate-run wall-clock improvement does
+not reproduce in Sweep B's own data — a `policy=default` vs
+`policy=layer_order` confound in the gate script, not a real effect.
+Independently re-confirmed the fetch-path lock inventory (per-chunk lock
+only, no global lock, at every `pread()` call site).
+
+Phase 1 (platform microbenchmark, no pager): neither "scales" nor
+"serialises" holds cleanly for raw `O_DIRECT` concurrency — aggregate
+throughput rises 1→2 threads then plateaus at a ~3400-4300 MiB/s ceiling
+through 8 threads. `fd-per-thread` does not lift the ceiling over
+`shared-fd`, ruling out item 10e's single-`model_fd` hypothesis directly.
+
+Phase 2 (calibrated compute phase added to the driver,
+`--compute-ns-per-mib`): STOP-AND-REPORT gate passed. Prefetch hit rate
+FELL with heavier compute in 14/18 series — the opposite of the
+pre-registered hypothesis. Arm E beat arm D's `read_bytes` at r=0.5 and
+r=0.75 under heavy compute — the first time in this project's history.
+Found and investigated (not fully resolved) a 2-3× calibration
+achieved-vs-requested discrepancy, most likely CPU/cache contention among
+concurrent compute threads. Hit a real machine-exclusivity contamination
+(a Gradle daemon) mid-sweep; per instruction, did not kill it, discarded
+ambiguously-contaminated partial results, restarted clean.
+
+Phase 3 (chunk-size sweep, 32/64/128/256 MiB): OPT ≥ floor gate passed at
+all 12 combinations. Arm D's bytes and wall-clock are BOTH monotonically
+increasing with chunk size at every ratio — minimum is always the
+smallest size tested (32 MiB), not 128 MiB. Handler-overhead fraction did
+NOT shrink at larger chunk sizes as predicted. Arm A's `read_bytes` read
+exactly 0 in 11/12 cells — the WSL2 host-cache confound, reported as
+NOT MEASURABLE rather than estimated.
+
+Phase 4 (consolidated 6-arm sweep, 5 ratios × 2 compute levels): OPT ≤ D
+held at all 10 cells. E beat D's `read_bytes` at exactly r=0.5 and
+r=0.75, only under heavy compute — independently replicating Phase 2's
+finding on a separate grid. `lru` still thrashes at 100% miss everywhere.
+Backfilled an omitted `--fetch-trace` flag (disclosed oversight, not
+hidden) with a labelled n=1 supplementary pass.
+
+Phase 5: `results/PROJECT_STATE.md` — see that file directly rather than
+this summary for the full consolidated headline-result list, open
+questions, limitations, spec-amendment index, and superseded-results
+table.
+
 **ITEM 10e — lookahead window driver + retention regime boundary. Full
 report: `results/LOOKAHEAD_REPORT.md`.** Task A fixes a spec defect
 introduced in item 10d (A-8's hard barrier made async's throughput benefit
