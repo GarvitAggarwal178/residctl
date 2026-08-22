@@ -179,6 +179,37 @@ int main(int argc, char **argv) {
     uint64_t majflt_after = read_majflt();
     uint64_t io_after = read_io_read_bytes();
 
+    // Campaign 12 Phase A: a baseline arm that reads nothing from storage is
+    // not a baseline -- it means the guest page cache served every touch
+    // (drop_caches didn't run or didn't take effect for this invocation),
+    // not that the mechanism performed no I/O. Found via a real, reproduced
+    // defect in this project's own Campaign 11 Phase 3/4 sweep scripts: a
+    // `>> "$LOG"` redirect placed AFTER `echo 3 > /proc/sys/vm/drop_caches`
+    // on the SAME command silently overrides fd1 a second time, so `echo`'s
+    // actual output went to the log file, never to the kernel's drop_caches
+    // interface -- exit status 0, no error, buff/cache measured unchanged
+    // before/after. Rather than trust the caller ran drop_caches correctly,
+    // assert it worked from inside this binary: abort loudly here instead of
+    // silently reporting a zero that looks like "the kernel served this from
+    // a cache we can't see" when it actually means "we read stale cached
+    // data, not real information about this run."
+    if (io_before != UINT64_MAX && io_after != UINT64_MAX && bytes_touched > 0) {
+        uint64_t io_delta = io_after - io_before;
+        if (io_delta == 0) {
+            fprintf(stderr,
+                    "BASELINE FAILED: bytes_touched=%llu but io_read_bytes delta is 0 -- "
+                    "the guest page cache served every touch (drop_caches did not run or "
+                    "did not take effect before this invocation). This binary refuses to "
+                    "report a baseline arm that performed no measured I/O. Fix the caller's "
+                    "drop_caches invocation and rerun; do not treat this 0 as a real "
+                    "measurement.\n",
+                    (unsigned long long)bytes_touched);
+            munmap(map, region_len);
+            close(fd);
+            return 1;
+        }
+    }
+
     double seconds = (double)(t_end - t_start) / 1e9;
     printf("BASELINE SUMMARY (arm %s)\n", hints_on ? "B" : "A");
     printf("  madvise_mode=%s hints=%s passes=%u touches=%u bytes_touched=%llu wall_ns=%llu (%.3fs) touches/sec=%.1f\n",

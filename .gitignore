@@ -17,6 +17,10 @@ results/*.csv
 !results/phase2_compute.csv
 !results/phase3_chunk_size.csv
 !results/phase4_consolidated.csv
+!results/campaign12_phaseA_phase3_AB.csv
+!results/campaign12_phaseA_phase4_AB.csv
+!results/campaign12_phaseB_chunk_floor.csv
+!results/campaign12_phaseD_paper_table.csv
 results/*.log
 !results/.gitkeep
 src/test_startup

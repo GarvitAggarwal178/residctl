@@ -1,0 +1,591 @@
+=== machine exclusivity check (before) ===
+ 16:18:09 up 1 day, 19:56,  1 user,  load average: 0.13, 0.29, 0.15
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       92265 50.0  0.0   4948  3644 pts/3    Ss+  16:18   0:00 bash /root/residctl/src/run_phase4_AB_rerun.sh
+root           7  0.0  0.0   4540  2272 ?        Sl   Aug20   0:32 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  4700 ?        Ss   Aug20   0:15 /usr/lib/systemd/systemd-udevd
+root       12530  0.0  0.1 1246960 10248 pts/0   Ssl+ Aug21   0:10 /mnt/wsl/docker-desktop/docker-desktop-user-distro proxy --distro-name Ubuntu --docker-desktop-root /mnt/wsl/docker-desktop C:\Program Files\Docker\Docker\resources
+root         156  0.0  0.1  34244 10940 ?        S<s  Aug20   0:12 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  8220 ?        Ss   Aug20   0:12 /sbin/init
+polkitd      880  0.0  0.0 306444  3448 ?        Ssl  Aug20   0:04 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+--- ratio=0.25 arm=A mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=5535389380 (5.535s) touches/sec=14.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=8
+  io_read_bytes_delta=10743746560
+  pgscan_delta=5104533 pgsteal_delta=2479753 workingset_refault_file_delta=2098696
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=5535389380,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10743746560,majflt_delta=8,pgscan_delta=5104533,pgsteal_delta=2479753
+PASS
+--- ratio=0.25 arm=A mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3986869762 (3.987s) touches/sec=20.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=8
+  io_read_bytes_delta=10743746560
+  pgscan_delta=5110909 pgsteal_delta=2477144 workingset_refault_file_delta=2098696
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3986869762,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10743746560,majflt_delta=8,pgscan_delta=5110909,pgsteal_delta=2477144
+PASS
+--- ratio=0.25 arm=A mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=4794007220 (4.794s) touches/sec=16.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=8
+  io_read_bytes_delta=10743746560
+  pgscan_delta=5096213 pgsteal_delta=2480185 workingset_refault_file_delta=2098696
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=4794007220,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10743746560,majflt_delta=8,pgscan_delta=5096213,pgsteal_delta=2480185
+PASS
+=== resuming: existing CSV has 4 lines ===
+=== machine exclusivity check (before) ===
+ 16:26:33 up 1 day, 20:04,  1 user,  load average: 0.05, 0.20, 0.20
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       92578 25.0  0.0   4948  3628 pts/3    Ss+  16:26   0:00 bash /root/residctl/src/run_phase4_AB_rerun.sh
+root           7  0.0  0.0   4252  2256 ?        Sl   Aug20   0:32 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  4700 ?        Ss   Aug20   0:15 /usr/lib/systemd/systemd-udevd
+root       12530  0.0  0.1 1246960 10248 pts/0   Ssl+ Aug21   0:10 /mnt/wsl/docker-desktop/docker-desktop-user-distro proxy --distro-name Ubuntu --docker-desktop-root /mnt/wsl/docker-desktop C:\Program Files\Docker\Docker\resources
+root         156  0.0  0.1  34244 10952 ?        S<s  Aug20   0:12 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  8220 ?        Ss   Aug20   0:12 /sbin/init
+polkitd      880  0.0  0.0 306444  3448 ?        Ssl  Aug20   0:04 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+SKIP (already 3 reps): ratio=0.25 arm=A mode=normal
+--- ratio=0.25 arm=A mode=random rep=1 rc=124 ---
+
+=== resuming: existing CSV has 5 lines ===
+=== machine exclusivity check (before) ===
+ 16:28:37 up 1 day, 20:06,  1 user,  load average: 0.90, 0.49, 0.31
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       92718  100  0.0   7212  4452 pts/4    R+   16:28   0:00 ps aux --sort=-%cpu
+root       92704 55.5  0.0  35384  5160 ?        S    16:28   0:00 (udev-worker)
+root       92703 30.0  0.0   4948  3572 pts/4    Ss+  16:28   0:00 bash /root/residctl/src/run_phase4_AB_rerun.sh
+root       92691 24.0  0.8 2099924 64112 pts/3   D    16:28   0:00 /root/residctl/src/baseline_main /sys/fs/cgroup/residctl_phase4_AB /root/residctl/scratch/pattern_2g.bin 2147483648 134217728 5 random off
+root       92705 12.5  0.0  35384  5168 ?        S    16:28   0:00 (udev-worker)
+root       92706 12.5  0.0  35384  5140 ?        S    16:28   0:00 (udev-worker)
+root       92707 12.5  0.0  35384  5156 ?        S    16:28   0:00 (udev-worker)
+SKIP (already 3 reps): ratio=0.25 arm=A mode=normal
+--- ratio=0.25 arm=A mode=random rep=2 rc=137 ---
+
+--- ratio=0.25 arm=A mode=random rep=3 rc=137 ---
+
+--- ratio=0.25 arm=A mode=sequential rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=4107129164 (4.107s) touches/sec=19.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2476371 pgsteal_delta=2476345 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=4107129164,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2476371,pgsteal_delta=2476345
+PASS
+--- ratio=0.25 arm=A mode=sequential rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3514200507 (3.514s) touches/sec=22.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2479799 pgsteal_delta=2478657 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3514200507,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2479799,pgsteal_delta=2478657
+PASS
+--- ratio=0.25 arm=A mode=sequential rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3202458658 (3.202s) touches/sec=25.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2479775 pgsteal_delta=2478668 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3202458658,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2479775,pgsteal_delta=2478668
+PASS
+--- ratio=0.25 arm=B mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=4332419861 (4.332s) touches/sec=18.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=4332419861,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.25 arm=B mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=3112874822 (3.113s) touches/sec=25.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3112874822,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.25 arm=B mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=3322081428 (3.322s) touches/sec=24.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3322081428,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.375 arm=A mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=5500862914 (5.501s) touches/sec=14.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=8
+  io_read_bytes_delta=10743746560
+  pgscan_delta=4951887 pgsteal_delta=2412295 workingset_refault_file_delta=2098696
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=5500862914,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10743746560,majflt_delta=8,pgscan_delta=4951887,pgsteal_delta=2412295
+PASS
+--- ratio=0.375 arm=A mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3367474390 (3.367s) touches/sec=23.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=8
+  io_read_bytes_delta=10743746560
+  pgscan_delta=4945045 pgsteal_delta=2414666 workingset_refault_file_delta=2098696
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3367474390,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10743746560,majflt_delta=8,pgscan_delta=4945045,pgsteal_delta=2414666
+PASS
+--- ratio=0.375 arm=A mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3572620539 (3.573s) touches/sec=22.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=13
+  io_read_bytes_delta=10762620928
+  pgscan_delta=4950282 pgsteal_delta=2418783 workingset_refault_file_delta=2103304
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3572620539,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10762620928,majflt_delta=13,pgscan_delta=4950282,pgsteal_delta=2418783
+PASS
+=== resuming: existing CSV has 13 lines ===
+=== machine exclusivity check (before) ===
+ 16:32:31 up 1 day, 20:10,  1 user,  load average: 0.60, 0.77, 0.48
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       93376  100  0.0   7212  4484 pts/3    R+   16:32   0:00 ps aux --sort=-%cpu
+root       93367 30.7  0.0   4948  3652 pts/3    Ss+  16:32   0:00 bash /root/residctl/src/run_phase4_AB_rerun.sh
+root       93363  0.9  0.0  35384  5168 ?        S    16:32   0:00 (udev-worker)
+root       93362  0.4  0.0  35384  5168 ?        S    16:32   0:00 (udev-worker)
+root       92618  0.0  0.1 1866288 14212 ?       Ssl  16:28   0:00 /usr/libexec/wsl-pro-service
+root           7  0.0  0.0   4536  2268 ?        Sl   Aug20   0:33 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  4700 ?        Ss   Aug20   0:16 /usr/lib/systemd/systemd-udevd
+SKIP (already 3 reps): ratio=0.25 arm=A mode=normal
+=== resuming: existing CSV has 13 lines ===
+=== machine exclusivity check (before) ===
+ 16:45:17 up 1 day, 20:23,  1 user,  load average: 0.09, 0.20, 0.36
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       93636 16.6  0.0   4948  3628 pts/3    Ss+  16:45   0:00 bash /root/residctl/src/run_phase4_AB_rerun.sh
+root           7  0.0  0.0   4252  2256 ?        Sl   Aug20   0:33 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  4700 ?        Ss   Aug20   0:16 /usr/lib/systemd/systemd-udevd
+root       12530  0.0  0.1 1246960 10344 pts/0   Ssl+ Aug21   0:12 /mnt/wsl/docker-desktop/docker-desktop-user-distro proxy --distro-name Ubuntu --docker-desktop-root /mnt/wsl/docker-desktop C:\Program Files\Docker\Docker\resources
+root         156  0.0  0.1  34244 10984 ?        S<s  Aug20   0:12 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  8220 ?        Ss   Aug20   0:12 /sbin/init
+polkitd      880  0.0  0.0 306444  3448 ?        Ssl  Aug20   0:04 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+SKIP (already 3 reps): ratio=0.25 arm=A mode=normal
+=== random-only pass: machine exclusivity check ===
+ 16:52:10 up 1 day, 20:30,  1 user,  load average: 0.03, 0.30, 0.39
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           7  0.0  0.0   4400  2268 ?        Sl   Aug20   0:33 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  4700 ?        Ss   Aug20   0:16 /usr/lib/systemd/systemd-udevd
+root       12530  0.0  0.1 1246960 10344 pts/0   Ssl+ Aug21   0:12 /mnt/wsl/docker-desktop/docker-desktop-user-distro proxy --distro-name Ubuntu --docker-desktop-root /mnt/wsl/docker-desktop C:\Program Files\Docker\Docker\resources
+root         156  0.0  0.1  34244 10988 ?        S<s  Aug20   0:12 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  8220 ?        Ss   Aug20   0:12 /sbin/init
+polkitd      880  0.0  0.0 306444  3448 ?        Ssl  Aug20   0:04 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+_chrony      368  0.0  0.1  24056  8544 ?        S    Aug20   0:03 /usr/sbin/chronyd -n -F 1 -x
+--- RANDOM-ONLY ratio=0.25 rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=200426256711 (200.426s) touches/sec=0.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621441
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2481280 pgsteal_delta=2480196 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=200426256711,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=2621441,pgscan_delta=2481280,pgsteal_delta=2480196
+PASS
+--- RANDOM-ONLY ratio=0.25 rep=2 rc=124 ---
+
+--- RANDOM-ONLY ratio=0.25 rep=3 rc=124 ---
+
+--- RANDOM-ONLY ratio=0.375 rep=1 rc=124 ---
+
+--- RANDOM-ONLY ratio=0.375 rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=193487485548 (193.487s) touches/sec=0.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621439
+  io_read_bytes_delta=10737446912
+  pgscan_delta=2415798 pgsteal_delta=2414733 workingset_refault_file_delta=2097158
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=193487485548,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737446912,majflt_delta=2621439,pgscan_delta=2415798,pgsteal_delta=2414733
+PASS
+--- RANDOM-ONLY ratio=0.375 rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=189698897714 (189.699s) touches/sec=0.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621435
+  io_read_bytes_delta=10737430528
+  pgscan_delta=2415732 pgsteal_delta=2414654 workingset_refault_file_delta=2097154
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=189698897714,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737430528,majflt_delta=2621435,pgscan_delta=2415732,pgsteal_delta=2414654
+PASS
+--- RANDOM-ONLY ratio=0.5 rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=203479887503 (203.480s) touches/sec=0.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2621256
+  io_read_bytes_delta=10736697344
+  pgscan_delta=2350059 pgsteal_delta=2348948 workingset_refault_file_delta=2096975
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=203479887503,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10736697344,majflt_delta=2621256,pgscan_delta=2350059,pgsteal_delta=2348948
+PASS
+--- RANDOM-ONLY ratio=0.5 rep=2 rc=124 ---
+
+--- RANDOM-ONLY ratio=0.5 rep=3 rc=124 ---
+
+--- RANDOM-ONLY ratio=0.625 rep=1 rc=124 ---
+
+--- RANDOM-ONLY ratio=0.625 rep=2 rc=124 ---
+
+--- RANDOM-ONLY ratio=0.625 rep=3 rc=124 ---
+
+--- RANDOM-ONLY ratio=0.75 rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=216435286918 (216.435s) touches/sec=0.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2604295
+  io_read_bytes_delta=10667225088
+  pgscan_delta=2201978 pgsteal_delta=2200923 workingset_refault_file_delta=2080014
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=216435286918,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10667225088,majflt_delta=2604295,pgscan_delta=2201978,pgsteal_delta=2200923
+PASS
+--- RANDOM-ONLY ratio=0.75 rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=199313253954 (199.313s) touches/sec=0.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2620368
+  io_read_bytes_delta=10733060096
+  pgscan_delta=2218057 pgsteal_delta=2217002 workingset_refault_file_delta=2096087
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=199313253954,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10733060096,majflt_delta=2620368,pgscan_delta=2218057,pgsteal_delta=2217002
+PASS
+--- RANDOM-ONLY ratio=0.75 rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=random hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=204996755561 (204.997s) touches/sec=0.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=2613672
+  io_read_bytes_delta=10705633280
+  pgscan_delta=2211383 pgsteal_delta=2210306 workingset_refault_file_delta=2089391
+ARM_CSV,policy=mmap_random_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=204996755561,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10705633280,majflt_delta=2613672,pgscan_delta=2211383,pgsteal_delta=2210306
+PASS
+=== resuming: existing CSV has 28 lines ===
+=== machine exclusivity check (before) ===
+ 17:53:37 up 1 day, 21:31,  1 user,  load average: 0.52, 0.85, 0.92
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       94870 10.0  0.0   4948  3668 pts/3    Ss+  17:53   0:00 bash /root/residctl/src/run_phase4_AB_rerun.sh
+root           7  0.0  0.0   3552  2236 ?        Sl   Aug20   0:33 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  4700 ?        Ss   Aug20   0:17 /usr/lib/systemd/systemd-udevd
+root       12530  0.0  0.1 1246960 10348 pts/0   Ssl+ Aug21   0:12 /mnt/wsl/docker-desktop/docker-desktop-user-distro proxy --distro-name Ubuntu --docker-desktop-root /mnt/wsl/docker-desktop C:\Program Files\Docker\Docker\resources
+root         156  0.0  0.1  34244 11052 ?        S<s  Aug20   0:13 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  8220 ?        Ss   Aug20   0:12 /sbin/init
+polkitd      880  0.0  0.0 306444  3448 ?        Ssl  Aug20   0:04 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+SKIP (already 3 reps): ratio=0.25 arm=A mode=normal
+SKIP (already 3 reps): ratio=0.25 arm=A mode=random
+SKIP (already 3 reps): ratio=0.25 arm=A mode=sequential
+SKIP (already 3 reps): ratio=0.25 arm=B
+SKIP (already 3 reps): ratio=0.375 arm=A mode=normal
+SKIP (already 3 reps): ratio=0.375 arm=A mode=random
+--- ratio=0.375 arm=A mode=sequential rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3193870956 (3.194s) touches/sec=25.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737389568
+  pgscan_delta=2414229 pgsteal_delta=2413115 workingset_refault_file_delta=2097144
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3193870956,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737389568,majflt_delta=6,pgscan_delta=2414229,pgsteal_delta=2413115
+PASS
+--- ratio=0.375 arm=A mode=sequential rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2803228051 (2.803s) touches/sec=28.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2414243 pgsteal_delta=2413131 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2803228051,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2414243,pgsteal_delta=2413131
+PASS
+--- ratio=0.375 arm=A mode=sequential rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2758749278 (2.759s) touches/sec=29.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737389568
+  pgscan_delta=2409692 pgsteal_delta=2409659 workingset_refault_file_delta=2097144
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2758749278,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737389568,majflt_delta=6,pgscan_delta=2409692,pgsteal_delta=2409659
+PASS
+--- ratio=0.375 arm=B mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2652568267 (2.653s) touches/sec=30.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2652568267,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.375 arm=B mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2470499427 (2.470s) touches/sec=32.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2470499427,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.375 arm=B mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2414792728 (2.415s) touches/sec=33.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2414792728,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.5 arm=A mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3599097562 (3.599s) touches/sec=22.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=24
+  io_read_bytes_delta=10796175360
+  pgscan_delta=4839626 pgsteal_delta=2359429 workingset_refault_file_delta=2111496
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3599097562,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10796175360,majflt_delta=24,pgscan_delta=4839626,pgsteal_delta=2359429
+PASS
+--- ratio=0.5 arm=A mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3237294960 (3.237s) touches/sec=24.7
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=25
+  io_read_bytes_delta=10798272512
+  pgscan_delta=4836507 pgsteal_delta=2362947 workingset_refault_file_delta=2112008
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3237294960,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10798272512,majflt_delta=25,pgscan_delta=4836507,pgsteal_delta=2362947
+PASS
+--- ratio=0.5 arm=A mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3362817177 (3.363s) touches/sec=23.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=25
+  io_read_bytes_delta=10800369664
+  pgscan_delta=4837584 pgsteal_delta=2362984 workingset_refault_file_delta=2112520
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3362817177,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10800369664,majflt_delta=25,pgscan_delta=4837584,pgsteal_delta=2362984
+PASS
+SKIP (already 3 reps): ratio=0.5 arm=A mode=random
+--- ratio=0.5 arm=A mode=sequential rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3121153188 (3.121s) touches/sec=25.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2348206 pgsteal_delta=2347124 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3121153188,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2348206,pgsteal_delta=2347124
+PASS
+--- ratio=0.5 arm=A mode=sequential rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3123182474 (3.123s) touches/sec=25.6
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2348711 pgsteal_delta=2347616 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3123182474,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2348711,pgsteal_delta=2347616
+PASS
+--- ratio=0.5 arm=A mode=sequential rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2839320024 (2.839s) touches/sec=28.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2348708 pgsteal_delta=2347625 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2839320024,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2348708,pgsteal_delta=2347625
+PASS
+--- ratio=0.5 arm=B mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2769207714 (2.769s) touches/sec=28.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2769207714,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.5 arm=B mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2635055271 (2.635s) touches/sec=30.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2635055271,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.5 arm=B mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2395189500 (2.395s) touches/sec=33.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2395189500,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.625 arm=A mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3466466963 (3.466s) touches/sec=23.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=20
+  io_read_bytes_delta=10781495296
+  pgscan_delta=4679517 pgsteal_delta=2289488 workingset_refault_file_delta=2107912
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3466466963,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10781495296,majflt_delta=20,pgscan_delta=4679517,pgsteal_delta=2289488
+PASS
+--- ratio=0.625 arm=A mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2879431119 (2.879s) touches/sec=27.8
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=21
+  io_read_bytes_delta=10785402880
+  pgscan_delta=4677157 pgsteal_delta=2294221 workingset_refault_file_delta=2108866
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2879431119,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10785402880,majflt_delta=21,pgscan_delta=4677157,pgsteal_delta=2294221
+PASS
+--- ratio=0.625 arm=A mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3658460662 (3.658s) touches/sec=21.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=17
+  io_read_bytes_delta=10773041152
+  pgscan_delta=4677779 pgsteal_delta=2290796 workingset_refault_file_delta=2105848
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3658460662,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10773041152,majflt_delta=17,pgscan_delta=4677779,pgsteal_delta=2290796
+PASS
+SKIP (already 3 reps): ratio=0.625 arm=A mode=random
+--- ratio=0.625 arm=A mode=sequential rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3492608492 (3.493s) touches/sec=22.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2282661 pgsteal_delta=2281553 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3492608492,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2282661,pgsteal_delta=2281553
+PASS
+--- ratio=0.625 arm=A mode=sequential rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3409138223 (3.409s) touches/sec=23.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2279010 pgsteal_delta=2279004 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3409138223,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2279010,pgsteal_delta=2279004
+PASS
+--- ratio=0.625 arm=A mode=sequential rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=2935751609 (2.936s) touches/sec=27.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737389568
+  pgscan_delta=2278744 pgsteal_delta=2278727 workingset_refault_file_delta=2097144
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2935751609,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737389568,majflt_delta=6,pgscan_delta=2278744,pgsteal_delta=2278727
+PASS
+--- ratio=0.625 arm=B mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2652016172 (2.652s) touches/sec=30.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2652016172,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.625 arm=B mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2926564657 (2.927s) touches/sec=27.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2926564657,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.625 arm=B mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2621253751 (2.621s) touches/sec=30.5
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2621253751,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.75 arm=A mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=5259770725 (5.260s) touches/sec=15.2
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=18
+  io_read_bytes_delta=10775203840
+  pgscan_delta=4663295 pgsteal_delta=2225458 workingset_refault_file_delta=2106376
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=5259770725,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10775203840,majflt_delta=18,pgscan_delta=4663295,pgsteal_delta=2225458
+PASS
+--- ratio=0.75 arm=A mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3419779341 (3.420s) touches/sec=23.4
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=19
+  io_read_bytes_delta=10781483008
+  pgscan_delta=4663467 pgsteal_delta=2227296 workingset_refault_file_delta=2107909
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3419779341,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10781483008,majflt_delta=19,pgscan_delta=4663467,pgsteal_delta=2227296
+PASS
+--- ratio=0.75 arm=A mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=normal hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3627555153 (3.628s) touches/sec=22.1
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=17
+  io_read_bytes_delta=10773106688
+  pgscan_delta=4662440 pgsteal_delta=2225252 workingset_refault_file_delta=2105864
+ARM_CSV,policy=mmap_normal_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3627555153,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10773106688,majflt_delta=17,pgscan_delta=4662440,pgsteal_delta=2225252
+PASS
+SKIP (already 3 reps): ratio=0.75 arm=A mode=random
+--- ratio=0.75 arm=A mode=sequential rep=1 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3473966222 (3.474s) touches/sec=23.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2217663 pgsteal_delta=2216533 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3473966222,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2217663,pgsteal_delta=2216533
+PASS
+--- ratio=0.75 arm=A mode=sequential rep=2 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3758166623 (3.758s) touches/sec=21.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737389568
+  pgscan_delta=2217625 pgsteal_delta=2216514 workingset_refault_file_delta=2097144
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3758166623,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737389568,majflt_delta=6,pgscan_delta=2217625,pgsteal_delta=2216514
+PASS
+--- ratio=0.75 arm=A mode=sequential rep=3 rc=0 ---
+BASELINE SUMMARY (arm A)
+  madvise_mode=sequential hints=off passes=5 touches=80 bytes_touched=10737418240 wall_ns=3480030518 (3.480s) touches/sec=23.0
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=6
+  io_read_bytes_delta=10737455104
+  pgscan_delta=2217627 pgsteal_delta=2216558 workingset_refault_file_delta=2097160
+ARM_CSV,policy=mmap_sequential_off,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3480030518,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10737455104,majflt_delta=6,pgscan_delta=2217627,pgsteal_delta=2216558
+PASS
+--- ratio=0.75 arm=B mode=normal rep=1 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2932438151 (2.932s) touches/sec=27.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2932438151,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.75 arm=B mode=normal rep=2 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=2931026162 (2.931s) touches/sec=27.3
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=2931026162,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+--- ratio=0.75 arm=B mode=normal rep=3 rc=0 ---
+BASELINE SUMMARY (arm B)
+  madvise_mode=normal hints=on passes=5 touches=80 bytes_touched=10737418240 wall_ns=3208756012 (3.209s) touches/sec=24.9
+  elision_guard_sink=334233600 (nonzero, run-dependent -- evidence the full-chunk read loop executed)
+  majflt_delta=5
+  io_read_bytes_delta=10192158720
+  pgscan_delta=0 pgsteal_delta=0 workingset_refault_file_delta=1966080
+ARM_CSV,policy=mmap_normal_on,prefetch=n/a,budget_bytes=n/a,touches=80,bytes_touched=10737418240,wall_ns=3208756012,absent_handled=n/a,evictions=n/a,infeasible=n/a,prefetches=n/a,pager_bytes_fetched=n/a,io_read_bytes_delta=10192158720,majflt_delta=5,pgscan_delta=0,pgsteal_delta=0
+PASS
+
+=== machine exclusivity check (after) ===
+ 17:55:27 up 1 day, 21:33,  1 user,  load average: 1.05, 0.95, 0.95
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       95995  100  0.0   7212  4408 pts/3    R+   17:55   0:00 ps aux --sort=-%cpu
+root       94870  0.1  0.0   5080  3768 pts/3    Ss+  17:53   0:00 bash /root/residctl/src/run_phase4_AB_rerun.sh
+root           7  0.0  0.0   3552  2236 ?        Sl   Aug20   0:33 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root         191  0.0  0.0  35380  4700 ?        Ss   Aug20   0:17 /usr/lib/systemd/systemd-udevd
+root       12530  0.0  0.1 1246960 10348 pts/0   Ssl+ Aug21   0:12 /mnt/wsl/docker-desktop/docker-desktop-user-distro proxy --distro-name Ubuntu --docker-desktop-root /mnt/wsl/docker-desktop C:\Program Files\Docker\Docker\resources
+root         156  0.0  0.1  34244 11068 ?        S<s  Aug20   0:13 /usr/lib/systemd/systemd-journald
+root           1  0.0  0.1  24480  8220 ?        Ss   Aug20   0:12 /sbin/init
+
+=== Phase 4 arm A/B repair complete, results in /root/residctl/results/campaign12_phaseA_phase4_AB.csv ===
