@@ -3,6 +3,7 @@
 #include "budget.h"
 #include "cgroup_stat.h"
 #include "policy.h"
+#include "policy_trace.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,6 +103,35 @@ void evict_chunk(region_t *r, chunk_t *c) {
     pthread_mutex_unlock(&c->lock);
 }
 
+// Campaign 13 Phase A.3: records one --policy-trace entry for a real
+// eviction decision (victim_idx != CHUNK_NONE). Caller must already hold
+// r->budget_lock -- same requirement as select_victim()/evict_chunk()
+// themselves, so reading chunk state here without c->lock matches this
+// codebase's existing convention (select_victim's own implementations
+// already do the same). Read-only: does not influence which victim was
+// chosen, only observes it after the fact.
+static void record_policy_trace(region_t *r, uint32_t victim_idx) {
+    if (!r->diag_policy_trace) return;
+    policy_trace_record_t *rec = policy_trace_reserve(r->diag_policy_trace);
+    rec->victim_chunk = victim_idx;
+    rec->cursor_chunk = (r->policy && r->policy->trace_cursor) ? r->policy->trace_cursor(r) : CHUNK_NONE;
+    rec->victim_next_use_distance = (r->policy && r->policy->next_use_distance)
+        ? r->policy->next_use_distance(r, &r->chunks[victim_idx]) : INT64_MAX;
+    uint32_t n_resident = 0;
+    uint64_t bitmap_lo = 0, bitmap_hi = 0;
+    for (uint32_t i = 0; i < r->n_chunks; i++) {
+        if (r->chunks[i].state != CHUNK_RESIDENT) continue;
+        n_resident++;
+        if (i < 32) bitmap_lo |= (1u << i);
+        else if (i < 64) bitmap_hi |= (1u << (i - 32));
+        // i >= 64: not representable in the fixed 64-bit bitmap (see
+        // policy_trace.h) -- n_resident still counts it correctly.
+    }
+    rec->n_resident = n_resident;
+    rec->resident_set_bitmap_lo = (uint32_t)bitmap_lo;
+    rec->resident_set_bitmap_hi = (uint32_t)bitmap_hi;
+}
+
 // Default victim selector when r->policy is NULL: lowest layer_id /
 // region_off among RESIDENT+unpinned. This used to be the only option
 // (documented as "temporary until item 7"); now that item 7 exists, it's
@@ -170,6 +200,7 @@ int ensure_budget(region_t *r, uint64_t need) {
             pthread_mutex_unlock(&r->budget_lock);
             return -1;
         }
+        record_policy_trace(r, victim_idx);
         evict_chunk(r, &r->chunks[victim_idx]);
         reconcile(r); // A-3: unconditionally on every eviction
         r->fetches_since_reconcile = 0; // an eviction just gave us a fresh check
@@ -217,6 +248,7 @@ int ensure_budget_prefetch(region_t *r, chunk_t *target) {
             }
         }
 
+        record_policy_trace(r, victim_idx);
         evict_chunk(r, &r->chunks[victim_idx]);
         reconcile(r); // A-3: unconditionally on every eviction
         r->fetches_since_reconcile = 0;

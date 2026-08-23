@@ -12,7 +12,7 @@ exit code: 0
 
 === T-3 (test_storm, 60s, timeout-guarded at 90s) ===
 storm running for 60s with 8 threads, budget=4194304 (2 chunks of 2097152)...
-storm done: total_touches=94150 mismatches=0 resident_bytes=4194304 budget_bytes=4194304 evictions=35590 absent_handled=30290 dedup_resident=14265 dedup_fetching=12046 prefetches=5302 infeasible=27176
+storm done: total_touches=136686 mismatches=0 resident_bytes=4194304 budget_bytes=4194304 evictions=51918 absent_handled=43891 dedup_resident=22420 dedup_fetching=14161 prefetches=8029 infeasible=27040
 PASS
 exit code: 0
 

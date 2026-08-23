@@ -21,6 +21,11 @@ results/*.csv
 !results/campaign12_phaseA_phase4_AB.csv
 !results/campaign12_phaseB_chunk_floor.csv
 !results/campaign12_phaseD_paper_table.csv
+!results/campaign13_phaseA1_reproduce.csv
+!results/campaign13_phaseA2_determinism.csv
+!results/campaign13_phaseB_*.csv
+!results/campaign13_phaseC_*.csv
+!results/campaign13_phaseD_*.csv
 results/*.log
 !results/.gitkeep
 src/test_startup

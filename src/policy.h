@@ -23,6 +23,13 @@ struct policy {
     // closer than a victim -- guarded admission correctly declines every
     // eviction-requiring prefetch under lru).
     int64_t (*next_use_distance)(region_t *, chunk_t *);
+    // Campaign 13 Phase A.3: diagnostic-only accessor for --policy-trace.
+    // Returns the chunk currently used as this policy's ordering cursor
+    // (layer_order: the successor-chain walk's starting point, i.e. the
+    // chunk most recently passed to on_fault), or CHUNK_NONE if the
+    // policy has no cursor concept (lru). Read-only; does not affect
+    // select_victim/predict_next/next_use_distance's outcome.
+    uint32_t (*trace_cursor)(region_t *);
     void *state; // policy-private; NULL for lru (needs none)
 };
 

@@ -40,6 +40,9 @@ static int64_t lru_next_use_distance(region_t *r, chunk_t *c) {
 
 static void lru_noop(region_t *r, chunk_t *c) { (void)r; (void)c; }
 
+// Campaign 13 Phase A.3: lru has no ordering cursor concept.
+static uint32_t lru_trace_cursor(region_t *r) { (void)r; return CHUNK_NONE; }
+
 policy_t *policy_lru_create(void) {
     policy_t *p = calloc(1, sizeof *p);
     p->name = "lru";
@@ -48,6 +51,7 @@ policy_t *policy_lru_create(void) {
     p->select_victim = lru_select_victim;
     p->predict_next = lru_predict_next;
     p->next_use_distance = lru_next_use_distance;
+    p->trace_cursor = lru_trace_cursor;
     p->state = NULL;
     return p;
 }
@@ -135,6 +139,14 @@ static int64_t layer_order_next_use_distance(region_t *r, chunk_t *c) {
     return (d == UINT32_MAX) ? INT64_MAX : (int64_t)d;
 }
 
+// Campaign 13 Phase A.3: the successor-chain walk's starting point --
+// exactly the same `last_fetched` layer_order_compute_dist() itself reads.
+// Not a new decision point, just exposing the existing one for tracing.
+static uint32_t layer_order_trace_cursor(region_t *r) {
+    layer_order_state_t *st = (layer_order_state_t *)r->policy->state;
+    return st->last_fetched;
+}
+
 policy_t *policy_layer_order_create(uint32_t n_chunks) {
     policy_t *p = calloc(1, sizeof *p);
     layer_order_state_t *st = calloc(1, sizeof *st);
@@ -149,6 +161,7 @@ policy_t *policy_layer_order_create(uint32_t n_chunks) {
     p->select_victim = layer_order_select_victim;
     p->predict_next = layer_order_predict_next;
     p->next_use_distance = layer_order_next_use_distance;
+    p->trace_cursor = layer_order_trace_cursor;
     p->state = st;
     return p;
 }

@@ -22,6 +22,11 @@
 //     arg as its value). Item 10b Task A: emits one fetch_trace_record_t
 //     per real fetch AND per successful prefetch to <path> (raw binary
 //     array, no header), written once at process exit -- see fetch_trace.h.
+//   --policy-trace <path>: Campaign 13 Phase A.3. Emits one
+//     policy_trace_record_t per select_victim() call that returns a real
+//     victim (both the demand and prefetch eviction paths), raw binary
+//     array, written once at process exit -- see policy_trace.h. The
+//     resident-set bitmap fields are only meaningful for n_chunks <= 64.
 //   --sync-handler: item 10c. Restores the original fully-synchronous
 //     handler (items 2-10b) exactly, for A/B comparison against the new
 //     default async dispatch-only handler (A-5).
@@ -56,6 +61,7 @@
 #include "replay.h"
 #include "policy.h"
 #include "fetch_trace.h"
+#include "policy_trace.h"
 #include "prefetch_pool.h"
 
 #include <stdio.h>
@@ -95,6 +101,7 @@ int main(int argc, char **argv) {
     // they appear, before positional parsing.
     int eager_reconcile = 0;
     const char *fetch_trace_path = NULL;
+    const char *policy_trace_path = NULL; // Campaign 13 Phase A.3
     uint32_t prefetch_depth = 0; // 0 => region_startup's default (1)
     int sync_handler = 0;        // item 10c
     uint32_t fetch_workers = 0;  // item 10c: 0 => region_startup's default (4)
@@ -110,6 +117,11 @@ int main(int argc, char **argv) {
         if (strcmp(argv[i], "--fetch-trace") == 0) {
             if (i + 1 >= argc) { fprintf(stderr, "--fetch-trace requires a path\n"); return 2; }
             fetch_trace_path = argv[++i];
+            continue;
+        }
+        if (strcmp(argv[i], "--policy-trace") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--policy-trace requires a path\n"); return 2; }
+            policy_trace_path = argv[++i];
             continue;
         }
         if (strcmp(argv[i], "--prefetch-depth") == 0) {
@@ -239,6 +251,12 @@ int main(int argc, char **argv) {
         g_r.diag_fetch_trace = fetch_trace;
     }
 
+    policy_trace_t *policy_trace = NULL; // Campaign 13 Phase A.3
+    if (policy_trace_path) {
+        policy_trace = policy_trace_open(policy_trace_path, 200000); // generous; aborts if exceeded, not silently truncated
+        g_r.diag_policy_trace = policy_trace;
+    }
+
     printf("region_startup OK: n_chunks=%u chunk_size=%llu budget_bytes=%llu (%.1f chunks) "
            "policy=%s prefetch=%s reconcile_interval=%u prefetch_depth=%u "
            "handler=%s fetch_workers=%u driver_threads=%u lookahead_window=%u prefetch_retention=%s\n",
@@ -285,6 +303,11 @@ int main(int argc, char **argv) {
         fetch_trace_flush(fetch_trace); // once, here, after the handler thread has stopped -- never from inside it
         fetch_trace_close(fetch_trace);
         g_r.diag_fetch_trace = NULL;
+    }
+    if (policy_trace) { // Campaign 13 Phase A.3: same once-at-exit lifecycle as fetch_trace
+        policy_trace_flush(policy_trace);
+        policy_trace_close(policy_trace);
+        g_r.diag_policy_trace = NULL;
     }
 
     uint64_t io_after = read_io_read_bytes();

@@ -42,6 +42,7 @@ typedef struct policy policy_t;   // NULL until item 7
 typedef struct trace trace_t;     // caller-assigned after region_startup(); NULL if untraced
 typedef struct metrics metrics_t; // caller-assigned after region_startup(); NULL if unmeasured
 typedef struct fetch_trace fetch_trace_t; // item 10b Task A; NULL unless --fetch-trace
+typedef struct policy_trace policy_trace_t; // Campaign 13 Phase A.3; NULL unless --policy-trace
 typedef struct prefetch_pool prefetch_pool_t; // item 10b Task B; NULL unless prefetch_depth>1
 
 typedef struct {
@@ -63,6 +64,7 @@ typedef struct {
     trace_t *trace;     // NULL unless the caller opens one (trace_open()) and assigns it
     metrics_t *metrics; // NULL unless the caller inits one (metrics_init()) and assigns it
     fetch_trace_t *diag_fetch_trace; // item 10b Task A; NULL unless --fetch-trace
+    policy_trace_t *diag_policy_trace; // Campaign 13 Phase A.3; NULL unless --policy-trace
     char cgroup_path[256];
 
     // Bare fault/dedup/eviction counters. These satisfy §9's "treatment-arm
