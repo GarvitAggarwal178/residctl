@@ -635,6 +635,50 @@ anything "closer" than anything else: it returns `INT64_MAX`
 unconditionally, which correctly makes it decline every eviction a
 prefetch would otherwise force (see §6.3).
 
+**Amendment A-12 (WP1) — the policy interface accepts a declared access
+sequence from the workload.** `§1` argues the application knows its access
+order *in advance* while the kernel must infer the future from the past.
+Through Campaign 13 the project's `layer_order` did the latter: it built
+its successor chain from **fault-dispatch order** (`on_fault`), structurally
+the same inference the kernel does, one layer up — and Campaign 13 Phase A
+found that chain construction to be timing-dependent under concurrent
+driver threads with a real compute phase.
+
+Two additions align the implementation with §1's claim:
+
+- `void policy_declare_sequence(region_t*, const uint32_t *chunk_ids, uint32_t n)`
+  and two new `policy_t` members — `void (*on_access)(region_t*, chunk_t*)`
+  (the workload's per-reference consumption signal, delivered by
+  `pager_notify_access()`) and `void (*declare_sequence)(region_t*, const uint32_t*, uint32_t)`.
+- `layer_order` is split:
+  - **`layer_order_declared`** (new default) computes `next_use_distance`
+    as a lookup into the declared sequence from a consumption position
+    advanced **only** by `on_access()` — never from `on_fault`. A declared
+    static sequence cannot be perturbed by fault-dispatch order.
+    `predict_next(c)` is the chunk at the next declared position relative to
+    `c`, not a chain walk.
+  - **`layer_order_learned`** (formerly `layer_order`, behaviour byte-for-
+    byte unchanged) is retained as the comparison arm — WP1 measures what
+    declared application knowledge is worth over inferring the same
+    pattern.
+
+The `belady` solver (§10) is unchanged and is **not** refactored;
+`layer_order_declared`'s next-use table is computed separately and
+cross-checked against a naive forward scan of the reference string.
+
+**WP1's own measurement (`results/overnight/wp1_declared_order.md`):**
+`layer_order_declared` is deterministic and hits the provable cyclic Belady
+floor exactly wherever `layer_order_learned` was deterministic (serial, or
+concurrent without real timing variance) — eliminating both the learning
+cost and every suboptimal victim choice — but it is **still
+non-deterministic under the same three-factor trigger**
+(`--driver-threads>1` ∧ `--lookahead-window>0` ∧ `--compute-ns-per-mib>0`):
+the timing dependence moves from chain construction to the race between the
+once-per-reference consumption signal (single driver thread) and the
+concurrently-dispatched faults of the other driver threads. `--policy-trace`
+shows the first victim divergence at an identical resident set with a
+cursor (declared position) that differs by one.
+
 ---
 
 ## 9. TRACE AND METRICS
