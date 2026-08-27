@@ -25,11 +25,30 @@ struct policy {
     int64_t (*next_use_distance)(region_t *, chunk_t *);
     // Campaign 13 Phase A.3: diagnostic-only accessor for --policy-trace.
     // Returns the chunk currently used as this policy's ordering cursor
-    // (layer_order: the successor-chain walk's starting point, i.e. the
-    // chunk most recently passed to on_fault), or CHUNK_NONE if the
-    // policy has no cursor concept (lru). Read-only; does not affect
+    // (layer_order_learned: the successor-chain walk's starting point, i.e.
+    // the chunk most recently passed to on_fault; layer_order_declared: the
+    // chunk at the current position in the declared sequence), or CHUNK_NONE
+    // if the policy has no cursor concept (lru). Read-only; does not affect
     // select_victim/predict_next/next_use_distance's outcome.
     uint32_t (*trace_cursor)(region_t *);
+
+    // WP1 (Amendment A-12): the workload's own "I am about to consume this
+    // chunk" signal, fired once per reference by pager_notify_access()
+    // (pager.h) -- the same call the retention FIFO already listens on.
+    // layer_order_declared advances its position in the declared sequence
+    // HERE, never from on_fault/on_resident, so the position is a function
+    // of the workload's declared order and not of fault-dispatch timing.
+    // NULL for policies with no declared-sequence position (lru,
+    // layer_order_learned).
+    void (*on_access)(region_t *, chunk_t *);
+
+    // WP1 (Amendment A-12): receives the workload's access sequence in
+    // advance (the reference string for one pass; the policy may assume it
+    // repeats cyclically). Called once at startup by policy_declare_sequence()
+    // before the first touch. NULL for policies that infer order online
+    // (lru, layer_order_learned).
+    void (*declare_sequence)(region_t *, const uint32_t *, uint32_t);
+
     void *state; // policy-private; NULL for lru (needs none)
 };
 
@@ -40,16 +59,37 @@ struct policy {
 // policy... predicted to tie the baseline").
 policy_t *policy_lru_create(void);
 
-// The informed policy. Learns a next-chunk mapping online from the ACTUAL
-// fetch sequence (on_fault is called once per real ABSENT->FETCHING
-// transition, in fetch order) -- never from a declared/assumed access
-// order, per §8's explicit requirement not to hardcode "next = chunk_id+1".
-// predict_next(c) returns the chunk historically observed to follow c, or
-// -1 if never observed. select_victim walks the learned chain forward from
-// "now" and evicts the RESIDENT+unpinned chunk with the largest next-use
-// distance (a chunk never reached by the walk is treated as infinitely far,
-// i.e. the best possible victim -- the standard Belady-approximation rule).
-policy_t *policy_layer_order_create(uint32_t n_chunks);
+// The informed policy, LEARNED variant (was `layer_order` through Campaign
+// 13; renamed by WP1 / Amendment A-12, behaviour byte-for-byte unchanged).
+// Learns a next-chunk mapping online from the ACTUAL fetch sequence
+// (on_fault is called once per real ABSENT->FETCHING transition, in fetch
+// order). predict_next(c) returns the chunk historically observed to follow
+// c, or -1 if never observed. select_victim walks the learned chain forward
+// from "now" and evicts the RESIDENT+unpinned chunk with the largest
+// next-use distance (a chunk never reached by the walk is treated as
+// infinitely far, i.e. the best possible victim -- the standard
+// Belady-approximation rule). Campaign 13 Phase A found its chain
+// construction to be fault-dispatch-order-dependent under concurrent driver
+// threads with real compute; retained as the comparison arm A-12 measures
+// declared order against.
+policy_t *policy_layer_order_learned_create(uint32_t n_chunks);
+
+// The informed policy, DECLARED variant (WP1 / Amendment A-12). Takes the
+// workload's access sequence in advance via policy_declare_sequence() and
+// derives next-use distance as a lookup into that sequence from the current
+// consumption position (advanced only by on_access(), i.e.
+// pager_notify_access() -- never from a fault). predict_next(c) returns the
+// chunk at the next position of the declared sequence relative to c.
+// select_victim evicts the RESIDENT+unpinned chunk whose declared next use
+// is furthest ahead (never appears again => INT64_MAX => best victim). This
+// implements §1's claim that the application knows its access order in
+// advance, rather than inferring it from the past as the kernel does.
+policy_t *policy_layer_order_declared_create(uint32_t n_chunks);
+
+// WP1 (A-12): hand the workload's one-pass access sequence to r->policy. A
+// no-op for policies that infer order online (lru, layer_order_learned).
+// Call once at startup, before the first touch.
+void policy_declare_sequence(region_t *r, const uint32_t *chunk_ids, uint32_t n);
 
 void policy_destroy(policy_t *p);
 

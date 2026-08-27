@@ -299,7 +299,16 @@ void pager_run(region_t *r, volatile sig_atomic_t *stop, int poll_timeout_ms) {
 }
 
 void pager_notify_access(region_t *r, chunk_t *c) {
-    if (!r->prefetch_retention_pinned) return; // --prefetch-retention none: nothing is ever retained, always a no-op
+    // WP1 (A-12): the workload's consumption signal also advances
+    // layer_order_declared's position in the declared sequence. Fired for
+    // every reference regardless of --prefetch-retention mode -- the
+    // position must track the workload whether or not retention is on.
+    if (r->policy && r->policy->on_access) {
+        pthread_mutex_lock(&r->budget_lock);
+        r->policy->on_access(r, c);
+        pthread_mutex_unlock(&r->budget_lock);
+    }
+    if (!r->prefetch_retention_pinned) return; // --prefetch-retention none: nothing is ever retained
     pthread_mutex_lock(&r->budget_lock);
     prefetch_retain_release(r, (uint32_t)(c - r->chunks));
     pthread_mutex_unlock(&r->budget_lock);

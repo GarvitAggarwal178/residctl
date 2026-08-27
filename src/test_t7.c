@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
-    policy_t *policy = policy_layer_order_create(g_r.n_chunks);
+    policy_t *policy = policy_layer_order_learned_create(g_r.n_chunks);
     g_r.policy = policy;
     g_r.prefetch_enabled = true;
 

@@ -62,11 +62,11 @@ int main(void) {
         printf("lru: %s\n", fail ? "FAIL" : "ok");
     }
 
-    // ---- layer_order --------------------------------------------------
+    // ---- layer_order_learned ----------------------------------------
     {
         int local_fail = 0;
         reset_chunks();
-        policy_t *lo = policy_layer_order_create(N);
+        policy_t *lo = policy_layer_order_learned_create(N);
         g_r.policy = lo;
 
         // Train the chain 0->1->2->3 by calling on_fault in that order,
@@ -119,7 +119,94 @@ int main(void) {
         }
 
         policy_destroy(lo);
-        printf("layer_order: %s\n", local_fail ? "FAIL" : "ok");
+        printf("layer_order_learned: %s\n", local_fail ? "FAIL" : "ok");
+        fail |= local_fail;
+    }
+
+    // ---- layer_order_declared (WP1 / A-12) --------------------------
+    {
+        int local_fail = 0;
+        reset_chunks();
+        policy_t *lo = policy_layer_order_declared_create(N);
+        g_r.policy = lo;
+
+        // Declare a non-identity permutation so the test can't pass by
+        // accident on chunk_id==position.
+        const uint32_t decl[N] = { 0, 2, 4, 6, 1, 3, 5, 7 };
+        policy_declare_sequence(&g_r, decl, N);
+
+        // Before any on_access(): predict_next is keyed on the chunk's slot
+        // in the declared pass -- successor of 0 is 2, of 6 is 1, of 7 is 0
+        // (cyclic wrap).
+        if (lo->predict_next(&g_r, &g_chunks[0]) != 2) { fprintf(stderr, "FAIL(declared): predict_next(0) != 2\n"); local_fail = 1; }
+        if (lo->predict_next(&g_r, &g_chunks[6]) != 1) { fprintf(stderr, "FAIL(declared): predict_next(6) != 1\n"); local_fail = 1; }
+        if (lo->predict_next(&g_r, &g_chunks[7]) != 0) { fprintf(stderr, "FAIL(declared): predict_next(7) != 0 (cyclic wrap)\n"); local_fail = 1; }
+
+        // Consume the first two references (chunks 0 then 2). Position is
+        // now at declared index 1 (chunk 2). Distances from here: chunk 4 is
+        // 1 away, 6 is 2, 1 is 3, 3 is 4, 5 is 5, 7 is 6, 0 is 7, 2 is 8
+        // (full cycle -- it's the current chunk).
+        lo->on_access(&g_r, &g_chunks[0]);
+        lo->on_access(&g_r, &g_chunks[2]);
+        if (lo->next_use_distance(&g_r, &g_chunks[4]) != 1) { fprintf(stderr, "FAIL(declared): dist(4) != 1\n"); local_fail = 1; }
+        if (lo->next_use_distance(&g_r, &g_chunks[1]) != 3) { fprintf(stderr, "FAIL(declared): dist(1) != 3\n"); local_fail = 1; }
+        if (lo->next_use_distance(&g_r, &g_chunks[2]) != 8) { fprintf(stderr, "FAIL(declared): dist(2) != 8 (current chunk, one full cycle)\n"); local_fail = 1; }
+        if (lo->trace_cursor(&g_r) != 2) { fprintf(stderr, "FAIL(declared): trace_cursor != 2\n"); local_fail = 1; }
+
+        // select_victim among residents {6, 1, 7}: distances 2, 3, 6 -> the
+        // furthest (7) must be chosen, not lowest index (1) or nearest (6).
+        g_chunks[6].state = CHUNK_RESIDENT;
+        g_chunks[1].state = CHUNK_RESIDENT;
+        g_chunks[7].state = CHUNK_RESIDENT;
+        uint32_t v = lo->select_victim(&g_r);
+        if (v != 7) { fprintf(stderr, "FAIL(declared): expected victim 7 (furthest declared next-use), got %u\n", v); local_fail = 1; }
+
+        // Pin 7 -> next furthest (1, dist 3) wins.
+        g_chunks[7].pin = 1;
+        v = lo->select_victim(&g_r);
+        if (v != 1) { fprintf(stderr, "FAIL(declared): expected victim 1 (7 pinned), got %u\n", v); local_fail = 1; }
+
+        // No residents -> CHUNK_NONE.
+        g_chunks[6].state = CHUNK_ABSENT; g_chunks[1].state = CHUNK_ABSENT;
+        g_chunks[7].state = CHUNK_ABSENT; g_chunks[7].pin = 0;
+        if (lo->select_victim(&g_r) != CHUNK_NONE) { fprintf(stderr, "FAIL(declared): expected CHUNK_NONE with no residents\n"); local_fail = 1; }
+
+        // ---- Belady cross-check (§1.1): the declared policy's next-use
+        // distance must agree, at every position and for every chunk, with
+        // an independent naive forward scan over the unrolled cyclic
+        // reference string. Written separately here -- belady.c's solver is
+        // NOT refactored -- exactly as the spec requires.
+        {
+            const uint32_t W = 6;                 // distinct chunks
+            const uint32_t cyc[6] = { 3, 1, 4, 0, 5, 2 };
+            reset_chunks();
+            policy_t *d2 = policy_layer_order_declared_create(W);
+            g_r.policy = d2;
+            policy_declare_sequence(&g_r, cyc, W);
+
+            int xchk_fail = 0;
+            for (uint32_t step = 0; step < W; step++) {
+                d2->on_access(&g_r, &g_chunks[cyc[step]]); // position now at step
+                for (uint32_t x = 0; x < W; x++) {
+                    int64_t got = d2->next_use_distance(&g_r, &g_chunks[x]);
+                    // naive: smallest k>=1 with cyc[(step+k) % W] == x
+                    int64_t want = -1;
+                    for (uint32_t k = 1; k <= W; k++)
+                        if (cyc[(step + k) % W] == x) { want = (int64_t)k; break; }
+                    if (got != want) {
+                        fprintf(stderr, "FAIL(declared xcheck): step=%u chunk=%u got=%lld want=%lld\n",
+                                step, x, (long long)got, (long long)want);
+                        xchk_fail = 1;
+                    }
+                }
+            }
+            printf("declared next-use vs naive Belady scan: %s\n", xchk_fail ? "DISAGREE" : "agree (all positions, all chunks)");
+            if (xchk_fail) local_fail = 1;
+            policy_destroy(d2);
+        }
+
+        policy_destroy(lo);
+        printf("layer_order_declared: %s\n", local_fail ? "FAIL" : "ok");
         fail |= local_fail;
     }
 

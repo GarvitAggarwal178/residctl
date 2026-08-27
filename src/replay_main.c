@@ -7,7 +7,10 @@
 //                     <budget_bytes> <n_passes> [policy] [prefetch]
 //                     [fault_trace_path] [reference_trace_path]
 //                     [--eager-reconcile]
-//   policy: "default" (no policy set), "lru", or "layer_order". Default "default".
+//   policy: "default" (no policy set), "lru", "layer_order_learned",
+//     "layer_order_declared", or "layer_order" (alias for
+//     layer_order_learned; kept so pre-A-12 sweep scripts reproduce).
+//     Default is "layer_order_declared" (WP1 / Amendment A-12).
 //   prefetch: "on" or "off" (item 8). Default "off".
 //   fault_trace_path: optional. If given, the PAGER's own fault trace
 //     (TRACE_TYPE_FAULT) is written here -- misses only, metrics/dedup/
@@ -183,7 +186,8 @@ int main(int argc, char **argv) {
     uint64_t chunk_size = strtoull(args[3], NULL, 10);
     uint64_t budget_bytes = strtoull(args[4], NULL, 10);
     uint32_t n_passes = (uint32_t)strtoul(args[5], NULL, 10);
-    const char *policy_name = (nargs >= 7) ? args[6] : "default";
+    // WP1 (A-12): default policy is layer_order_declared (was "default"/none).
+    const char *policy_name = (nargs >= 7) ? args[6] : "layer_order_declared";
     const char *prefetch_arg = (nargs >= 8) ? args[7] : "off";
     const char *fault_trace_path = (nargs >= 9 && args[8][0] != '\0') ? args[8] : NULL;
     const char *reference_trace_path = (nargs >= 10 && args[9][0] != '\0') ? args[9] : NULL;
@@ -209,16 +213,36 @@ int main(int argc, char **argv) {
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
 
+    // WP1 (A-12): `layer_order` split into `layer_order_learned` (the
+    // pre-A-12 behaviour) and `layer_order_declared` (new default). The bare
+    // name `layer_order` is kept as an alias for `layer_order_learned` so
+    // every pre-A-12 sweep script reproduces exactly.
     policy_t *policy = NULL;
     if (strcmp(policy_name, "lru") == 0) {
         policy = policy_lru_create();
-    } else if (strcmp(policy_name, "layer_order") == 0) {
-        policy = policy_layer_order_create(g_r.n_chunks);
+    } else if (strcmp(policy_name, "layer_order_learned") == 0 ||
+               strcmp(policy_name, "layer_order") == 0) {
+        policy = policy_layer_order_learned_create(g_r.n_chunks);
+        policy_name = "layer_order_learned";
+    } else if (strcmp(policy_name, "layer_order_declared") == 0) {
+        policy = policy_layer_order_declared_create(g_r.n_chunks);
     } else if (strcmp(policy_name, "default") != 0) {
-        fprintf(stderr, "unknown policy '%s' (expected default|lru|layer_order)\n", policy_name);
+        fprintf(stderr, "unknown policy '%s' (expected default|lru|layer_order_learned|"
+                        "layer_order_declared|layer_order)\n", policy_name);
         return 2;
     }
     g_r.policy = policy;
+
+    // WP1 (A-12): the replay driver knows its own access sequence -- a
+    // single cyclic pass over chunks 0..n_chunks-1. Declare it now, before
+    // the first touch, so layer_order_declared has it in hand. No-op for
+    // every other policy.
+    if (policy && policy->declare_sequence) {
+        uint32_t *decl_seq = malloc(g_r.n_chunks * sizeof(uint32_t));
+        for (uint32_t i = 0; i < g_r.n_chunks; i++) decl_seq[i] = i;
+        policy_declare_sequence(&g_r, decl_seq, g_r.n_chunks);
+        free(decl_seq);
+    }
     g_r.prefetch_enabled = prefetch_on;
 
     // item 10c: under the async handler (the default), pager_run() owns the

@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 
     // --- layer_order + prefetch: must measurably beat the no-prefetch baseline ---
     {
-        policy_t *lo = policy_layer_order_create(REGION_LEN / CHUNK_SIZE);
+        policy_t *lo = policy_layer_order_learned_create(REGION_LEN / CHUNK_SIZE);
         uint64_t absent = 0, prefetches = 0;
         fail |= run_scenario(argv[1], argv[2], lo, &absent, &prefetches);
         printf("layer_order+prefetch: absent_handled=%llu prefetches=%llu (no-prefetch baseline was %d)\n",

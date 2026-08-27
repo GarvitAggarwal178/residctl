@@ -39,9 +39,10 @@ static void *pager_trampoline(void *argp) {
 static int run_t1(const char *cgroup_path, const char *model_path) {
     printf("=== T-1: full-region data integrity under 25%% budget, all policies ===\n");
     int fail = 0;
-    const char *policy_names[] = { "default", "lru", "layer_order" };
+    // WP1 (A-12): layer_order -> layer_order_learned; layer_order_declared added.
+    const char *policy_names[] = { "default", "lru", "layer_order_learned", "layer_order_declared" };
 
-    for (int pi = 0; pi < 3; pi++) {
+    for (int pi = 0; pi < 4; pi++) {
         region_config_t cfg = {
             .region_len = REGION_LEN, .chunk_size = CHUNK_SIZE,
             .model_path = model_path, .cgroup_path = cgroup_path,
@@ -53,8 +54,17 @@ static int run_t1(const char *cgroup_path, const char *model_path) {
 
         policy_t *policy = NULL;
         if (pi == 1) policy = policy_lru_create();
-        else if (pi == 2) policy = policy_layer_order_create(g_r.n_chunks);
+        else if (pi == 2) policy = policy_layer_order_learned_create(g_r.n_chunks);
+        else if (pi == 3) policy = policy_layer_order_declared_create(g_r.n_chunks);
         g_r.policy = policy;
+        if (pi == 3) {
+            // WP1 (A-12): the declared policy needs its sequence up front.
+            // T-1's scan touches chunks 0,1,2,... in order.
+            uint32_t *seq = malloc(g_r.n_chunks * sizeof(uint32_t));
+            for (uint32_t i = 0; i < g_r.n_chunks; i++) seq[i] = i;
+            policy_declare_sequence(&g_r, seq, g_r.n_chunks);
+            free(seq);
+        }
 
         volatile sig_atomic_t stop = 0;
         pthread_t pager_thread;
@@ -63,6 +73,11 @@ static int run_t1(const char *cgroup_path, const char *model_path) {
 
         uint64_t mismatches = 0, bytes_checked = 0;
         for (uint64_t off = 0; off < REGION_LEN; off += 4096) {
+            // WP1 (A-12): fire the workload consumption signal at each chunk
+            // boundary so the declared policy's position actually advances
+            // (a no-op for the other three policies).
+            if (off % CHUNK_SIZE == 0)
+                pager_notify_access(&g_r, &g_r.chunks[off / CHUNK_SIZE]);
             uint8_t got = g_r.map_a[off];
             uint8_t want = expected_byte(off);
             bytes_checked += 4096;
@@ -139,8 +154,9 @@ static int run_t2(const char *cgroup_path, const char *model_path) {
 // T-4: after an arbitrary sequence of fetches/evictions, resident_bytes
 // must match memory.stat[shmem] minus known overhead EXACTLY -- a tighter
 // check than reconcile()'s own one-chunk operational threshold (I-7).
-static int run_t4(const char *cgroup_path, const char *model_path) {
-    printf("=== T-4: exact accounting after mixed fetch/evict sequence ===\n");
+static int run_t4_one(const char *cgroup_path, const char *model_path, int declared) {
+    printf("=== T-4: exact accounting after mixed fetch/evict sequence (policy=%s) ===\n",
+           declared ? "layer_order_declared" : "layer_order_learned");
     region_config_t cfg = {
         .region_len = REGION_LEN, .chunk_size = CHUNK_SIZE,
         .model_path = model_path, .cgroup_path = cgroup_path,
@@ -149,19 +165,26 @@ static int run_t4(const char *cgroup_path, const char *model_path) {
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
-    policy_t *policy = policy_layer_order_create(g_r.n_chunks);
+    policy_t *policy = declared ? policy_layer_order_declared_create(g_r.n_chunks)
+                                : policy_layer_order_learned_create(g_r.n_chunks);
     g_r.policy = policy;
     g_r.prefetch_enabled = true;
+    // Arbitrary, non-monotonic touch sequence. For the declared policy this
+    // IS the declared sequence (repeated cyclically) -- a deliberately
+    // irregular one, so the lookup path is exercised, not just a clean scan.
+    uint32_t seq[] = { 0, 3, 1, 7, 2, 6, 0, 5, 4, 3, 7, 1, 6, 0, 2 };
+    if (declared) {
+        policy_declare_sequence(&g_r, seq, sizeof(seq) / sizeof(seq[0]));
+    }
 
     volatile sig_atomic_t stop = 0;
     pthread_t pager_thread;
     pager_args_t pa = { &g_r, &stop };
     pthread_create(&pager_thread, NULL, pager_trampoline, &pa);
 
-    // Arbitrary, non-monotonic touch sequence.
-    uint32_t seq[] = { 0, 3, 1, 7, 2, 6, 0, 5, 4, 3, 7, 1, 6, 0, 2 };
     for (size_t i = 0; i < sizeof(seq) / sizeof(seq[0]); i++) {
         chunk_t *c = &g_r.chunks[seq[i]];
+        if (declared) pager_notify_access(&g_r, c); // WP1 (A-12): advance declared position
         volatile uint8_t x = g_r.map_a[c->region_off];
         (void)x;
     }
@@ -202,7 +225,8 @@ int main(int argc, char **argv) {
     int fail = 0;
     fail |= run_t1(argv[1], argv[2]);
     fail |= run_t2(argv[1], argv[2]);
-    fail |= run_t4(argv[1], argv[2]);
+    fail |= run_t4_one(argv[1], argv[2], 0); // layer_order_learned
+    fail |= run_t4_one(argv[1], argv[2], 1); // layer_order_declared (WP1 / A-12)
 
     if (fail) { fprintf(stderr, "FAIL\n"); return 1; }
     printf("PASS\n");
