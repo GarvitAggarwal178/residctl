@@ -1,0 +1,32 @@
+=== cell 1 (serial, deterministic) ===
+  absent_handled=48 evictions=40 bytes_punched=5368709120 infeasible=0
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3188593503,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442455040,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0
+=== cell 5 (8t/w1/c400000) rep A ===
+  absent_handled=91 evictions=83 bytes_punched=11140071424 infeasible=0
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=6071376790,absent_handled=91,evictions=83,infeasible=0,prefetches=0,pager_bytes_fetched=12213813248,io_read_bytes_delta=12213813248,dedup_resident=37,dedup_fetching=211,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1835993.2
+=== cell 5 rep B ===
+  absent_handled=73 evictions=65 bytes_punched=8724152320 infeasible=0
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=5212063355,absent_handled=73,evictions=65,infeasible=0,prefetches=0,pager_bytes_fetched=9797894144,io_read_bytes_delta=9797898240,dedup_resident=46,dedup_fetching=132,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1521472.8
+=== cell 5 rep C ===
+  absent_handled=92 evictions=84 bytes_punched=11274289152 infeasible=0
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=6255434782,absent_handled=92,evictions=84,infeasible=0,prefetches=0,pager_bytes_fetched=12348030976,io_read_bytes_delta=12348030976,dedup_resident=40,dedup_fetching=205,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1791569.0
+cell1 (serial):   40 evictions, victims=[7, 8, 9, 10, 11, 12, 13, 14, 6, 7, 8, 9, 10, 11, 12, 13, 5, 6, 7, 8, 9, 10, 11, 12, 4, 5, 6, 7, 8, 9, 10, 11, 3, 4, 5, 6, 7, 8, 9, 10]
+cell5 repA:       83 evictions, victims=[7, 8, 6, 9, 8, 10, 9, 11, 10, 12, 11, 13, 12, 14, 13, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10, 9, 11, 10, 12, 11, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10, 9, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 15, 14, 0, 15, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 13, 12, 14, 13]
+cell5 repB:       65 evictions, victims=[7, 8, 9, 6, 10, 9, 11, 10, 12, 11, 13, 12, 14, 13, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10, 9, 11, 10, 12, 11, 2, 4, 5, 6, 7, 8, 9, 3, 10, 9, 1, 0, 2, 1, 3, 2, 3, 5, 6, 7, 8, 4, 15, 14, 15, 1, 2, 3, 4, 5, 6, 13, 12, 14, 13]
+cell5 repC:       84 evictions, victims=[7, 6, 8, 7, 9, 8, 10, 9, 11, 10, 12, 11, 13, 12, 14, 13, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10, 9, 11, 10, 12, 11, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10, 9, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 15, 14, 0, 15, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 13, 12, 14, 13]
+
+repA vs repB: first victim divergence at eviction index 2 (seq=3)
+  repA: victim=6 cursor=8 dist=14 n_resident=8 bitmap_lo=639
+  repB: victim=9 cursor=9 dist=16 n_resident=8 bitmap_lo=639
+  same resident set? YES
+
+repA vs repC: first victim divergence at eviction index 1 (seq=2)
+  repA: victim=8 cursor=8 dist=16 n_resident=8 bitmap_lo=383
+  repC: victim=6 cursor=7 dist=15 n_resident=8 bitmap_lo=383
+  same resident set? YES
+
+repB vs repC: first victim divergence at eviction index 1 (seq=2)
+  repB: victim=8 cursor=8 dist=16 n_resident=8 bitmap_lo=383
+  repC: victim=6 cursor=7 dist=15 n_resident=8 bitmap_lo=383
+  same resident set? YES
+=== done ===
