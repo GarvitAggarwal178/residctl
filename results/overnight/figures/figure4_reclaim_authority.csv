@@ -1,0 +1,5 @@
+condition,pgscan,pgsteal,shmem_reclaimed_MiB,memory_events_high
+memory.swap.max=0 (S3d),0,0,0,37
+swap available (S3e run 1),120668,60109,236.6,512
+swap available (S3e run 2),120850,60205,236.9,515
+swap available (S3e run 3),120543,60108,236.1,513
