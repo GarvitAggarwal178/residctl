@@ -1,0 +1,29 @@
+=== 25 largest blobs in git history (any commit) ===
+     4015911  results/final/phase1_equal_budget_log.txt
+     3214843  results/final/phase1_console.txt
+     1541580  results/overnight/wp2_sweep_log.txt
+      669840  results/overnight/wp2_sweep_before_fix_log.txt
+      527781  results/campaign12_phaseD_paper_table_log.txt
+      364319  results/phase2_compute_log.txt
+      330989  results/campaign12_phaseB_chunk_floor_log.txt
+      327648  results/overnight/wp1_sweep_log.txt
+      327457  results/overnight/wp1_sweep_log.txt
+      248207  results/overnight/figures/figure6_llamacpp.png
+      241956  results/overnight/figures/figure6_llamacpp.png
+      241384  results/overnight/figures/figure1_bytes_per_work.png
+      237663  results/overnight/figures/figure3_chunk_size_tradeoff.png
+      236508  results/phase4_consolidated_log.txt
+      229351  results/overnight/figures/figure1_bytes_per_work.png
+      228112  results/phase3_chunk_size_log.txt
+      197574  results/overnight/figures/figure2_miss_rate.png
+      188348  results/task_e_sweep_b_log.txt
+      168739  results/overnight/figures/figure2_miss_rate.png
+      146159  results/overnight/figures/figure4_reclaim_authority.png
+      133722  results/overnight/wp2_gate_log.txt
+      133710  results/overnight/wp2_gate_log.txt
+      130612  results/task_e_sweep_c_log.txt
+      127801  results/overnight/figures/figure7_throughput_scaling.png
+      122858  results/task_d_sweep_b_log.txt
+
+=== total pack size ===
+8.1M	.git/objects

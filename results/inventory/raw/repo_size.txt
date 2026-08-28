@@ -1,0 +1,72 @@
+=== working tree size (excl .git) ===
+5.0G	.
+=== .git size ===
+8.3M	.git
+=== tracked file count ===
+310
+=== untracked file count ===
+51937
+
+=== 30 largest TRACKED files ===
+     4015911  results/final/phase1_equal_budget_log.txt
+     3214843  results/final/phase1_console.txt
+     1541580  results/overnight/wp2_sweep_log.txt
+      669840  results/overnight/wp2_sweep_before_fix_log.txt
+      527781  results/campaign12_phaseD_paper_table_log.txt
+      364319  results/phase2_compute_log.txt
+      330989  results/campaign12_phaseB_chunk_floor_log.txt
+      327457  results/overnight/wp1_sweep_log.txt
+      248207  results/overnight/figures/figure6_llamacpp.png
+      237663  results/overnight/figures/figure3_chunk_size_tradeoff.png
+      236508  results/phase4_consolidated_log.txt
+      229351  results/overnight/figures/figure1_bytes_per_work.png
+      228112  results/phase3_chunk_size_log.txt
+      197574  results/overnight/figures/figure2_miss_rate.png
+      188348  results/task_e_sweep_b_log.txt
+      146159  results/overnight/figures/figure4_reclaim_authority.png
+      133722  results/overnight/wp2_gate_log.txt
+      130612  results/task_e_sweep_c_log.txt
+      127801  results/overnight/figures/figure7_throughput_scaling.png
+      122858  results/task_d_sweep_b_log.txt
+      122432  results/overnight/figures/figure5_prefetch_total_fetches.png
+       91786  results/final/phase2_log.txt
+       75929  results/task_c_sweep2_log.txt
+       73862  results/phase1_platform_io_log.txt
+       71169  results/item10_v2_harness_log.txt
+       64295  results/PROJECT_STATE.md
+       63240  results/task_d_sweep_c_log.txt
+       58736  results/task_c_sweep3_log.txt
+       58094  CLAUDE.md
+       57278  results/task_c_sweep1_log.txt
+
+=== 30 largest UNTRACKED files ===
+  2147483648  scratch/pattern_2g.bin
+  2104932768  models/model.gguf
+    27294720  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/@napi-rs/canvas-win32-x64-msvc/skia.win32-x64-msvc.node
+    18406400  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/@img/sharp-win32-x64/lib/libvips-42.dll
+    16777216  scratch/test_model.bin
+    16777216  scratch/pattern_16m.bin
+    15776467  third_party/llama.cpp/models/ggml-vocab-gemma-4.gguf
+    15456814  third_party/llama.cpp/build/tools/ui/ui.cpp
+    12236321  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/mermaid/dist/mermaid.js.map
+    12210930  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/mermaid/dist/mermaid.min.js.map
+    11670528  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/@esbuild/win32-x64/esbuild.exe
+    10874545  third_party/llama.cpp/models/ggml-vocab-command-r.gguf
+    10468208  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/@napi-rs/canvas-win32-x64-msvc/icudtl.dat
+     9112572  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/typescript/lib/typescript.js
+     8855918  third_party/llama.cpp/build/tools/ui/dist/_app/immutable/bundle.PHW1grXF.js
+     8744448  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/lightningcss-win32-x64-msvc/lightningcss.win32-x64-msvc.node
+     7818140  third_party/llama.cpp/models/ggml-vocab-llama-bpe.gguf
+     7632684  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/mermaid/dist/mermaid.js
+     7621872  third_party/llama.cpp/build/bin/libllama-server-impl.so
+     6864632  results/inventory/raw/all_files.csv
+     6821877  third_party/llama.cpp/models/ggml-vocab-nomic-bert-moe.gguf
+     6430306  third_party/llama.cpp/build/tools/server/libserver-context.a
+     6213092  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/typescript/lib/_tsc.js
+     6203632  third_party/llama.cpp/docs/ops/SYCL.csv
+     6139352  third_party/llama.cpp/build/bin/libllama-common.so.0.0.41
+     5928682  third_party/llama.cpp/models/ggml-vocab-qwen35.gguf
+     5928681  third_party/llama.cpp/models/ggml-vocab-qwen2.gguf
+     5658363  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/sass/sass.dart.js
+     5515187  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/svelte-check/dist/src/index.js
+     5224402  third_party/llama.cpp/build/tools/ui/ui-src/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs.map
