@@ -2,7 +2,7 @@
 
 read_bytes per touch (MiB) = pager_bytes_fetched / total references. total fetches = demand faults + prefetches. arm/OPT = read_bytes / OPT bytes.
 
-Flag key: **x** = excluded, non-deterministic arm D cell (Campaign 13 Phase A â€” the number shown is one sample from a distribution, not stable). **X** = non-deterministic under WP1 declared order (WP1 Â§1.3, same three-factor trigger). **h** = arm A/B host-cache contaminated (achieved bandwidth > 3396 MiB/s O_DIRECT ceiling â€” Windows VHDX host cache, out of scope to defeat). **s** = superseded on this metric by the declared-order row below it (WP1). **d** = WP1 declared-order policy (`layer_order_declared`).
+Flag key: **x** = excluded, non-deterministic arm D LEARNED cell (Campaign 13 Phase A â€” one sample from a distribution). The WP0 consumption-signal fix made the DECLARED compute=400000 cells deterministic, so no X flags remain on declared rows. **h** = arm A/B host-cache contaminated (achieved bandwidth > 3396 MiB/s O_DIRECT ceiling â€” Windows VHDX host cache, out of scope to defeat). **s** = superseded on this metric by the declared-order row below it (WP1). **d** = WP1 declared-order policy (`layer_order_declared`).
 
 | chunk | ratio | arm | policy | compute | read_bytes_per_touch_MiB | total_fetches | demand_faults | wall_s | arm/OPT | flags |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -14,10 +14,10 @@ Flag key: **x** = excluded, non-deterministic arm D cell (Campaign 13 Phase A â€
 | 8MiB | 0.25 | C | lru | 400000 | 8.00 | 1280 | 1280 | 8.753 | 1.250 |  |
 | 8MiB | 0.25 | D | layer_order_learned | 400000 | 9.15 | 1464 | 1464 | 10.216 | 1.430 | x |
 | 8MiB | 0.25 | E | layer_order_learned | 400000 | 8.29 | 1322 | 772 | 7.441 | 1.295 |  |
-| 8MiB | 0.25 | D | layer_order_declared | 0 | 6.41 | 1025 | 1025 | 4.501 | 1.001 | d |
-| 8MiB | 0.25 | E | layer_order_declared | 0 | 7.04 | 1126 | 451 | 3.884 | 1.100 | d |
-| 8MiB | 0.25 | D | layer_order_declared | 400000 | 12.18 | 1949 | 1949 | 8.805 | 1.903 | dX |
-| 8MiB | 0.25 | E | layer_order_declared | 400000 | 8.39 | 1342 | 664 | 5.249 | 1.311 | d |
+| 8MiB | 0.25 | D | layer_order_declared | 0 | 6.40 | 1024 | 1024 | 4.593 | 1.000 | d |
+| 8MiB | 0.25 | E | layer_order_declared | 0 | 6.40 | 1024 | 347 | 3.815 | 1.000 | d |
+| 8MiB | 0.25 | D | layer_order_declared | 400000 | 6.40 | 1024 | 1024 | 5.465 | 1.000 | d |
+| 8MiB | 0.25 | E | layer_order_declared | 400000 | 6.40 | 1024 | 346 | 4.340 | 1.000 | d |
 | 8MiB | 0.25 | OPT | belady | n/a | 6.40 | 1024 | 1024 | n/a | 1.000 |  |
 | 8MiB | 0.375 | A | madvise:sequential | n/a | 8.00 | n/a | n/a | 3.415 | 1.429 |  |
 | 8MiB | 0.375 | B | madvise+hints | n/a | 7.97 | n/a | n/a | 3.002 | 1.423 | h |
@@ -36,10 +36,10 @@ Flag key: **x** = excluded, non-deterministic arm D cell (Campaign 13 Phase A â€
 | 8MiB | 0.5 | C | lru | 400000 | 8.00 | 1280 | 1280 | 9.539 | 1.667 |  |
 | 8MiB | 0.5 | D | layer_order_learned | 400000 | 6.87 | 1099 | 1099 | 8.298 | 1.431 |  |
 | 8MiB | 0.5 | E | layer_order_learned | 400000 | 7.02 | 1123 | 638 | 6.760 | 1.462 |  |
-| 8MiB | 0.5 | D | layer_order_declared | 0 | 4.80 | 768 | 768 | 3.393 | 1.000 | d |
-| 8MiB | 0.5 | E | layer_order_declared | 0 | 4.96 | 796 | 292 | 3.054 | 1.033 | d |
-| 8MiB | 0.5 | D | layer_order_declared | 400000 | 8.57 | 1372 | 1372 | 7.153 | 1.786 | dX |
-| 8MiB | 0.5 | E | layer_order_declared | 400000 | 6.15 | 984 | 478 | 4.415 | 1.281 | d |
+| 8MiB | 0.5 | D | layer_order_declared | 0 | 4.80 | 768 | 768 | 3.425 | 1.000 | d |
+| 8MiB | 0.5 | E | layer_order_declared | 0 | 4.80 | 768 | 263 | 2.903 | 1.000 | d |
+| 8MiB | 0.5 | D | layer_order_declared | 400000 | 4.80 | 768 | 768 | 4.486 | 1.000 | d |
+| 8MiB | 0.5 | E | layer_order_declared | 400000 | 4.80 | 768 | 262 | 3.592 | 1.000 | d |
 | 8MiB | 0.5 | OPT | belady | n/a | 4.80 | 768 | 768 | n/a | 1.000 |  |
 | 8MiB | 0.625 | A | madvise:sequential | n/a | 8.00 | n/a | n/a | 3.905 | 2.000 |  |
 | 8MiB | 0.625 | B | madvise+hints | n/a | 7.97 | n/a | n/a | 2.982 | 1.992 | h |
@@ -58,10 +58,10 @@ Flag key: **x** = excluded, non-deterministic arm D cell (Campaign 13 Phase A â€
 | 8MiB | 0.75 | C | lru | 400000 | 8.00 | 1280 | 1280 | 7.599 | 2.500 |  |
 | 8MiB | 0.75 | D | layer_order_learned | 400000 | 4.29 | 687 | 687 | 4.505 | 1.342 |  |
 | 8MiB | 0.75 | E | layer_order_learned | 400000 | 3.81 | 621 | 432 | 3.574 | 1.189 |  |
-| 8MiB | 0.75 | D | layer_order_declared | 0 | 3.20 | 512 | 512 | 2.688 | 1.000 | d |
-| 8MiB | 0.75 | E | layer_order_declared | 0 | 3.23 | 516 | 184 | 2.135 | 1.008 | d |
-| 8MiB | 0.75 | D | layer_order_declared | 400000 | 5.06 | 810 | 810 | 4.633 | 1.582 | dX |
-| 8MiB | 0.75 | E | layer_order_declared | 400000 | 3.87 | 619 | 281 | 3.030 | 1.209 | d |
+| 8MiB | 0.75 | D | layer_order_declared | 0 | 3.20 | 512 | 512 | 2.515 | 1.000 | d |
+| 8MiB | 0.75 | E | layer_order_declared | 0 | 3.20 | 512 | 175 | 2.103 | 1.000 | d |
+| 8MiB | 0.75 | D | layer_order_declared | 400000 | 3.20 | 512 | 512 | 3.304 | 1.000 | d |
+| 8MiB | 0.75 | E | layer_order_declared | 400000 | 3.20 | 512 | 174 | 2.820 | 1.000 | d |
 | 8MiB | 0.75 | OPT | belady | n/a | 3.20 | 512 | 512 | n/a | 1.000 |  |
 | 128MiB | 0.25 | A | madvise:sequential | n/a | 128.00 | n/a | n/a | 2.673 | 1.231 | h |
 | 128MiB | 0.25 | B | madvise+hints | n/a | 121.50 | n/a | n/a | 2.438 | 1.168 | h |
@@ -71,10 +71,10 @@ Flag key: **x** = excluded, non-deterministic arm D cell (Campaign 13 Phase A â€
 | 128MiB | 0.25 | C | lru | 400000 | 128.00 | 80 | 80 | 5.389 | 1.231 |  |
 | 128MiB | 0.25 | D | layer_order_learned | 400000 | 161.60 | 101 | 101 | 6.210 | 1.554 | x |
 | 128MiB | 0.25 | E | layer_order_learned | 400000 | 204.80 | 128 | 81 | 6.353 | 1.969 |  |
-| 128MiB | 0.25 | D | layer_order_declared | 0 | 104.00 | 65 | 65 | 3.943 | 1.000 | d |
-| 128MiB | 0.25 | E | layer_order_declared | 0 | 169.60 | 106 | 53 | 4.139 | 1.631 | d |
-| 128MiB | 0.25 | D | layer_order_declared | 400000 | 208.00 | 130 | 130 | 7.736 | 2.000 | dX |
-| 128MiB | 0.25 | E | layer_order_declared | 400000 | 172.80 | 108 | 53 | 5.461 | 1.662 | d |
+| 128MiB | 0.25 | D | layer_order_declared | 0 | 120.00 | 75 | 75 | 4.501 | 1.154 | d |
+| 128MiB | 0.25 | E | layer_order_declared | 0 | 129.60 | 81 | 40 | 4.732 | 1.246 | d |
+| 128MiB | 0.25 | D | layer_order_declared | 400000 | 120.00 | 75 | 75 | 5.292 | 1.154 | d |
+| 128MiB | 0.25 | E | layer_order_declared | 400000 | 129.60 | 81 | 40 | 5.231 | 1.246 | d |
 | 128MiB | 0.25 | OPT | belady | n/a | 104.00 | 65 | 65 | n/a | 1.000 |  |
 | 128MiB | 0.375 | A | madvise:sequential | n/a | 128.00 | n/a | n/a | 2.969 | 1.429 | h |
 | 128MiB | 0.375 | B | madvise+hints | n/a | 121.50 | n/a | n/a | 3.027 | 1.356 |  |
@@ -93,10 +93,10 @@ Flag key: **x** = excluded, non-deterministic arm D cell (Campaign 13 Phase A â€
 | 128MiB | 0.5 | C | lru | 400000 | 128.00 | 80 | 80 | 5.835 | 1.667 |  |
 | 128MiB | 0.5 | D | layer_order_learned | 400000 | 128.00 | 80 | 80 | 5.571 | 1.667 | x |
 | 128MiB | 0.5 | E | layer_order_learned | 400000 | 129.60 | 79 | 48 | 4.863 | 1.688 |  |
-| 128MiB | 0.5 | D | layer_order_declared | 0 | 76.80 | 48 | 48 | 3.164 | 1.000 | d |
-| 128MiB | 0.5 | E | layer_order_declared | 0 | 131.20 | 82 | 43 | 3.364 | 1.708 | d |
-| 128MiB | 0.5 | D | layer_order_declared | 400000 | 145.60 | 91 | 91 | 6.148 | 1.896 | dX |
-| 128MiB | 0.5 | E | layer_order_declared | 400000 | 126.40 | 80 | 47 | 4.602 | 1.646 | d |
+| 128MiB | 0.5 | D | layer_order_declared | 0 | 88.00 | 55 | 55 | 3.430 | 1.146 | d |
+| 128MiB | 0.5 | E | layer_order_declared | 0 | 96.00 | 60 | 26 | 3.305 | 1.250 | d |
+| 128MiB | 0.5 | D | layer_order_declared | 400000 | 88.00 | 55 | 55 | 4.471 | 1.146 | d |
+| 128MiB | 0.5 | E | layer_order_declared | 400000 | 96.00 | 60 | 26 | 3.728 | 1.250 | d |
 | 128MiB | 0.5 | OPT | belady | n/a | 76.80 | 48 | 48 | n/a | 1.000 |  |
 | 128MiB | 0.625 | A | madvise:normal | n/a | 128.30 | n/a | n/a | 2.733 | 2.005 | h |
 | 128MiB | 0.625 | B | madvise+hints | n/a | 121.50 | n/a | n/a | 3.258 | 1.898 |  |
@@ -115,8 +115,8 @@ Flag key: **x** = excluded, non-deterministic arm D cell (Campaign 13 Phase A â€
 | 128MiB | 0.75 | C | lru | 400000 | 128.00 | 80 | 80 | 5.932 | 2.500 |  |
 | 128MiB | 0.75 | D | layer_order_learned | 400000 | 80.00 | 50 | 50 | 4.003 | 1.562 |  |
 | 128MiB | 0.75 | E | layer_order_learned | 400000 | 75.20 | 48 | 37 | 4.463 | 1.469 |  |
-| 128MiB | 0.75 | D | layer_order_declared | 0 | 51.20 | 32 | 32 | 2.793 | 1.000 | d |
-| 128MiB | 0.75 | E | layer_order_declared | 0 | 67.20 | 42 | 22 | 2.223 | 1.312 | d |
-| 128MiB | 0.75 | D | layer_order_declared | 400000 | 76.80 | 48 | 48 | 3.832 | 1.500 | dX |
-| 128MiB | 0.75 | E | layer_order_declared | 400000 | 73.60 | 46 | 26 | 3.377 | 1.438 | d |
+| 128MiB | 0.75 | D | layer_order_declared | 0 | 56.00 | 35 | 35 | 2.272 | 1.094 | d |
+| 128MiB | 0.75 | E | layer_order_declared | 0 | 57.60 | 36 | 16 | 1.877 | 1.125 | d |
+| 128MiB | 0.75 | D | layer_order_declared | 400000 | 56.00 | 35 | 35 | 3.291 | 1.094 | d |
+| 128MiB | 0.75 | E | layer_order_declared | 400000 | 56.00 | 35 | 15 | 2.706 | 1.094 | d |
 | 128MiB | 0.75 | OPT | belady | n/a | 51.20 | 32 | 32 | n/a | 1.000 |  |

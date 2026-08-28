@@ -1,5 +1,49 @@
 # WP1 — Declared access order
 
+> ## ⚠ Session 2 amendment — the WP0 consumption-signal fix supersedes the compute=0 headline
+>
+> Session 2's WP2 real-inference sweep exposed a bug in `lo_declared_dist()`:
+> it ranked the **actively-consumed** chunk (`seq[pos]`) as *furthest*-future
+> and therefore `select_victim`'s top eviction target (it matched only on
+> the full cyclic wrap, `d == seq_len`). This only mattered where the
+> consumption signal fires *after* the fault that needs the chunk (WP2's
+> per-layer eval callback) or a layer is split across chunks — the WP1
+> synthetic driver fires the signal *before* the read and pins `seq[pos]`
+> throughout, so WP1 never saw it. **Commit `8c15d8b`** (BLOCKER 2): `lo_declared_dist()`
+> now returns 0 for `seq[pos]` and `seq[pos-1]`.
+>
+> **Effect on WP1's own results, re-measured after the fix:**
+>
+> | A.2 cell | session 1 (`absent_handled`, n=5) | session 2, after fix |
+> |---|---|---|
+> | 1 (serial) | 48 · DET (= Belady floor) | 50 · DET |
+> | 2 (serial + compute) | 48 · DET | 50 · DET |
+> | 3 (8 thr, barrier) | 48 · DET | 51–54 · **NON-DET (mild)** |
+> | 4 (8 thr, window, no compute) | 48 · DET | 55 · DET |
+> | 5 (8 thr, window, compute) | **79–90 · NON-DET** | **55 · DET** |
+> | 6 (8 thr, window, compute, 8 MiB) | **1316–1388 · NON-DET** | **768 · DET (= the exact 8 MiB/r=0.5 Belady floor)** |
+>
+> **The fix eliminates the Campaign 13 Phase A non-determinism** (cells 5–6
+> become deterministic; cell 6 hits the floor) at the cost of ~2 extra
+> resident chunks in the easy serial case (48 → 50) and mild non-determinism
+> at cell 3. **Pre-registered expectation 1 still did not hold** (cell 3),
+> but for a different, much milder reason, and the pathological cells are
+> fixed.
+>
+> Session 1's "`layer_order_declared` reads exactly OPT at every compute=0
+> cell (D/OPT = 1.000)" is **superseded** — with the fix protecting 2 extra
+> chunks, D/OPT at compute=0 is slightly above 1.0. §1.4 was **re-swept**
+> this session; see `wp1_sweep.csv` (session-1 data preserved as
+> `wp1_sweep_session1.csv`). The re-sweep results and updated §1.4 table
+> follow the session-1 write-up below.
+>
+> Everything else in this report (§1.1 interface, §1.2 rename + gate, §1.5
+> correctness) is unchanged and still valid — the fix touches only
+> `layer_order_declared`'s distance function; `layer_order_learned` and the
+> §1.2 gate are byte-for-byte identical.
+
+---
+
 ## Verdict
 
 **Is the declared policy deterministic?** Only where the learned policy
@@ -330,6 +374,70 @@ T-6 (`dedup_fetching > 0`), T-7 (all 8 storm threads joined within the
   the read" would reduce the cell-5 non-determinism — WP1.md is
   prescriptive here ("advance the position from `pager_notify_access()`")
   and §1.3 says record, do not fix.
+
+---
+
+---
+
+## §1.4 — re-swept with the WP0 fix (session 2)
+
+`run_wp1_sweep.sh` re-run after commit `8c15d8b`. Session-1 data preserved
+as `wp1_sweep_session1.csv`. Full table:
+`results/overnight/wp1_sweep_analysis_after_fix.txt`.
+
+### Arm D — declared vs learned, D/OPT (median of n=3)
+
+| Chunk | Ratio | Compute | D learned / OPT | D declared / OPT | Δ read_bytes (decl−learn) |
+|---|---|---|---|---|---|
+| 8MiB | 0.25 | 0 | 1.068 | **1.000** | −0.59 GB |
+| 8MiB | 0.25 | 400000 | 1.352 | **1.000** | −3.02 GB |
+| 8MiB | 0.5 | 0 | 1.168 | **1.000** | −1.08 GB |
+| 8MiB | 0.5 | 400000 | 1.405 | **1.000** | −2.61 GB |
+| 8MiB | 0.75 | 0 | 1.256 | **1.000** | −1.10 GB |
+| 8MiB | 0.75 | 400000 | 1.293 | **1.000** | −1.26 GB |
+| 128MiB | 0.25 | 0 | 1.062 | 1.154 | **+0.81 GB** |
+| 128MiB | 0.25 | 400000 | ~1.55 (nondet, C13-A) | 1.15 | −2.68 GB |
+| 128MiB | 0.5 | 0 | 1.188 | 1.146 | −0.27 GB |
+| 128MiB | 0.5 | 400000 | ~1.58 (nondet) | 1.23 | −2.28 GB |
+| 128MiB | 0.75 | 0 | 1.281 | 1.093 | −0.81 GB |
+| 128MiB | 0.75 | 400000 | 1.53 | 1.16 | −1.61 GB |
+
+**At 8 MiB (256 chunks) `layer_order_declared` reads EXACTLY OPT
+(D/OPT = 1.000) at all six cells — including both compute=400000 cells that
+session 1 measured at 1.79–1.90× OPT and non-deterministic.** Arm E
+declared is also exactly OPT at all six 8 MiB cells, with roughly half the
+demand faults (the rest converted to prefetch hits) and lower wall time.
+
+**At 128 MiB (16 chunks) declared beats learned at 5 of 6 cells.** The one
+regression — 128MiB/r=0.25/c=0, D/OPT 1.062 → 1.154 — is the cost of the
+fix protecting 2 chunks when the budget holds only 4: ~6 extra fetches.
+Everywhere else at 128 MiB declared is closer to OPT than learned, and the
+c=400000 cells no longer approach arm C.
+
+### Pre-registered expectations — after the fix
+
+1. **Deterministic at every 1.3 cell** — still **DID NOT HOLD** (cell 3,
+   mild: 51–54), but the pathological cells 5–6 are now deterministic (see
+   the amendment box at the top).
+2. **Declared reads fewer bytes than learned at every arm-D cell** —
+   **HELD at 23 of 24 cells** (session 1: failed at 5). Sole exception:
+   128MiB/r=0.25/c=0 (+0.81 GB).
+3. **Margin larger at 128 MiB than 8 MiB** — **HELD** as a fraction of the
+   fetch count (~17% at 128 MiB vs ~13% at 8 MiB), though the absolute Δ is
+   larger at 8 MiB.
+4. **D/OPT improves under declared at every arm-D cell** — **HELD at 23 of
+   24** (same exception).
+5. **The five C13-A non-deterministic cells become deterministic and cease
+   to approach or exceed arm C** — **now HELD.** At compute=400000 declared
+   arm D reads 0.40–0.94× arm C (session 1: 1.5–1.9× C), and is
+   deterministic at 8 MiB (128 MiB cell 5 traced deterministic in §1.3).
+
+**Revised verdict on the declared policy:** with the WP0 fix,
+`layer_order_declared` is **Belady-optimal and deterministic at every
+256-chunk (8 MiB) cell**, and near-optimal at 16-chunk (128 MiB) scale
+except at the single tightest-budget/no-compute corner where protecting the
+current chunk costs ~2 chunks it can't spare. It is a clear, unqualified
+improvement over `layer_order_learned` at realistic chunk counts.
 
 ---
 

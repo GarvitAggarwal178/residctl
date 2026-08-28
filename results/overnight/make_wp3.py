@@ -137,9 +137,9 @@ def figure1():
         ax.set_ylabel('bytes read per touch (MiB)'); ax.grid(alpha=0.3)
         ax.legend(fontsize=8)
     fig.suptitle('Figure 1 — Bytes read per unit of work, by budget ratio (compute=0)', fontsize=12)
-    fig.text(0.5, 0.055, 'D/E: WP1 declared-order policy (r=0.25/0.5/0.75 only); D reads exactly OPT at compute=0. '
-             'A/C: Campaign 12 Phase D (Phase A repaired baseline). Arm A line is hidden behind C (they read '
-             'near-identical bytes).', ha='center', fontsize=7)
+    fig.text(0.5, 0.055, 'D/E: WP1 declared-order policy WITH the WP0 fix (r=0.25/0.5/0.75); at 8 MiB D reads '
+             'exactly OPT, at 128 MiB D/OPT=1.09-1.15. A/C: Campaign 12 Phase D (Phase A repaired baseline). '
+             'Arm A line is hidden behind C.', ha='center', fontsize=7)
     fig.text(0.5, 0.02, f'X = arm A point whose achieved bandwidth exceeds the spike {OD_CEIL:.0f} MiB/s '
              'O_DIRECT ceiling -- Windows VHDX host-cache contamination.', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.10,1,0.95])
@@ -185,10 +185,10 @@ def figure2():
         ax.set_title(label); ax.set_xlabel('budget ratio'); ax.set_ylabel('demand faults / total references')
         ax.set_ylim(0, 1.05); ax.grid(alpha=0.3); ax.legend(fontsize=8)
     fig.suptitle('Figure 2 — Miss rate against the optimal bound (compute=0)', fontsize=12)
-    fig.text(0.5, 0.02, 'C sits flat at 1.000 (every reference misses -- full-pass thrashing). D tracks OPT '
-             'exactly (declared order = Belady at compute=0). E is below OPT here because its DEMAND-fault rate '
-             'excludes prefetches; E total fetches (demand+prefetch) still >= OPT. D/E: WP1 declared-order.',
-             ha='center', fontsize=7.2)
+    fig.text(0.5, 0.02, 'C sits flat at 1.000 (every reference misses -- full-pass thrashing). D (with the WP0 fix) '
+             'tracks OPT exactly at 8 MiB and sits ~10-15% above it at 128 MiB (protecting the 2 live chunks '
+             'costs more when only ~8 fit). E is below the OPT line because its DEMAND-fault rate excludes '
+             'prefetches; E total fetches (demand+prefetch) still >= OPT.', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.07,1,0.95])
     fig.savefig(f'{OUT}/figure2_miss_rate.png', dpi=200)
     plt.close(fig)
@@ -329,6 +329,65 @@ def figure5():
         csv.writer(f).writerows(csv_rows)
     print("figure5 done")
 
+# ================================================================ FIGURE 6
+def figure6():
+    """llama.cpp real workload -- same idea as Figure 1, real model. Only if WP2 produced data."""
+    import os
+    swp = f'{R}/overnight/wp2_sweep.csv'
+    optp = f'{R}/overnight/wp2_opt.csv'
+    if not (os.path.exists(swp) and os.path.exists(optp)):
+        print("figure6 SKIPPED -- no WP2 sweep data"); return
+    wr = [r for r in rows_(swp) if r['rc'] == '0']
+    opt = {o['ratio']: int(o['opt_missed_bytes']) for o in rows_(optp) if o['opt_missed_bytes']}
+    by6 = {}
+    for r in wr: by6.setdefault((r['ratio'], r['arm']), []).append(r)
+    RA = sorted({r['ratio'] for r in wr}, key=float)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
+    csv_rows = [('ratio','arm','read_bytes_GB','read_bytes_per_OPT','tokens_s','demand_faults','source')]
+    style = {'A':('-o','#7a7a7a','A (kernel mmap)'), 'C':('-s','#1f77b4','C (kernel LRU)'),
+             'D':('-^','#2ca02c','D (declared order)'), 'E':('-D','#ff7f0e','E (declared + prefetch)')}
+    for arm,(st,col,lab) in style.items():
+        xr, yb, yt = [], [], []
+        for ra in RA:
+            rs = by6.get((ra, arm), [])
+            if not rs: continue
+            fld = 'io_gen_bytes' if arm == 'A' else 'pager_bytes_fetched'
+            vals = [int(x[fld]) for x in rs if x[fld] not in ('','n/a')]
+            if not vals: continue
+            rb = statistics.median(vals)
+            ts = statistics.median([float(x['tokens_s']) for x in rs if x['tokens_s'] not in ('','n/a')])
+            df = statistics.median([int(x['absent_handled']) for x in rs if x['absent_handled'] not in ('','n/a')]) if arm != 'A' else 0
+            xr.append(float(ra)); yb.append(rb/1e9); yt.append(ts)
+            ob = opt.get(ra)
+            csv_rows.append((ra, arm, f'{rb/1e9:.1f}', f'{rb/ob:.3f}' if ob else '', f'{ts:.2f}', df, 'wp2_sweep'))
+        ax1.plot(xr, yb, st, color=col, label=lab)
+        ax2.plot(xr, yt, st, color=col, label=lab)
+    # OPT
+    xr, yb = [], []
+    for ra in RA:
+        if ra in opt: xr.append(float(ra)); yb.append(opt[ra]/1e9)
+    ax1.plot(xr, yb, '--', color='k', label='OPT (Belady, declared seq)')
+    for ra in RA:
+        if ra in opt: csv_rows.append((ra, 'OPT', f'{opt[ra]/1e9:.1f}', '1.000', '', '', 'wp2_opt'))
+    ax1.set_xlabel('budget ratio (of weight region)'); ax1.set_ylabel('bytes read during generation (GB)')
+    ax1.set_title('bytes read, 64 tokens'); ax1.grid(alpha=0.3); ax1.legend(fontsize=8)
+    ax2.set_xlabel('budget ratio (of weight region)'); ax2.set_ylabel('tokens / s')
+    ax2.axhline(13.2, ls=':', color='gray', label='unconstrained baseline (13.2 t/s)')
+    ax2.set_title('generation throughput'); ax2.grid(alpha=0.3); ax2.legend(fontsize=8)
+    fig.suptitle('Figure 6 — llama.cpp (Qwen2.5-3B Q4_K_M): real model through the pager', fontsize=12)
+    fig.text(0.5, 0.02, 'Arm E collapsed at r=0.25 (360s timeout) -- absent from that x-point. D reads 24-51% '
+             'fewer bytes than the kernel at r>=0.5 and D/OPT=1.09-1.14. A/C cannot turn extra budget into '
+             'throughput; D/E can. layer_order_declared with the WP0 fix.', ha='center', fontsize=7)
+    fig.tight_layout(rect=[0,0.07,1,0.94])
+    fig.savefig(f'{OUT}/figure6_llamacpp.png', dpi=200)
+    plt.close(fig)
+    with open(f'{OUT}/figure6_llamacpp.csv','w',newline='') as f:
+        csv.writer(f).writerows(csv_rows)
+    print("figure6 done")
+
+def rows_(p):
+    with open(p) as f: return list(csv.DictReader(f))
+
 # ================================================================ TABLE 1
 def table1():
     """arm x ratio x chunk x compute: read_bytes/touch, total fetches, demand faults, wall, D/OPT.
@@ -387,7 +446,8 @@ def table1():
                         pf = med([i(r['prefetches']) for r in rs]) or 0
                         wall = med([i(r['wall_ns']) for r in rs])
                         flags = 'd'
-                        if arm == 'D' and comp == '400000': flags += 'X'  # non-det (WP1 §1.3 cells 5/6 analogue)
+                        # WP0 fix made the compute=400000 declared cells deterministic (WP1 §1.3
+                        # post-fix: cell 5 = this grid's config is deterministic). No 'X' flag.
                         out.append([cslabel, ra, arm, 'layer_order_declared', comp, f'{rb/tp/MiB:.2f}',
                                     int(dem+pf), int(dem), f'{wall/1e9:.3f}',
                                     f'{rb/optb:.3f}' if optb else 'n/a', flags])
@@ -402,9 +462,9 @@ def table1():
         f.write('# Table 1 — Main results\n\n')
         f.write('read_bytes per touch (MiB) = pager_bytes_fetched / total references. '
                 'total fetches = demand faults + prefetches. arm/OPT = read_bytes / OPT bytes.\n\n')
-        f.write('Flag key: **x** = excluded, non-deterministic arm D cell (Campaign 13 Phase A — '
-                'the number shown is one sample from a distribution, not stable). '
-                '**X** = non-deterministic under WP1 declared order (WP1 §1.3, same three-factor trigger). '
+        f.write('Flag key: **x** = excluded, non-deterministic arm D LEARNED cell (Campaign 13 Phase A — '
+                'one sample from a distribution). The WP0 consumption-signal fix made the DECLARED '
+                'compute=400000 cells deterministic, so no X flags remain on declared rows. '
                 '**h** = arm A/B host-cache contaminated (achieved bandwidth > 3396 MiB/s O_DIRECT ceiling — '
                 'Windows VHDX host cache, out of scope to defeat). '
                 '**s** = superseded on this metric by the declared-order row below it (WP1). '
@@ -452,6 +512,6 @@ def table2():
         for k,v in env: f.write(f'| {k} | {v} |\n')
     print("table2 done")
 
-figure1(); figure2(); figure3(); figure4(); figure5()
+figure1(); figure2(); figure3(); figure4(); figure5(); figure6()
 table1(); table2()
 print("ALL DONE ->", OUT)

@@ -167,59 +167,83 @@ evidence of mechanism saturation (items 10b–10e) — superseded by Campaign
 
 ---
 
-### Claim 7: Declared access order outperforms inferred access order — in the deterministic regime; under a concurrent compute phase it does not.
+### Claim 7: Declared access order outperforms inferred access order, and — with the WP0 consumption-signal fix — is Belady-optimal and deterministic at realistic chunk counts.
 
-Evidence: `wp1_declared_order.md`, `wp1_sweep.csv`, `wp1_determinism.csv`,
-`wp1_policytrace_log.txt`. compute=0: `layer_order_declared` reads exactly
-OPT at all 6 cells vs `layer_order_learned` 1.06–1.28× OPT; deterministic
-at A.2 cells 1–4 at the Belady floor. compute=400000: declared is
-non-deterministic (same three-factor trigger as learned) and reads +2% to
-+47% more than learned at 5 of 6 cells, exceeding arm C at both r=0.25
-cells.
+Evidence: `wp1_declared_order.md` (session-2 §1.4 amendment),
+`wp1_sweep.csv` (re-swept post-fix), `wp1_determinism.csv`,
+`wp1_policytrace_log.txt`; and WP2 `wp2_sweep.csv` (real model).
 
-Figure: Figures 1 and 2 (declared arm D on the OPT line).
+- **WP1, after the WP0 fix (commit `8c15d8b`):** `layer_order_declared`
+  reads **exactly OPT (D/OPT = 1.000) at all six 8 MiB (256-chunk) cells,
+  both compute levels**, and is deterministic there. It beats
+  `layer_order_learned` on bytes at 23 of 24 arm-D cells. At 128 MiB
+  (16 chunks) D/OPT = 1.09–1.15 — one regression, 128MiB/r=0.25/c=0
+  (1.06 → 1.15), the cost of protecting 2 of only 4 budget chunks.
+- **The WP0 fix eliminates the Campaign 13 Phase A non-determinism**: WP1
+  §1.3 cells 5–6 go from non-deterministic (79–90 / 1316–1388) to
+  deterministic (55 / 768 — the latter the exact 8 MiB/r=0.5 Belady
+  floor). Residual mild non-determinism at cell 3 (51–54).
+- **WP2 (real model):** D reads 24–51% fewer bytes than the kernel at
+  r ≥ 0.5; D/OPT = 1.09–1.14 — *closer to optimal on real inference than
+  synthetically*, because real per-layer compute (~51 k ns/MiB) is far
+  lighter than the synthetic heavy setting.
 
-Strength: **qualified — two-sided.** Strong for the compute=0 half
-(deterministic, equals OPT, verification gate passed). The compute=400000
-half is a genuine negative result reported in full.
+Figure: Figures 1, 2 (WP1, post-fix), Figure 6 (WP2 real model).
 
-Caveats: the non-determinism is the same one Campaign 13 Phase A found for
-the learned policy — WP1 moved it from chain construction to the
-consumption-position signal but did not remove it (`--policy-trace`:
-identical resident set, cursor differs by one). A reviewer will ask "so is
-declared order actually better?" — the honest answer is "strictly better
-whenever the workload's own timing is deterministic; worse than the
-learned policy's hedge when 8 concurrent driver threads race a real
-compute phase, because declared confidently evicts a just-consumed chunk a
-straggler still needs."
+Strength: **strong for byte efficiency and near-optimality; qualified on
+determinism** (cell 3 still mildly non-deterministic; the pathological
+cells are fixed).
 
-Superseded prior claims: the project's `layer_order` (now
-`layer_order_learned`) was the only informed policy through Campaign 13;
-A-12 adds the declared variant. Campaign 13 Phase A's finding that the
-learned chain is fault-dispatch-order-dependent stands.
+Caveats: (1) the fix costs ~2 resident chunks — visible only at small
+chunk counts (128 MiB / tight budget). (2) Arm E (declared + prefetch)
+**collapsed at r=0.25 on the real model** (360 s timeout) — the fix's
+current-chunk protection plus prefetch pinning over-constrains the tightest
+budget. (3) The driver-side alternative for the signal ("notify =
+finished", broader blast radius) was not tried — BLOCKER 2.
+
+Superseded prior claims: **session 1's own Claim 7** ("declared order is
+Belady-optimal at compute=0 but *worse* than the learned hedge under a
+concurrent compute phase") — the WP0 fix reverses the compute=400000
+regression entirely. Campaign 13 Phase A's diagnosis of the learned
+chain's fault-dispatch-order dependence stands; the declared policy is now
+the recommended informed policy.
 
 Only valid because WP1 completed.
 
 ---
 
-### Claim 8: The findings hold on a real model.
+### Claim 8: The core findings hold on a real model.
 
-Evidence: **NONE — WP2 was not run.** `models/model.gguf` is absent
-(`results/overnight/BLOCKERS.md` BLOCKER 1). Every finding in this project
-remains validated only against the synthetic cyclic-scan replay driver.
+Evidence: **WP2 (session 2).** `wp2_gate_log.txt` (correctness gate PASS —
+byte-identical tokens), `wp2_sweep.csv`, `wp2_opt.csv`, `wp2_llamacpp.md`.
+Qwen2.5-3B-Instruct Q4_K_M through the userfaultfd pager.
 
-Figure: Figure 6 was to show this; not produced.
+- Kernel LRU (arm C) degenerates to full-pass thrashing on the real layer
+  scan — ~100% miss, 134–144 GB per 64 tokens, ~1 tokens/s, at **every**
+  budget ratio including 0.75. Identical to the synthetic degeneration.
+- Application-authoritative residency (arm D) reads 24–51% fewer bytes than
+  the kernel at r ≥ 0.5 and is within 15% of the offline optimum
+  (D/OPT = 1.09–1.14).
+- The offline optimum is computable for the real workload with unequal
+  chunk sizes (`wp2_opt.c`, `missed_bytes = Σ missed chunk sizes`,
+  floor-checked).
 
-Strength: **cannot be claimed.** The writeup must state explicitly that no
-finding has been tested against a real, non-synthetic access pattern, and
-that WP2 (llama.cpp integration) is the single largest open question.
+Figure: Figure 6.
 
-Caveats: the synthetic driver was built as a faithful model of llama.cpp's
-layer-scan access pattern (`replay.h`, `MECHANISM_SPEC.md` §11), and the
-one structural difference WP2 would have measured — real per-layer compute
-time vs the `--compute-ns-per-mib` proxy — is exactly the axis on which
-WP1 found the declared policy's behaviour flips. So the real-model result
-is not merely "unconfirmed detail" but potentially "changes which policy
-wins."
+Strength: **strong for the core thesis (Claims 1, 2, 4); qualified /
+contradicted for the follow-ups.**
 
-Superseded prior claims: none.
+Caveats & what did NOT transfer: (1) **Claim 6 (prefetch pays under a
+compute phase) does not transfer** — real per-layer compute (~51 k ns/MiB)
+is ~30× lighter than the synthetic heavy setting where arm E won; on the
+real model E never beats D on bytes (it does win latency). (2) Arm D ≈
+arm A at r=0.25 (the kernel keeps `memory.max` resident, exceeding D's
+self-imposed budget). (3) Arm E collapsed at r=0.25. (4) One 3B dense
+model, CPU-only, 2 GiB — not larger models, MoE, or GPU offload. (5) The
+GGUF's tensors are stored in name-lex not layer order, and layer 21 is
+split — the synthetic uniform table hid this.
+
+Superseded prior claims: **session 1's Claim 8 ("cannot be claimed —
+WP2 not run")**. The synthetic-only limitation in PROJECT_STATE §3 is now
+partially lifted: the thesis is confirmed on one real model; the
+prefetch-vs-compute finding is contradicted.
