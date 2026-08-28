@@ -314,8 +314,9 @@ void *residctl_llama_mmap(int llama_fd, size_t file_size) {
 static void notify_chunk(uint32_t c) {
     if (c == 0xFFFFFFFFu || c >= g_r.n_chunks) return;
     pager_notify_access(&g_r, &g_r.chunks[c]);
+    g_notify_seq++;
     if (g_reftrace)
-        trace_record(g_reftrace, ++g_notify_seq, c, TRACE_NA, TRACE_NA);
+        trace_record(g_reftrace, g_notify_seq, c, TRACE_NA, TRACE_NA);
 }
 
 void residctl_llama_notify_layer(int layer) {

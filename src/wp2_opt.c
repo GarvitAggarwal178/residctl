@@ -9,8 +9,10 @@
 // ensure_budget implement; it is optimal for the equal-size case (checked
 // below) and the standard approximation for unequal sizes.
 //
-// usage: wp2_opt <chunk_bytes_file> <budget_bytes> <n_passes>
+// usage: wp2_opt <chunk_bytes_file> <budget_bytes> <n_passes> [seq_file]
 //   chunk_bytes_file: one chunk length (bytes) per line, in chunk-id order.
+//   seq_file (optional): one chunk id per line = ONE pass of the declared
+//     access sequence. If omitted, the pass is 0,1,...,n_chunks-1.
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,8 +20,8 @@
 #include <string.h>
 
 int main(int argc, char **argv) {
-    if (argc != 4) {
-        fprintf(stderr, "usage: %s <chunk_bytes_file> <budget_bytes> <n_passes>\n", argv[0]);
+    if (argc != 4 && argc != 5) {
+        fprintf(stderr, "usage: %s <chunk_bytes_file> <budget_bytes> <n_passes> [seq_file]\n", argv[0]);
         return 2;
     }
     FILE *f = fopen(argv[1], "r");
@@ -37,9 +39,28 @@ int main(int argc, char **argv) {
     uint32_t passes = (uint32_t)strtoul(argv[3], NULL, 10);
     if (n == 0 || passes == 0) { fprintf(stderr, "empty chunk table or 0 passes\n"); return 1; }
 
-    uint64_t total_refs = n * (uint64_t)passes;
+    // one pass of the declared sequence
+    uint32_t *pass = NULL; uint64_t pass_len = 0;
+    if (argc == 5) {
+        FILE *sf = fopen(argv[4], "r");
+        if (!sf) { fprintf(stderr, "cannot open seq %s\n", argv[4]); return 1; }
+        uint64_t pc = 64; pass = malloc(pc * sizeof *pass);
+        char sl[64];
+        while (fgets(sl, sizeof sl, sf)) {
+            if (sl[0] == '\n' || sl[0] == '#') continue;
+            if (pass_len == pc) { pc *= 2; pass = realloc(pass, pc * sizeof *pass); }
+            pass[pass_len++] = (uint32_t)strtoul(sl, NULL, 10);
+        }
+        fclose(sf);
+    } else {
+        pass_len = n; pass = malloc(n * sizeof *pass);
+        for (uint64_t i = 0; i < n; i++) pass[i] = (uint32_t)i;
+    }
+    if (pass_len == 0) { fprintf(stderr, "empty sequence\n"); return 1; }
+
+    uint64_t total_refs = pass_len * (uint64_t)passes;
     uint32_t *ref = malloc(total_refs * sizeof *ref);
-    for (uint64_t i = 0; i < total_refs; i++) ref[i] = (uint32_t)(i % n);
+    for (uint64_t i = 0; i < total_refs; i++) ref[i] = pass[i % pass_len];
 
     // next-occurrence index: next_use[i] = smallest j>i with ref[j]==ref[i], or UINT64_MAX
     uint64_t *next_use = malloc(total_refs * sizeof *next_use);
@@ -81,16 +102,24 @@ int main(int argc, char **argv) {
         cur_nextuse[c] = next_use[i];
     }
 
-    // sanity floors (adapted from belady_main's A-2 check for the unequal case)
-    uint64_t sum_all = 0; for (uint64_t c = 0; c < n; c++) sum_all += len[c];
+    // sanity floors (adapted from belady_main's A-2 check for the unequal case):
+    // compulsory = every DISTINCT chunk in the sequence must miss at least once.
+    uint8_t *seen = calloc(n, 1);
+    uint64_t distinct = 0, sum_distinct = 0;
+    for (uint64_t i = 0; i < pass_len; i++) if (!seen[pass[i]]) { seen[pass[i]] = 1; distinct++; sum_distinct += len[pass[i]]; }
     int below = 0;
-    if (misses < n) { fprintf(stderr, "WP2_OPT FAIL: misses=%llu < n=%llu compulsory\n",
-                              (unsigned long long)misses, (unsigned long long)n); below = 1; }
-    if (missed_bytes < sum_all) { fprintf(stderr, "WP2_OPT FAIL: missed_bytes=%llu < sum(chunk sizes)=%llu\n",
-                                  (unsigned long long)missed_bytes, (unsigned long long)sum_all); below = 1; }
+    if (misses < distinct) { fprintf(stderr, "WP2_OPT FAIL: misses=%llu < distinct chunks=%llu (compulsory)\n",
+                              (unsigned long long)misses, (unsigned long long)distinct); below = 1; }
+    if (missed_bytes < sum_distinct) { fprintf(stderr, "WP2_OPT FAIL: missed_bytes=%llu < sum(distinct chunk sizes)=%llu\n",
+                                  (unsigned long long)missed_bytes, (unsigned long long)sum_distinct); below = 1; }
+    uint64_t sum_all = sum_distinct;
 
-    // equal-size cross-check
-    int all_equal = 1; for (uint64_t c = 1; c < n; c++) if (len[c] != len[0]) { all_equal = 0; break; }
+    // equal-size cross-check over the sequence's distinct chunks
+    int all_equal = 1;
+    { uint64_t first = 0; int have = 0;
+      for (uint64_t c = 0; c < n; c++) if (seen[c]) { if (!have) { first = len[c]; have = 1; } else if (len[c] != first) all_equal = 0; }
+    }
+    free(seen);
     if (all_equal && missed_bytes != misses * len[0]) {
         fprintf(stderr, "WP2_OPT FAIL: equal-size cross-check: missed_bytes=%llu != misses*len=%llu\n",
                 (unsigned long long)missed_bytes, (unsigned long long)(misses * len[0]));
