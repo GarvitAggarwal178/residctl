@@ -35,7 +35,11 @@ cbf, dsf = '/tmp/wp2_chunk_bytes.txt', '/tmp/wp2_declared_seq.txt'
 open(cbf, 'w').write('\n'.join(str(x) for x in chunk_bytes) + '\n')
 open(dsf, 'w').write('\n'.join(str(x) for x in declared_seq) + '\n')
 
-rows = [r for r in csv.DictReader(open(SWEEP)) if r['rc'] == '0']
+allrows = list(csv.DictReader(open(SWEEP)))
+timedout = [(r['ratio'], r['arm']) for r in allrows if r['rc'] != '0']
+if timedout:
+    print(f"TIMED-OUT / non-zero-rc cells (excluded from medians): {timedout}\n")
+rows = [r for r in allrows if r['rc'] == '0']
 by = {}
 for r in rows:
     by.setdefault((r['ratio'], r['arm']), []).append(r)
@@ -71,36 +75,45 @@ for ratio in RATIOS:
     ob = opt.get(ratio)
     for arm in ('A', 'C', 'D', 'E'):
         cell = (ratio, arm)
-        if cell not in by: continue
+        if cell not in by:
+            print(f"| {ratio} | {arm} | COLLAPSED (360s timeout, no output) | - | - | - | - | - | - | - | - | - | - |")
+            tbl[cell] = dict(rb=None, dopt=None, ts=None, ws=None, collapsed=True)
+            continue
         rb = med(cell, 'io_gen_bytes') if arm == 'A' else med(cell, 'pager_bytes_fetched')
-        df = med(cell, 'absent_handled')
-        ev = med(cell, 'evictions')
-        ts = med(cell, 'tokens_s'); tt = med(cell, 'ttft_ms'); p99 = med(cell, 'p99_inter_ms')
-        ws = med(cell, 'wall_s'); mp = med(cell, 'memory_peak'); inf = med(cell, 'infeasible'); pb = med(cell, 'pin_broken')
+        df = med(cell, 'absent_handled') or 0
+        ev = med(cell, 'evictions') or 0
+        ts = med(cell, 'tokens_s') or 0; tt = med(cell, 'ttft_ms') or 0; p99 = med(cell, 'p99_inter_ms') or 0
+        ws = med(cell, 'wall_s') or 0; mp = med(cell, 'memory_peak') or 0
+        inf = med(cell, 'infeasible'); pb = med(cell, 'pin_broken')
         dopt = rb / ob if (rb and ob) else None
         tbl[cell] = dict(rb=rb, dopt=dopt, ts=ts, ws=ws)
-        print(f"| {ratio} | {arm} | {rb/1e9:.1f} | {dopt:.2f} | {df:.0f} | {ev:.0f} | {ts:.2f} | {tt:.0f} | {p99:.0f} | {ws:.1f} | "
-              f"{(mp or 0)/MiB:.0f} | {inf if inf is not None else '-'} | {pb if pb is not None else '-'} |"
-              if dopt else f"| {ratio} | {arm} | {rb/1e9 if rb else 0:.1f} | - | {df or 0:.0f} | {ev or 0:.0f} | {ts:.2f} | {tt:.0f} | {p99:.0f} | {ws:.1f} | {(mp or 0)/MiB:.0f} | - | - |")
+        ds = f"{dopt:.2f}" if dopt else "-"
+        print(f"| {ratio} | {arm} | {(rb or 0)/1e9:.1f} | {ds} | {df:.0f} | {ev:.0f} | {ts:.2f} | {tt:.0f} | {p99:.0f} | {ws:.1f} | "
+              f"{mp/MiB:.0f} | {inf if inf is not None else '-'} | {pb if pb is not None else '-'} |")
 
 print()
 print("## Pre-registered expectations")
-c_miss = []
 for ratio in RATIOS:
-    dfC = med((ratio,'C'),'absent_handled'); refs = (med((ratio,'C'),'layer_transitions') or 0) + 2*passes
+    dfC = med((ratio,'C'),'absent_handled') or 0
+    refs = (med((ratio,'C'),'layer_transitions') or 0) + 2*passes
     print(f"1. arm C miss rate ~100%: r={ratio} demand_faults={dfC:.0f} over ~{int(refs)} references -> {dfC/refs if refs else 0:.3f}")
 for ratio in RATIOS:
     A, D = tbl.get((ratio,'A')), tbl.get((ratio,'D'))
-    if A and D and A['rb'] and D['rb']:
+    if A and D and A.get('rb') and D.get('rb'):
         print(f"2. D<A bytes @ r={ratio}: D={D['rb']/1e9:.1f}GB vs A={A['rb']/1e9:.1f}GB -> {'HELD' if D['rb']<A['rb'] else 'DID NOT HOLD'}")
 for ratio in RATIOS:
     D, E = tbl.get((ratio,'D')), tbl.get((ratio,'E'))
-    if D and E and D['rb'] and E['rb']:
+    if D and E and D.get('rb') and E.get('rb'):
         print(f"3. E<D bytes @ r={ratio}: E={E['rb']/1e9:.1f}GB vs D={D['rb']/1e9:.1f}GB -> {'HELD' if E['rb']<D['rb'] else 'DID NOT HOLD'}")
+    elif E and E.get('collapsed'):
+        print(f"3. E<D bytes @ r={ratio}: arm E COLLAPSED (timeout) -> cannot evaluate")
 for ratio in RATIOS:
     D = tbl.get((ratio,'D'))
-    if D and D['dopt']: print(f"4. OPT<=D @ r={ratio}: D/OPT={D['dopt']:.2f} -> {'HELD' if D['dopt']>=1.0 else 'DID NOT HOLD (D below OPT!)'}")
-print("5. tokens/s vs budget (graceful?):")
+    if D and D.get('dopt'): print(f"4. OPT<=D @ r={ratio}: D/OPT={D['dopt']:.2f} -> {'HELD' if D['dopt']>=1.0 else 'DID NOT HOLD (D below OPT!)'}")
+print("5. tokens/s vs budget (graceful? baseline unconstrained ~13.2 t/s):")
 for arm in ('A','C','D','E'):
-    ts = [f"r={r}:{tbl[(r,arm)]['ts']:.2f}" for r in RATIOS if (r,arm) in tbl]
-    print(f"   {arm}: {'  '.join(ts)}  (baseline unconstrained ~13.2 t/s)")
+    parts = []
+    for r in RATIOS:
+        c = tbl.get((r,arm))
+        parts.append(f"r={r}:{'COLLAPSE' if (c and c.get('collapsed')) else (f'{c['ts']:.2f}' if c else '-')}")
+    print(f"   {arm}: {'  '.join(parts)}")

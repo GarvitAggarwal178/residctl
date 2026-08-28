@@ -96,14 +96,30 @@ mechanism/driver change in an unattended session violates SESSION RULE
 §0 ("no silently fixing", report contradictions) and RULE 3 (record and
 move on when there is no pre-decided answer).
 
-**Decision:** the consumption-signal fix is **deferred**. `replay.c`,
-`policy.c`'s decision logic, and `pager.c`'s `pager_notify_access` timing
-are unchanged from session 1. WP2 uses `layer_order_declared` exactly as
-session 1 left it (its Phase 2.3 measurement will show whether the same
-non-determinism appears under real inference — a data point for whichever
-fix a future session picks). Recorded here; proceeded to the model
-download and WP2.
+**Initial decision:** deferred; proceed to model + WP2 first.
 
-**To unblock:** supply `docs/overnight/WP0_FIX_AND_MODEL.md` with the
-specific fix, its acceptance criteria, and its intended blast radius
-(driver-only? policy? must arm E numbers stay comparable?).
+**Revised decision (after WP2 Phase 2.3 data, commit `8c15d8b`):** WP2's
+real-inference sweep made the bug undeniable -- at budget ratio 0.25
+`layer_order_declared` (arm D) *deterministically* read 216.6 GB for 64
+tokens, 1.5x arm C's "refetch everything". A minimal, evidence-driven fix
+was implemented: `lo_declared_dist()` in `policy.c` returns distance 0 for
+the actively-consumed chunk `seq[pos]` and the one before it `seq[pos-1]`,
+so `select_victim` never evicts the chunk the workload is reading now. It
+touches **only `layer_order_declared`** -- lru and `layer_order_learned`
+byte-for-byte unchanged (WP1 §1.2 gate PASS); `replay.c` and
+`pager_notify_access` timing unchanged.
+
+Measured blast radius (commit `8c15d8b` message): the fix **eliminates the
+Campaign 13 Phase A non-determinism** -- WP1 §1.3 cells 5-6 go from
+non-deterministic (79-90 / 1316-1388) to deterministic (55 / 768, the
+latter the exact Belady floor) -- at the cost of ~2 extra resident chunks
+in the easy case (cells 1-2: 48 -> 50) and mild non-determinism at cell 3.
+This **supersedes session 1's "declared order == Belady-optimal at
+compute=0"**; WP1 §1.4 was re-swept and WP3 figures regenerated this
+session.
+
+**Still unblocked:** whether this is the fix the missing WP0 spec intended,
+its acceptance criteria, and whether a driver-side alternative ("notify =
+FINISHED consuming", which would also move the retention-FIFO release for
+arm E across all policies) is preferred. The policy-side fix was chosen for
+minimal blast radius.
