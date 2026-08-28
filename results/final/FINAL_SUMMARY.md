@@ -4,8 +4,9 @@ The last measurement session. After this the project moves to writeup;
 `results/final/WRITEUP_PACKAGE.md` is the reference for that.
 
 Spec: `docs/overnight/final session.md` (the prompt named `docs/final/FINAL_SESSION.md`;
-it does not exist at that path — BLOCKERS.md NOTE 1). Commits `aff3e02` → `<P5>`,
-all pushed to `origin/main`. Machine exclusive throughout (own sweeps + a
+it does not exist at that path — BLOCKERS.md NOTE 1). Commits `aff3e02` (P1),
+`8227670` (P2), `6a47ca9` (P3), `aae66f0` (P4), `da6f205` (P5), all pushed to
+`origin/main`. Machine exclusive throughout (own sweeps + a
 lightweight 90 s-poll supervisor; no foreign workloads; `pgrep cn-spike|iperf3|gate5`
 clean before/after every phase).
 
