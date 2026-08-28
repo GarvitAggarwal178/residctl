@@ -1,0 +1,313 @@
+=== fresh === B=501MiB memory.max=629MiB ratio=0.25
+=== machine exclusivity (before) ===
+ 16:24:49 up  2:56,  1 user,  load average: 0.13, 0.48, 0.59
+(clean)
+--- config=orig_protect_on_traced rep=0 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    protect_current=on
+    fetchtrace=/root/residctl/results/final/phase3_orig_protect_on_traced_fetch.trace
+    policytrace=/root/residctl/results/final/phase3_orig_protect_on_traced_policy.trace
+>>> WATCHDOG t=100s pid=28976: SIGUSR1 + wchan
+   tid 28976 wchan=handle_userfault
+   tid 28977 wchan=poll_schedule_timeout.constprop.0
+   tid 28978 wchan=futex_do_wait
+   tid 28979 wchan=0
+   tid 28980 wchan=futex_do_wait
+   tid 28981 wchan=futex_do_wait
+   tid 28982 wchan=futex_do_wait
+   tid 28983 wchan=futex_do_wait
+   tid 28984 wchan=futex_do_wait
+   tid 28985 wchan=futex_do_wait
+   tid 28986 wchan=futex_do_wait
+   tid 28987 wchan=futex_do_wait
+   tid 28988 wchan=futex_do_wait
+   mem.events low 0
+   mem.events high 0
+   mem.events max 0
+   mem.events oom 0
+   mem.events oom_kill 0
+   mem.events oom_group_kill 0
+--- config=orig_protect_on_traced rep=0 rc=124 ---
+RESIDCTL_SIGDUMP n_chunks=41 resident=5 resident_unpinned=3 pinned=2 fetching=1 resident_bytes=323018752 budget_bytes=526233600 stat_pin_broken=0 stat_infeasible=0 stat_absent_handled=1142 stat_evictions=1238 stat_prefetches=101
+--- config=default_protect_off rep=1 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    
+--- config=default_protect_off rep=1 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.200,ttft_ms=1243.92,p99_inter_ms=1220.093,wall_s=67.004,tokens_s=0.955,io_read_bytes_load=8671232,io_read_bytes_gen=171705749504
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1689,evictions=3371,infeasible=0,prefetches=1685,pager_bytes_fetched=171705954304,dedup_resident=297,dedup_fetching=662,pin_broken=0,resident_bytes_end=479608832,memory_peak=632201216,handler_p99_ns=134217727,notify_layers=2496
+--- config=protect_on rep=1 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    protect_current=on
+>>> WATCHDOG t=100s pid=29451: SIGUSR1 + wchan
+   tid 29451 wchan=futex_do_wait
+   tid 29452 wchan=poll_schedule_timeout.constprop.0
+   tid 29453 wchan=0
+   tid 29454 wchan=futex_do_wait
+   tid 29455 wchan=futex_do_wait
+   tid 29456 wchan=futex_do_wait
+   tid 29457 wchan=futex_do_wait
+   tid 29458 wchan=futex_do_wait
+   tid 29459 wchan=futex_do_wait
+   tid 29460 wchan=futex_do_wait
+   tid 29461 wchan=handle_userfault
+   tid 29462 wchan=futex_do_wait
+   tid 29463 wchan=futex_do_wait
+   mem.events low 0
+   mem.events high 0
+   mem.events max 0
+   mem.events oom 0
+   mem.events oom_kill 0
+   mem.events oom_group_kill 0
+--- config=protect_on rep=1 rc=124 ---
+RESIDCTL_SIGDUMP n_chunks=41 resident=5 resident_unpinned=3 pinned=2 fetching=1 resident_bytes=403238912 budget_bytes=526233600 stat_pin_broken=0 stat_infeasible=0 stat_absent_handled=1174 stat_evictions=1297 stat_prefetches=128
+--- config=off_retention_none rep=1 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    retention=none
+--- config=off_retention_none rep=1 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.220,ttft_ms=1264.81,p99_inter_ms=1099.812,wall_s=67.575,tokens_s=0.947,io_read_bytes_load=8671232,io_read_bytes_gen=166161637376
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1601,evictions=3264,infeasible=0,prefetches=1666,pager_bytes_fetched=166161899520,dedup_resident=339,dedup_fetching=897,pin_broken=0,resident_bytes_end=479608832,memory_peak=632201216,handler_p99_ns=134217727,notify_layers=2496
+--- config=off_depth1 rep=1 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    prefetch_depth=1
+--- config=off_depth1 rep=1 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.216,ttft_ms=1380.39,p99_inter_ms=1355.253,wall_s=76.401,tokens_s=0.838,io_read_bytes_load=8671232,io_read_bytes_gen=171666137088
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=2236,evictions=3448,infeasible=0,prefetches=1216,pager_bytes_fetched=171666399232,dedup_resident=176,dedup_fetching=486,pin_broken=0,resident_bytes_end=523120640,memory_peak=629956608,handler_p99_ns=134217727,notify_layers=2496
+--- config=off_none_depth1 rep=1 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    retention=none
+    prefetch_depth=1
+--- config=off_none_depth1 rep=1 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.283,ttft_ms=2088.32,p99_inter_ms=1326.529,wall_s=76.199,tokens_s=0.840,io_read_bytes_load=8671232,io_read_bytes_gen=173777162240
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=2193,evictions=3403,infeasible=0,prefetches=1214,pager_bytes_fetched=173777424384,dedup_resident=257,dedup_fetching=477,pin_broken=0,resident_bytes_end=523120640,memory_peak=629305344,handler_p99_ns=134217727,notify_layers=2496
+--- config=default_protect_off rep=2 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    
+--- config=default_protect_off rep=2 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.226,ttft_ms=1323.59,p99_inter_ms=1366.429,wall_s=76.807,tokens_s=0.833,io_read_bytes_load=8671232,io_read_bytes_gen=173081649152
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1706,evictions=3408,infeasible=0,prefetches=1705,pager_bytes_fetched=173081878528,dedup_resident=312,dedup_fetching=787,pin_broken=0,resident_bytes_end=479608832,memory_peak=632471552,handler_p99_ns=134217727,notify_layers=2496
+--- config=protect_on rep=2 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    protect_current=on
+>>> WATCHDOG t=100s pid=30209: SIGUSR1 + wchan
+   tid 30209 wchan=futex_do_wait
+   tid 30210 wchan=poll_schedule_timeout.constprop.0
+   tid 30211 wchan=futex_do_wait
+   tid 30212 wchan=0
+   tid 30213 wchan=futex_do_wait
+   tid 30214 wchan=futex_do_wait
+   tid 30215 wchan=futex_do_wait
+   tid 30216 wchan=handle_userfault
+   tid 30217 wchan=futex_do_wait
+   tid 30218 wchan=futex_do_wait
+   tid 30219 wchan=futex_do_wait
+   tid 30220 wchan=futex_do_wait
+   tid 30221 wchan=futex_do_wait
+   mem.events low 0
+   mem.events high 0
+   mem.events max 0
+   mem.events oom 0
+   mem.events oom_kill 0
+   mem.events oom_group_kill 0
+--- config=protect_on rep=2 rc=124 ---
+RESIDCTL_SIGDUMP n_chunks=41 resident=4 resident_unpinned=2 pinned=2 fetching=1 resident_bytes=147988480 budget_bytes=526233600 stat_pin_broken=0 stat_infeasible=0 stat_absent_handled=1093 stat_evictions=1117 stat_prefetches=28
+--- config=off_retention_none rep=2 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    retention=none
+--- config=off_retention_none rep=2 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.199,ttft_ms=1123.70,p99_inter_ms=1015.295,wall_s=61.806,tokens_s=1.035,io_read_bytes_load=8671232,io_read_bytes_gen=166547972096
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1605,evictions=3274,infeasible=0,prefetches=1672,pager_bytes_fetched=166548226048,dedup_resident=340,dedup_fetching=888,pin_broken=0,resident_bytes_end=479608832,memory_peak=632291328,handler_p99_ns=134217727,notify_layers=2496
+--- config=off_depth1 rep=2 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    prefetch_depth=1
+--- config=off_depth1 rep=2 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.197,ttft_ms=1297.41,p99_inter_ms=1213.311,wall_s=68.640,tokens_s=0.932,io_read_bytes_load=8671232,io_read_bytes_gen=171066265600
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=2223,evictions=3435,infeasible=0,prefetches=1216,pager_bytes_fetched=171066527744,dedup_resident=175,dedup_fetching=474,pin_broken=0,resident_bytes_end=523120640,memory_peak=629739520,handler_p99_ns=134217727,notify_layers=2496
+--- config=off_none_depth1 rep=2 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    retention=none
+    prefetch_depth=1
+--- config=off_none_depth1 rep=2 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.216,ttft_ms=1385.24,p99_inter_ms=1426.040,wall_s=78.574,tokens_s=0.815,io_read_bytes_load=8671232,io_read_bytes_gen=173493112832
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=2185,evictions=3397,infeasible=0,prefetches=1216,pager_bytes_fetched=173493374976,dedup_resident=256,dedup_fetching=473,pin_broken=0,resident_bytes_end=523120640,memory_peak=629612544,handler_p99_ns=134217727,notify_layers=2496
+--- config=default_protect_off rep=3 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    
+--- config=default_protect_off rep=3 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.198,ttft_ms=1209.12,p99_inter_ms=1063.060,wall_s=64.873,tokens_s=0.987,io_read_bytes_load=8671232,io_read_bytes_gen=172481003520
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1698,evictions=3397,infeasible=0,prefetches=1702,pager_bytes_fetched=172481241088,dedup_resident=308,dedup_fetching=806,pin_broken=0,resident_bytes_end=479608832,memory_peak=632156160,handler_p99_ns=134217727,notify_layers=2496
+--- config=protect_on rep=3 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    protect_current=on
+>>> WATCHDOG t=100s pid=30962: SIGUSR1 + wchan
+   tid 30962 wchan=futex_do_wait
+   tid 30963 wchan=poll_schedule_timeout.constprop.0
+   tid 30964 wchan=futex_do_wait
+   tid 30965 wchan=futex_do_wait
+   tid 30966 wchan=futex_do_wait
+   tid 30967 wchan=0
+   tid 30968 wchan=futex_do_wait
+   tid 30969 wchan=futex_do_wait
+   tid 30970 wchan=handle_userfault
+   tid 30971 wchan=futex_do_wait
+   tid 30972 wchan=futex_do_wait
+   tid 30973 wchan=futex_do_wait
+   tid 30974 wchan=futex_do_wait
+   mem.events low 0
+   mem.events high 0
+   mem.events max 0
+   mem.events oom 0
+   mem.events oom_kill 0
+   mem.events oom_group_kill 0
+--- config=protect_on rep=3 rc=124 ---
+RESIDCTL_SIGDUMP n_chunks=41 resident=4 resident_unpinned=2 pinned=2 fetching=1 resident_bytes=147988480 budget_bytes=526233600 stat_pin_broken=1 stat_infeasible=0 stat_absent_handled=1207 stat_evictions=1428 stat_prefetches=225
+--- config=off_retention_none rep=3 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    retention=none
+--- config=off_retention_none rep=3 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.182,ttft_ms=1143.51,p99_inter_ms=1017.605,wall_s=62.534,tokens_s=1.023,io_read_bytes_load=8671232,io_read_bytes_gen=167012044800
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1611,evictions=3287,infeasible=0,prefetches=1679,pager_bytes_fetched=167012298752,dedup_resident=311,dedup_fetching=916,pin_broken=0,resident_bytes_end=479608832,memory_peak=631930880,handler_p99_ns=134217727,notify_layers=2496
+--- config=off_depth1 rep=3 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    prefetch_depth=1
+--- config=off_depth1 rep=3 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.179,ttft_ms=1338.36,p99_inter_ms=1167.868,wall_s=67.617,tokens_s=0.947,io_read_bytes_load=8671232,io_read_bytes_gen=171628441600
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=2237,evictions=3447,infeasible=0,prefetches=1214,pager_bytes_fetched=171628703744,dedup_resident=173,dedup_fetching=490,pin_broken=0,resident_bytes_end=523120640,memory_peak=629858304,handler_p99_ns=134217727,notify_layers=2496
+--- config=off_none_depth1 rep=3 ---
+    model=/root/residctl/models/model.gguf
+    cgroup=/sys/fs/cgroup/residctl_final_p3
+    budget_bytes=526233600
+    policy=layer_order_declared
+    prefetch=on
+    prefetch_depth=2
+    retention=pinned
+    fetch_workers=4
+    eager_reconcile=0
+    retention=none
+    prefetch_depth=1
+--- config=off_none_depth1 rep=3 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.178,ttft_ms=1303.68,p99_inter_ms=1278.807,wall_s=72.227,tokens_s=0.886,io_read_bytes_load=8671232,io_read_bytes_gen=173579866112
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=2189,evictions=3399,infeasible=0,prefetches=1214,pager_bytes_fetched=173580128256,dedup_resident=258,dedup_fetching=467,pin_broken=0,resident_bytes_end=523120640,memory_peak=629866496,handler_p99_ns=134217727,notify_layers=2496
+
+=== machine exclusivity (after) ===
+ 17:03:11 up  3:35,  1 user,  load average: 2.80, 2.23, 1.95
+=== Phase 3 complete: /root/residctl/results/final/phase3_arm_e.csv ===

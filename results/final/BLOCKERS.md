@@ -59,3 +59,30 @@ is the **opposite direction** and ≈ 4× smaller than WP2's original confound
 Phase 1 byte-comparison is therefore modestly *optimistic* for the residctl
 arms at r=0.25 and essentially unaffected at r ≥ 0.5 — noted in
 `phase1_equal_budget.md` and every downstream table.
+
+---
+
+## FINDING 1 (Phase 3) — latent deadlock: prefetch + pinned-retention + protect-current
+
+**When:** Phase 3, characterising arm E's r=0.25 collapse. **Recorded, not
+pursued** (spec: "if a task reveals something new, record it and do not pursue
+it"; Phase 3 caps at the pre-decided mitigation).
+
+**Signature** (4 independent SIGUSR1 dumps at the hang, `protect_current=on`):
+`resident_bytes` 148–403 MiB against a **526 MiB budget** (budget not binding);
+2–3 RESIDENT + unpinned chunks present (victims available); `stat_infeasible=0`,
+`stat_pin_broken=0`; **1 chunk stuck in `FETCHING` with every fetch worker parked
+in `futex_do_wait`**; main thread blocked forever in `handle_userfault`.
+
+**Mechanism (diagnosed, not fixed):** a demand fault deduped against an in-flight
+prefetch waits on a `FETCHING` slot no worker owns, while `--prefetch-retention
+pinned` holds 2 chunks pinned and `--protect-current on` shields the live chunk.
+The `FETCHING` chunk never completes; the fault never resolves.
+
+**Mitigation applied (pre-decided):** `--protect-current off` (Phase 2's new
+default) alone resolves it; `--prefetch-retention none` resolves it with the
+lowest `read_bytes`. See `phase3_arm_e_collapse.md`.
+
+**For the next session:** a 7th concurrency-class issue (cf. the 6 in CLAUDE.md).
+A fix would make the dedup / `ensure_budget` path escalate to `infeasible` or
+reclaim the orphaned `FETCHING` slot instead of spinning. Out of scope here.
