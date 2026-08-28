@@ -1,0 +1,395 @@
+=== config ===
+model=/root/residctl/models/model.gguf
+cgroup=/sys/fs/cgroup/residctl_repro
+budget_bytes=526233600
+policy=layer_order_declared
+prefetch=on
+prefetch_depth=2
+retention=pinned
+fetch_workers=4
+eager_reconcile=0
+protect_current=on
+fetchtrace=results/cleanup/repro_fetch.trace
+policytrace=results/cleanup/repro_policy.trace
+=== WATCHDOG t=45s pid=39096 ===
+  tid 39096 wchan=futex_do_wait comm=wp2_gen
+  tid 39097 wchan=poll_schedule_timeout.constprop.0 comm=wp2_gen
+  tid 39098 wchan=futex_do_wait comm=wp2_gen
+  tid 39099 wchan=0 comm=wp2_gen
+  tid 39100 wchan=futex_do_wait comm=wp2_gen
+  tid 39101 wchan=futex_do_wait comm=wp2_gen
+  tid 39102 wchan=futex_do_wait comm=wp2_gen
+  tid 39103 wchan=futex_do_wait comm=wp2_gen
+  tid 39104 wchan=futex_do_wait comm=wp2_gen
+  tid 39105 wchan=handle_userfault comm=wp2_gen
+  tid 39106 wchan=futex_do_wait comm=wp2_gen
+  tid 39107 wchan=futex_do_wait comm=wp2_gen
+  tid 39108 wchan=futex_do_wait comm=wp2_gen
+  --- gdb thread apply all bt (t=45) ---
+Thread 13 (Thread 0x755316d3f6c0 (LWP 39097) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa061c in __internal_syscall_cancel (a1=128999725722920, a2=1, a3=50, a4=0, a5=0, a6=0, nr=7) at ./nptl/cancellation.c:49
+#2  __syscall_cancel (a1=a1@entry=128999725722920, a2=a2@entry=1, a3=a3@entry=50, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=0, nr=7) at ./nptl/cancellation.c:75
+#3  0x0000755420b27dce in __GI___poll (fds=fds@entry=0x755316d3ed28, nfds=nfds@entry=1, timeout=timeout@entry=50) at ../sysdeps/unix/sysv/linux/poll.c:29
+#4  0x00005ea49424ae04 in poll (__fds=0x755316d3ed28, __nfds=1, __timeout=50) at /usr/include/x86_64-linux-gnu/bits/poll2.h:44
+#5  pager_run (r=0x5ea494254640 <g_r>, stop=<optimized out>, poll_timeout_ms=poll_timeout_ms@entry=50) at pager.c:318
+#6  0x00005ea494247cc9 in pager_trampoline (a=<optimized out>) at residctl_llama.c:305
+#7  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#8  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 12 (Thread 0x75531653e6c0 (LWP 39098) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa058c in __internal_syscall_cancel (a1=a1@entry=128999611173096, a2=<optimized out>, a3=a3@entry=547975596, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=4294967295, nr=202) at ./nptl/cancellation.c:49
+#2  0x0000755420aa0967 in __futex_abstimed_wait_common64 (private=0, futex_word=0x7553100008e8, expected=547975596, op=393, abstime=0x0, cancel=true) at ./nptl/futex-internal.c:57
+#3  __futex_abstimed_wait_common (futex_word=0x7553100008e8, expected=547975596, clockid=0, abstime=0x0, private=0, cancel=true) at ./nptl/futex-internal.c:87
+#4  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7553100008e8, expected=expected@entry=738, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#5  0x0000755420aa3347 in __pthread_cond_wait_common (cond=0x75531000092c, mutex=0x7553100008a0, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:421
+#6  ___pthread_cond_wait (cond=cond@entry=0x7553100008c8, mutex=mutex@entry=0x7553100008a0) at ./nptl/pthread_cond_wait.c:453
+#7  0x00005ea49424e1b3 in worker_main (argp=0x755310000880) at prefetch_pool.c:287
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 11 (Thread 0x755315d3d6c0 (LWP 39099) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa058c in __internal_syscall_cancel (a1=a1@entry=128999611173096, a2=<optimized out>, a3=a3@entry=547975596, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=4294967295, nr=202) at ./nptl/cancellation.c:49
+#2  0x0000755420aa0967 in __futex_abstimed_wait_common64 (private=0, futex_word=0x7553100008e8, expected=547975596, op=393, abstime=0x0, cancel=true) at ./nptl/futex-internal.c:57
+#3  __futex_abstimed_wait_common (futex_word=0x7553100008e8, expected=547975596, clockid=0, abstime=0x0, private=0, cancel=true) at ./nptl/futex-internal.c:87
+#4  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7553100008e8, expected=expected@entry=738, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#5  0x0000755420aa3347 in __pthread_cond_wait_common (cond=0x75531000092c, mutex=0x7553100008a0, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:421
+#6  ___pthread_cond_wait (cond=cond@entry=0x7553100008c8, mutex=mutex@entry=0x7553100008a0) at ./nptl/pthread_cond_wait.c:453
+#7  0x00005ea49424e1b3 in worker_main (argp=0x755310000880) at prefetch_pool.c:287
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 10 (Thread 0x75531553c6c0 (LWP 39100) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa058c in __internal_syscall_cancel (a1=a1@entry=128999611173100, a2=<optimized out>, a3=a3@entry=547975596, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=4294967295, nr=202) at ./nptl/cancellation.c:49
+#2  0x0000755420aa0967 in __futex_abstimed_wait_common64 (private=0, futex_word=0x7553100008ec, expected=547975596, op=393, abstime=0x0, cancel=true) at ./nptl/futex-internal.c:57
+#3  __futex_abstimed_wait_common (futex_word=0x7553100008ec, expected=547975596, clockid=0, abstime=0x0, private=0, cancel=true) at ./nptl/futex-internal.c:87
+#4  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7553100008ec, expected=expected@entry=735, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#5  0x0000755420aa3347 in __pthread_cond_wait_common (cond=0x75531000092c, mutex=0x7553100008a0, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:421
+#6  ___pthread_cond_wait (cond=cond@entry=0x7553100008c8, mutex=mutex@entry=0x7553100008a0) at ./nptl/pthread_cond_wait.c:453
+#7  0x00005ea49424e1b3 in worker_main (argp=0x755310000880) at prefetch_pool.c:287
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 9 (Thread 0x755314d3b6c0 (LWP 39101) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa061c in __internal_syscall_cancel (a1=<optimized out>, a2=3, a3=<optimized out>, a4=<optimized out>, a5=0, a6=0, nr=285) at ./nptl/cancellation.c:49
+#2  __syscall_cancel (a1=<optimized out>, a2=a2@entry=3, a3=<optimized out>, a4=<optimized out>, a5=a5@entry=0, a6=a6@entry=0, nr=285) at ./nptl/cancellation.c:75
+#3  0x0000755420b28e52 in fallocate64 (fd=<optimized out>, mode=mode@entry=3, offset=<optimized out>, len=<optimized out>) at ../sysdeps/unix/sysv/linux/fallocate64.c:27
+#4  0x00005ea49424c03f in evict_chunk (r=r@entry=0x5ea494254640 <g_r>, c=0x5ea497bc9dc0) at budget.c:94
+#5  0x00005ea49424c5df in ensure_budget (r=r@entry=0x5ea494254640 <g_r>, need=175030272) at budget.c:204
+#6  0x00005ea49424e4c3 in do_one_demand (pool=0x755310000880, idx=2) at prefetch_pool.c:77
+#7  worker_main (argp=0x755310000880) at prefetch_pool.c:299
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 8 (Thread 0x75530a9e36c0 (LWP 39102) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 7 (Thread 0x75530a1e26c0 (LWP 39103) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 6 (Thread 0x7553099e16c0 (LWP 39104) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 5 (Thread 0x7553091e06c0 (LWP 39105) "wp2_gen"):
+#0  0x000075542094664f in ggml_vec_dot_q6_K_q8_K () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#1  0x000075542088716d in ggml_compute_forward_mul_mat () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554208894ff in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#3  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#4  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#5  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 4 (Thread 0x7553089df6c0 (LWP 39106) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 3 (Thread 0x7553081de6c0 (LWP 39107) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 2 (Thread 0x7553079dd6c0 (LWP 39108) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 1 (Thread 0x7554215b7c40 (LWP 39096) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215d4709 in GOMP_parallel () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x000075542088b261 in ggml_graph_compute () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#4  0x000075542088b74b in ggml_backend_cpu_graph_compute(ggml_backend*, ggml_cgraph*) () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#5  0x000075542116494c in ggml_backend_sched_graph_compute_async () from /root/residctl/third_party/llama.cpp/build/bin/libggml-base.so.0
+#6  0x00007554212f17d0 in llama_context::graph_compute(ggml_cgraph*, bool) () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#7  0x00007554212f58a9 in llama_context::process_ubatch(llama_ubatch const&, llm_graph_type, llama_memory_context_i*, ggml_status&) () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#8  0x00007554212fc708 in llama_context::decode(llama_batch const&) () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#9  0x00007554212fe522 in llama_decode () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#10 0x00005ea494246664 in main (argc=<optimized out>, argv=<optimized out>) at wp2_gen.cpp:141
+=== WATCHDOG t=75s pid=39096 ===
+  tid 39096 wchan=futex_do_wait comm=wp2_gen
+  tid 39097 wchan=poll_schedule_timeout.constprop.0 comm=wp2_gen
+  tid 39098 wchan=blk_io_schedule comm=wp2_gen
+  tid 39099 wchan=futex_do_wait comm=wp2_gen
+  tid 39100 wchan=0 comm=wp2_gen
+  tid 39101 wchan=futex_do_wait comm=wp2_gen
+  tid 39102 wchan=futex_do_wait comm=wp2_gen
+  tid 39103 wchan=futex_do_wait comm=wp2_gen
+  tid 39104 wchan=futex_do_wait comm=wp2_gen
+  tid 39105 wchan=futex_do_wait comm=wp2_gen
+  tid 39106 wchan=futex_do_wait comm=wp2_gen
+  tid 39107 wchan=handle_userfault comm=wp2_gen
+  tid 39108 wchan=futex_do_wait comm=wp2_gen
+  --- gdb thread apply all bt (t=75) ---
+Thread 13 (Thread 0x755316d3f6c0 (LWP 39097) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa061c in __internal_syscall_cancel (a1=128999725722920, a2=1, a3=50, a4=0, a5=0, a6=0, nr=7) at ./nptl/cancellation.c:49
+#2  __syscall_cancel (a1=a1@entry=128999725722920, a2=a2@entry=1, a3=a3@entry=50, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=0, nr=7) at ./nptl/cancellation.c:75
+#3  0x0000755420b27dce in __GI___poll (fds=fds@entry=0x755316d3ed28, nfds=nfds@entry=1, timeout=timeout@entry=50) at ../sysdeps/unix/sysv/linux/poll.c:29
+#4  0x00005ea49424ae04 in poll (__fds=0x755316d3ed28, __nfds=1, __timeout=50) at /usr/include/x86_64-linux-gnu/bits/poll2.h:44
+#5  pager_run (r=0x5ea494254640 <g_r>, stop=<optimized out>, poll_timeout_ms=poll_timeout_ms@entry=50) at pager.c:318
+#6  0x00005ea494247cc9 in pager_trampoline (a=<optimized out>) at residctl_llama.c:305
+#7  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#8  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 12 (Thread 0x75531653e6c0 (LWP 39098) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa058c in __internal_syscall_cancel (a1=a1@entry=128999611173096, a2=<optimized out>, a3=a3@entry=547975596, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=4294967295, nr=202) at ./nptl/cancellation.c:49
+#2  0x0000755420aa0967 in __futex_abstimed_wait_common64 (private=0, futex_word=0x7553100008e8, expected=547975596, op=393, abstime=0x0, cancel=true) at ./nptl/futex-internal.c:57
+#3  __futex_abstimed_wait_common (futex_word=0x7553100008e8, expected=547975596, clockid=0, abstime=0x0, private=0, cancel=true) at ./nptl/futex-internal.c:87
+#4  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7553100008e8, expected=expected@entry=1266, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#5  0x0000755420aa3347 in __pthread_cond_wait_common (cond=0x75531000092c, mutex=0x7553100008a0, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:421
+#6  ___pthread_cond_wait (cond=cond@entry=0x7553100008c8, mutex=mutex@entry=0x7553100008a0) at ./nptl/pthread_cond_wait.c:453
+#7  0x00005ea49424e1b3 in worker_main (argp=0x755310000880) at prefetch_pool.c:287
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 11 (Thread 0x755315d3d6c0 (LWP 39099) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa058c in __internal_syscall_cancel (a1=a1@entry=128999611173100, a2=<optimized out>, a3=a3@entry=547975596, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=4294967295, nr=202) at ./nptl/cancellation.c:49
+#2  0x0000755420aa0967 in __futex_abstimed_wait_common64 (private=0, futex_word=0x7553100008ec, expected=547975596, op=393, abstime=0x0, cancel=true) at ./nptl/futex-internal.c:57
+#3  __futex_abstimed_wait_common (futex_word=0x7553100008ec, expected=547975596, clockid=0, abstime=0x0, private=0, cancel=true) at ./nptl/futex-internal.c:87
+#4  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7553100008ec, expected=expected@entry=1269, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#5  0x0000755420aa3347 in __pthread_cond_wait_common (cond=0x75531000092c, mutex=0x7553100008a0, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:421
+#6  ___pthread_cond_wait (cond=cond@entry=0x7553100008c8, mutex=mutex@entry=0x7553100008a0) at ./nptl/pthread_cond_wait.c:453
+#7  0x00005ea49424e1b3 in worker_main (argp=0x755310000880) at prefetch_pool.c:287
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 10 (Thread 0x75531553c6c0 (LWP 39100) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa058c in __internal_syscall_cancel (a1=a1@entry=128999611173100, a2=<optimized out>, a3=a3@entry=547975596, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=4294967295, nr=202) at ./nptl/cancellation.c:49
+#2  0x0000755420aa0967 in __futex_abstimed_wait_common64 (private=0, futex_word=0x7553100008ec, expected=547975596, op=393, abstime=0x0, cancel=true) at ./nptl/futex-internal.c:57
+#3  __futex_abstimed_wait_common (futex_word=0x7553100008ec, expected=547975596, clockid=0, abstime=0x0, private=0, cancel=true) at ./nptl/futex-internal.c:87
+#4  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7553100008ec, expected=expected@entry=1269, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#5  0x0000755420aa3347 in __pthread_cond_wait_common (cond=0x75531000092c, mutex=0x7553100008a0, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:421
+#6  ___pthread_cond_wait (cond=cond@entry=0x7553100008c8, mutex=mutex@entry=0x7553100008a0) at ./nptl/pthread_cond_wait.c:453
+#7  0x00005ea49424e1b3 in worker_main (argp=0x755310000880) at prefetch_pool.c:287
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 9 (Thread 0x755314d3b6c0 (LWP 39101) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa061c in __internal_syscall_cancel (a1=<optimized out>, a2=129002323873792, a3=175030272, a4=261206016, a5=0, a6=0, nr=17) at ./nptl/cancellation.c:49
+#2  __syscall_cancel (a1=<optimized out>, a2=a2@entry=129002323873792, a3=a3@entry=175030272, a4=a4@entry=261206016, a5=a5@entry=0, a6=a6@entry=0, nr=17) at ./nptl/cancellation.c:75
+#3  0x0000755420b0438c in __libc_pread64 (fd=<optimized out>, buf=buf@entry=0x7553b1b09000, count=count@entry=175030272, offset=offset@entry=261206016) at ../sysdeps/unix/sysv/linux/pread64.c:25
+#4  0x00005ea49424b918 in pread (__fd=<optimized out>, __buf=0x7553b1b09000, __nbytes=175030272, __offset=261206016) at /usr/include/x86_64-linux-gnu/bits/unistd.h:46
+#5  fetch_read (r=0x5ea494254640 <g_r>, c=0x5ea497bc9e60) at fetch.c:72
+#6  fetch_chunk (r=r@entry=0x5ea494254640 <g_r>, c=c@entry=0x5ea497bc9e60, out_timing=0x755314d3ad80) at fetch.c:119
+#7  0x00005ea49424e537 in do_one_demand (pool=0x755310000880, idx=2) at prefetch_pool.c:113
+#8  worker_main (argp=0x755310000880) at prefetch_pool.c:299
+#9  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#10 0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 8 (Thread 0x75530a9e36c0 (LWP 39102) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 7 (Thread 0x75530a1e26c0 (LWP 39103) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 6 (Thread 0x7553099e16c0 (LWP 39104) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 5 (Thread 0x7553091e06c0 (LWP 39105) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 4 (Thread 0x7553089df6c0 (LWP 39106) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 3 (Thread 0x7553081de6c0 (LWP 39107) "wp2_gen"):
+#0  0x000075542094664f in ggml_vec_dot_q6_K_q8_K () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#1  0x000075542088716d in ggml_compute_forward_mul_mat () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554208894ff in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#3  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#4  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#5  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 2 (Thread 0x7553079dd6c0 (LWP 39108) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 1 (Thread 0x7554215b7c40 (LWP 39096) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215d4709 in GOMP_parallel () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x000075542088b261 in ggml_graph_compute () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#4  0x000075542088b74b in ggml_backend_cpu_graph_compute(ggml_backend*, ggml_cgraph*) () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#5  0x000075542116494c in ggml_backend_sched_graph_compute_async () from /root/residctl/third_party/llama.cpp/build/bin/libggml-base.so.0
+#6  0x00007554212f17d0 in llama_context::graph_compute(ggml_cgraph*, bool) () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#7  0x00007554212f58a9 in llama_context::process_ubatch(llama_ubatch const&, llm_graph_type, llama_memory_context_i*, ggml_status&) () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#8  0x00007554212fc708 in llama_context::decode(llama_batch const&) () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#9  0x00007554212fe522 in llama_decode () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#10 0x00005ea494246664 in main (argc=<optimized out>, argv=<optimized out>) at wp2_gen.cpp:141
+=== WATCHDOG t=110s pid=39096 ===
+  tid 39096 wchan=futex_do_wait comm=wp2_gen
+  tid 39097 wchan=poll_schedule_timeout.constprop.0 comm=wp2_gen
+  tid 39098 wchan=futex_do_wait comm=wp2_gen
+  tid 39099 wchan=futex_do_wait comm=wp2_gen
+  tid 39100 wchan=futex_do_wait comm=wp2_gen
+  tid 39101 wchan=blk_io_schedule comm=wp2_gen
+  tid 39102 wchan=futex_do_wait comm=wp2_gen
+  tid 39103 wchan=futex_do_wait comm=wp2_gen
+  tid 39104 wchan=futex_do_wait comm=wp2_gen
+  tid 39105 wchan=handle_userfault comm=wp2_gen
+  tid 39106 wchan=futex_do_wait comm=wp2_gen
+  tid 39107 wchan=futex_do_wait comm=wp2_gen
+  tid 39108 wchan=futex_do_wait comm=wp2_gen
+  --- gdb thread apply all bt (t=110) ---
+Thread 13 (Thread 0x755316d3f6c0 (LWP 39097) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa061c in __internal_syscall_cancel (a1=128999725722920, a2=1, a3=50, a4=0, a5=0, a6=0, nr=7) at ./nptl/cancellation.c:49
+#2  __syscall_cancel (a1=a1@entry=128999725722920, a2=a2@entry=1, a3=a3@entry=50, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=0, nr=7) at ./nptl/cancellation.c:75
+#3  0x0000755420b27dce in __GI___poll (fds=fds@entry=0x755316d3ed28, nfds=nfds@entry=1, timeout=timeout@entry=50) at ../sysdeps/unix/sysv/linux/poll.c:29
+#4  0x00005ea49424ae04 in poll (__fds=0x755316d3ed28, __nfds=1, __timeout=50) at /usr/include/x86_64-linux-gnu/bits/poll2.h:44
+#5  pager_run (r=0x5ea494254640 <g_r>, stop=<optimized out>, poll_timeout_ms=poll_timeout_ms@entry=50) at pager.c:318
+#6  0x00005ea494247cc9 in pager_trampoline (a=<optimized out>) at residctl_llama.c:305
+#7  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#8  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 12 (Thread 0x75531653e6c0 (LWP 39098) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa058c in __internal_syscall_cancel (a1=a1@entry=128999611173096, a2=<optimized out>, a3=a3@entry=547975596, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=4294967295, nr=202) at ./nptl/cancellation.c:49
+#2  0x0000755420aa0967 in __futex_abstimed_wait_common64 (private=0, futex_word=0x7553100008e8, expected=547975596, op=393, abstime=0x0, cancel=true) at ./nptl/futex-internal.c:57
+#3  __futex_abstimed_wait_common (futex_word=0x7553100008e8, expected=547975596, clockid=0, abstime=0x0, private=0, cancel=true) at ./nptl/futex-internal.c:87
+#4  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7553100008e8, expected=expected@entry=1869, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#5  0x0000755420aa3347 in __pthread_cond_wait_common (cond=0x75531000092c, mutex=0x7553100008a0, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:421
+#6  ___pthread_cond_wait (cond=cond@entry=0x7553100008c8, mutex=mutex@entry=0x7553100008a0) at ./nptl/pthread_cond_wait.c:453
+#7  0x00005ea49424e1b3 in worker_main (argp=0x755310000880) at prefetch_pool.c:287
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 11 (Thread 0x755315d3d6c0 (LWP 39099) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa058c in __internal_syscall_cancel (a1=a1@entry=128999611173096, a2=<optimized out>, a3=a3@entry=547975596, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=4294967295, nr=202) at ./nptl/cancellation.c:49
+#2  0x0000755420aa0967 in __futex_abstimed_wait_common64 (private=0, futex_word=0x7553100008e8, expected=547975596, op=393, abstime=0x0, cancel=true) at ./nptl/futex-internal.c:57
+#3  __futex_abstimed_wait_common (futex_word=0x7553100008e8, expected=547975596, clockid=0, abstime=0x0, private=0, cancel=true) at ./nptl/futex-internal.c:87
+#4  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7553100008e8, expected=expected@entry=1869, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#5  0x0000755420aa3347 in __pthread_cond_wait_common (cond=0x75531000092c, mutex=0x7553100008a0, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:421
+#6  ___pthread_cond_wait (cond=cond@entry=0x7553100008c8, mutex=mutex@entry=0x7553100008a0) at ./nptl/pthread_cond_wait.c:453
+#7  0x00005ea49424e1b3 in worker_main (argp=0x755310000880) at prefetch_pool.c:287
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 10 (Thread 0x75531553c6c0 (LWP 39100) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa061c in __internal_syscall_cancel (a1=<optimized out>, a2=129002068623360, a3=255250432, a4=5955584, a5=0, a6=0, nr=17) at ./nptl/cancellation.c:49
+#2  __syscall_cancel (a1=<optimized out>, a2=a2@entry=129002068623360, a3=a3@entry=255250432, a4=a4@entry=5955584, a5=a5@entry=0, a6=a6@entry=0, nr=17) at ./nptl/cancellation.c:75
+#3  0x0000755420b0438c in __libc_pread64 (fd=<optimized out>, buf=buf@entry=0x7553a279c000, count=count@entry=255250432, offset=offset@entry=5955584) at ../sysdeps/unix/sysv/linux/pread64.c:25
+#4  0x00005ea49424b918 in pread (__fd=<optimized out>, __buf=0x7553a279c000, __nbytes=255250432, __offset=5955584) at /usr/include/x86_64-linux-gnu/bits/unistd.h:46
+#5  fetch_read (r=0x5ea494254640 <g_r>, c=0x5ea497bc9dc0) at fetch.c:72
+#6  fetch_chunk (r=r@entry=0x5ea494254640 <g_r>, c=c@entry=0x5ea497bc9dc0, out_timing=0x75531553bd80) at fetch.c:119
+#7  0x00005ea49424e537 in do_one_demand (pool=0x755310000880, idx=1) at prefetch_pool.c:113
+#8  worker_main (argp=0x755310000880) at prefetch_pool.c:299
+#9  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#10 0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 9 (Thread 0x755314d3b6c0 (LWP 39101) "wp2_gen"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/x86_64/syscall_cancel.S:56
+#1  0x0000755420aa058c in __internal_syscall_cancel (a1=a1@entry=128999611173096, a2=<optimized out>, a3=a3@entry=547975596, a4=a4@entry=0, a5=a5@entry=0, a6=a6@entry=4294967295, nr=202) at ./nptl/cancellation.c:49
+#2  0x0000755420aa0967 in __futex_abstimed_wait_common64 (private=0, futex_word=0x7553100008e8, expected=547975596, op=393, abstime=0x0, cancel=true) at ./nptl/futex-internal.c:57
+#3  __futex_abstimed_wait_common (futex_word=0x7553100008e8, expected=547975596, clockid=0, abstime=0x0, private=0, cancel=true) at ./nptl/futex-internal.c:87
+#4  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7553100008e8, expected=expected@entry=1869, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=0) at ./nptl/futex-internal.c:139
+#5  0x0000755420aa3347 in __pthread_cond_wait_common (cond=0x75531000092c, mutex=0x7553100008a0, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:421
+#6  ___pthread_cond_wait (cond=cond@entry=0x7553100008c8, mutex=mutex@entry=0x7553100008a0) at ./nptl/pthread_cond_wait.c:453
+#7  0x00005ea49424e1b3 in worker_main (argp=0x755310000880) at prefetch_pool.c:287
+#8  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#9  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 8 (Thread 0x75530a9e36c0 (LWP 39102) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 7 (Thread 0x75530a1e26c0 (LWP 39103) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 6 (Thread 0x7553099e16c0 (LWP 39104) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 5 (Thread 0x7553091e06c0 (LWP 39105) "wp2_gen"):
+#0  0x000075542094664f in ggml_vec_dot_q6_K_q8_K () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#1  0x000075542088716d in ggml_compute_forward_mul_mat () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554208894ff in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#3  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#4  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#5  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 4 (Thread 0x7553089df6c0 (LWP 39106) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 3 (Thread 0x7553081de6c0 (LWP 39107) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 2 (Thread 0x7553079dd6c0 (LWP 39108) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215deb5f in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x0000755420aa407a in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:454
+#4  0x0000755420b3772c in __GI___clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+Thread 1 (Thread 0x7554215b7c40 (LWP 39096) "wp2_gen"):
+#0  0x00007554215e1cc3 in ?? () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#1  0x0000755420887b41 in ggml_graph_compute_thread.isra () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#2  0x00007554215d4709 in GOMP_parallel () from /usr/lib/x86_64-linux-gnu/libgomp.so.1
+#3  0x000075542088b261 in ggml_graph_compute () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#4  0x000075542088b74b in ggml_backend_cpu_graph_compute(ggml_backend*, ggml_cgraph*) () from /root/residctl/third_party/llama.cpp/build/bin/libggml-cpu.so.0
+#5  0x000075542116494c in ggml_backend_sched_graph_compute_async () from /root/residctl/third_party/llama.cpp/build/bin/libggml-base.so.0
+#6  0x00007554212f17d0 in llama_context::graph_compute(ggml_cgraph*, bool) () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#7  0x00007554212f58a9 in llama_context::process_ubatch(llama_ubatch const&, llm_graph_type, llama_memory_context_i*, ggml_status&) () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#8  0x00007554212fc708 in llama_context::decode(llama_batch const&) () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#9  0x00007554212fe522 in llama_decode () from /root/residctl/third_party/llama.cpp/build/bin/libllama.so.0
+#10 0x00005ea494246664 in main (argc=<optimized out>, argv=<optimized out>) at wp2_gen.cpp:141
+=== rc=124 ===
+set_abort_callback: call
+RESIDCTL_SIGDUMP2 reserved_bytes=255250432 pinned_prefetch_len=2 fetching_idx=1 fetching_len=255250432 stat_prefetch_declined=204 stat_prefetch_infeasible=204 stat_dedup_fetching=36 stat_dedup_resident=50 stat_bytes_fetched=93248249856
+RESIDCTL_SIGDUMP n_chunks=41 resident=4 resident_unpinned=2 pinned=2 fetching=1 resident_bytes=147988480 budget_bytes=526233600 stat_pin_broken=0 stat_infeasible=0 stat_absent_handled=450 stat_evictions=523 stat_prefetches=77
+RESIDCTL_SIGDUMP2 reserved_bytes=175030272 pinned_prefetch_len=2 fetching_idx=2 fetching_len=175030272 stat_prefetch_declined=343 stat_prefetch_infeasible=343 stat_dedup_fetching=59 stat_dedup_resident=99 stat_bytes_fetched=157997346816
+RESIDCTL_SIGDUMP n_chunks=41 resident=4 resident_unpinned=2 pinned=2 fetching=1 resident_bytes=147988480 budget_bytes=526233600 stat_pin_broken=1 stat_infeasible=0 stat_absent_handled=767 stat_evictions=917 stat_prefetches=154
+RESIDCTL_SIGDUMP2 reserved_bytes=175030272 pinned_prefetch_len=2 fetching_idx=2 fetching_len=175030272 stat_prefetch_declined=505 stat_prefetch_infeasible=505 stat_dedup_fetching=82 stat_dedup_resident=148 stat_bytes_fetched=232817930240
+RESIDCTL_SIGDUMP n_chunks=41 resident=4 resident_unpinned=2 pinned=2 fetching=1 resident_bytes=147988480 budget_bytes=526233600 stat_pin_broken=2 stat_infeasible=0 stat_absent_handled=1131 stat_evictions=1358 stat_prefetches=231

@@ -2,6 +2,7 @@
 #define _GNU_SOURCE
 #include "prefetch.h"
 #include "policy.h"
+#include "pager.h"    // CLEANUP session: pager_abandon_fetch()
 #include "budget.h"
 #include "fetch.h"
 #include "trace.h"
@@ -44,6 +45,7 @@ void maybe_prefetch(region_t *r, chunk_t *just_resident) {
     uint64_t t_start = now_ns();
     target->pin++; // I-4: never punched while a prefetch targets it
     target->state = CHUNK_FETCHING;
+    target->fetching_since_ns = t_start; // CLEANUP session: FETCHING watchdog clock
     uint64_t seq = __sync_add_and_fetch(&r->fault_seq, 1); // Task B: atomic, see pager.c's note
     target->last_fault_seq = seq;
     if (r->trace)
@@ -67,10 +69,13 @@ void maybe_prefetch(region_t *r, chunk_t *just_resident) {
 
     if (budget_rc != 0) {
         // Infeasible: abandon this prefetch, not fatal (§7/§11 censoring
-        // logic already ran inside ensure_budget). The chunk stays ABSENT
-        // and will be fetched normally on a real fault later.
-        target->state = CHUNK_ABSENT;
+        // logic already ran inside ensure_budget). CLEANUP session (part a):
+        // reset FETCHING + UFFDIO_WAKE via pager_abandon_fetch so any faulter
+        // that deduped against this window is not left blocked (matters only
+        // when a fetch pool runs under --sync-handler at depth>1; harmless
+        // otherwise).
         target->pin--;
+        pager_abandon_fetch(r, target); // -> ABSENT, fetching_since_ns=0, WAKE
         r->stat_prefetch_infeasible++;
         pthread_mutex_unlock(&target->lock);
         return;
@@ -84,6 +89,7 @@ void maybe_prefetch(region_t *r, chunk_t *just_resident) {
     // the other two call sites so all three reason about it the same way.
     commit_reserved(r, target->len); // moves the ensure_budget() reservation into resident_bytes
     target->state = CHUNK_RESIDENT;
+    target->fetching_since_ns = 0; // CLEANUP session: left FETCHING
     r->stat_bytes_fetched += target->len; // Defect 3: pager's own byte accounting
     // item 10d Task C (A-9): mirrors prefetch_pool.c's do_one_prefetch --
     // under --prefetch-retention pinned (default), keep target pinned via

@@ -35,4 +35,14 @@ chunk_t *pager_lookup(region_t *r, uint64_t rel_off);
 // own true reference sequence regardless of hit/miss.
 void pager_notify_access(region_t *r, chunk_t *c);
 
+// CLEANUP session (7th concurrency-class fix, part a): abandon an in-flight
+// fetch of chunk c -- reset its state to CHUNK_ABSENT, clear fetching_since_ns,
+// and issue UFFDIO_WAKE over the chunk's range so any faulter that deduped
+// against this FETCHING episode (handle_fault's CHUNK_FETCHING branch drops
+// the message assuming a future CONTINUE will wake it) refaults and retries
+// instead of blocking forever. Caller MUST hold c->lock. Used by every
+// budget-infeasible / prefetch-declined drop path in pager.c, prefetch_pool.c
+// and prefetch.c, and by pager_run()'s FETCHING watchdog.
+void pager_abandon_fetch(region_t *r, chunk_t *c);
+
 #endif

@@ -42,10 +42,27 @@ static uint64_t now_ns(void) {
     return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
 }
 
+// CLEANUP session (7th concurrency-class fix, part a). Caller holds c->lock.
+void pager_abandon_fetch(region_t *r, chunk_t *c) {
+    c->state = CHUNK_ABSENT;
+    c->fetching_since_ns = 0;
+    struct uffdio_range range;
+    range.start = (unsigned long)(r->map_a + c->region_off);
+    range.len = c->len;
+    // UFFDIO_WAKE unblocks any thread that faulted on this range and whose
+    // message the dispatcher dropped (handle_fault's CHUNK_FETCHING branch)
+    // expecting a CONTINUE that will now never come. EAGAIN / harmless races
+    // (the fault may have been resolved already) are ignored.
+    if (ioctl(r->uffd, UFFDIO_WAKE, &range) != 0 && errno != EAGAIN)
+        fprintf(stderr, "pager_abandon_fetch: UFFDIO_WAKE failed (region_off=%llu): %s\n",
+                (unsigned long long)c->region_off, strerror(errno));
+}
+
 static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
     uint64_t t_start = now_ns();
 
     c->state = CHUNK_FETCHING;
+    c->fetching_since_ns = t_start;
     // Task B: fault_seq is shared with prefetch_pool workers once depth>1,
     // so this must be a genuine atomic increment, not `++r->fault_seq`
     // (a plain non-atomic read-modify-write would race). Capture the
@@ -95,11 +112,14 @@ static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
         // Infeasible at this budget (§7/§11's censoring rule, not a bug --
         // reconcile() already ran inside ensure_budget and would have
         // aborted if OUR accounting disagreed with the kernel's). Revert to
-        // ABSENT so a later fault can retry once budget frees up; drop this
-        // fault message the same way the FETCHING branch does (don't wait,
-        // don't issue I/O). The faulting thread stays blocked -- that's the
-        // correct, honest behaviour when the workload doesn't fit budget B.
-        c->state = CHUNK_ABSENT;
+        // ABSENT so a later fault can retry once budget frees up.
+        // CLEANUP session (part a): also UFFDIO_WAKE -- under the async
+        // handler a faulter that deduped against this FETCHING episode is
+        // otherwise never woken (the old "the faulting thread stays blocked"
+        // comment was correct only for the SYNC handler that returned the
+        // fault so a later touch could re-trigger handle_absent; the async
+        // dispatcher already read the message and there is no "later touch").
+        pager_abandon_fetch(r, c);
         return;
     }
     fetch_timing_t timing;
@@ -122,6 +142,7 @@ static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
     // right before returning.
     commit_reserved_and_pin(r, c, c->len);
     c->state = CHUNK_RESIDENT;
+    c->fetching_since_ns = 0; // CLEANUP session: left FETCHING
     r->stat_bytes_fetched += c->len; // Defect 3: pager's own byte accounting
     if (r->policy && r->policy->on_resident) r->policy->on_resident(r, c);
     if (r->prefetch_enabled) {
@@ -160,6 +181,7 @@ static void handle_absent(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
 static void handle_absent_dispatch(region_t *r, chunk_t *c, uint8_t trace_fault_type) {
     uint64_t t_entry = now_ns(); // item 10d Task B: dispatch latency, entry to enqueue (diagnostic)
     c->state = CHUNK_FETCHING;
+    c->fetching_since_ns = t_entry; // CLEANUP session: FETCHING watchdog clock
     uint64_t seq = __sync_add_and_fetch(&r->fault_seq, 1); // shared with fetch-pool workers; see budget.c note
     c->last_fault_seq = seq;
     if (r->trace)
@@ -238,6 +260,41 @@ static void handle_fault(region_t *r, uint64_t fault_addr, bool was_minor) {
     pthread_mutex_unlock(&c->lock);
 }
 
+// CLEANUP session (7th concurrency-class fix, part b): the FETCHING-state
+// watchdog. Runs on every dispatch-loop iteration (never blocks -- A-5). A
+// chunk that has been CHUNK_FETCHING for longer than r->fetching_timeout_ms
+// with NO worker in its fetch critical section (c->lock free -- checked via
+// trylock, so this itself never blocks) is an orphaned slot: some path set it
+// FETCHING and neither completed the fetch nor reset the state. Reclaim it --
+// reset to ABSENT, wake any deduped faulter, count it. Part (a) should make
+// this never fire; if stat_fetching_timeout > 0 in a run, part (a) missed a
+// path and the offending chunk id is logged here.
+static void pager_fetching_watchdog(region_t *r) {
+    uint32_t timeout_ms = r->fetching_timeout_ms ? r->fetching_timeout_ms : 30000;
+    uint64_t now = now_ns();
+    uint64_t timeout_ns = (uint64_t)timeout_ms * 1000000ULL;
+    for (uint32_t i = 0; i < r->n_chunks; i++) {
+        chunk_t *c = &r->chunks[i];
+        // Cheap unlocked pre-check -- both fields are plain scalars; a stale
+        // read only costs us one extra loop iteration before we act.
+        if (c->state != CHUNK_FETCHING) continue;
+        uint64_t since = c->fetching_since_ns;
+        if (since == 0 || now - since < timeout_ns) continue;
+        if (pthread_mutex_trylock(&c->lock) != 0)
+            continue; // a worker owns c->lock => a real fetch is in progress => not orphaned
+        if (c->state == CHUNK_FETCHING && c->fetching_since_ns != 0 &&
+            now - c->fetching_since_ns >= timeout_ns) {
+            fprintf(stderr, "pager: FETCHING watchdog reclaimed orphaned chunk %u "
+                    "(region_off=%llu len=%llu, stuck %.1fs) -- part (a) missed a reset path\n",
+                    i, (unsigned long long)c->region_off, (unsigned long long)c->len,
+                    (double)(now - c->fetching_since_ns) / 1e9);
+            pager_abandon_fetch(r, c);          // -> ABSENT, fetching_since_ns=0, UFFDIO_WAKE
+            __sync_fetch_and_add(&r->stat_fetching_timeout, 1);
+        }
+        pthread_mutex_unlock(&c->lock);
+    }
+}
+
 void pager_run(region_t *r, volatile sig_atomic_t *stop, int poll_timeout_ms) {
     struct pollfd pfd = { .fd = r->uffd, .events = POLLIN };
 
@@ -253,6 +310,11 @@ void pager_run(region_t *r, volatile sig_atomic_t *stop, int poll_timeout_ms) {
         prefetch_pool_start(r, r->fetch_workers);
 
     while (!*stop) {
+        // CLEANUP session (part b): FETCHING watchdog on every iteration --
+        // before poll (catches an orphan while the queue is quiet) and, via
+        // the loop, after every drain batch too. Never blocks (trylock).
+        if (r->async_handler) pager_fetching_watchdog(r);
+
         int pr = poll(&pfd, 1, poll_timeout_ms); // advisory only (I-2)
         if (pr < 0) {
             if (errno == EINTR) continue;

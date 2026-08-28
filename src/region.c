@@ -309,6 +309,8 @@ static void compute_budget(region_t *r, const region_config_t *cfg, const run_ma
     r->fetch_workers = cfg->fetch_workers ? cfg->fetch_workers : 4; // item 10c
     r->prefetch_admission_always = cfg->prefetch_admission_always; // item 10c Task B: guarded is the default
     r->prefetch_retention_pinned = !cfg->prefetch_retention_none; // item 10d Task C: pinned is the default
+    r->fetching_timeout_ms = cfg->fetching_timeout_ms ? cfg->fetching_timeout_ms : 30000; // CLEANUP session, part b
+    r->stat_fetching_timeout = 0;
     r->pinned_prefetch_cap = r->prefetch_depth > 0 ? r->prefetch_depth : 1;
     r->pinned_prefetch_queue = calloc(r->pinned_prefetch_cap, sizeof(uint32_t));
     if (!r->pinned_prefetch_queue)

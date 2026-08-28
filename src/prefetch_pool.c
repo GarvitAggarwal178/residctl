@@ -2,6 +2,7 @@
 #define _GNU_SOURCE
 #include "prefetch_pool.h"
 #include "policy.h"
+#include "pager.h"    // CLEANUP session: pager_abandon_fetch()
 #include "budget.h"
 #include "fetch.h"
 #include "trace.h"
@@ -93,10 +94,17 @@ static void do_one_demand(prefetch_pool_t *pool, uint32_t idx) {
         }
     }
     if (budget_rc != 0) {
-        // Infeasible at this budget (§7/§11 censoring rule). Revert to
-        // ABSENT and drop -- the faulting thread(s) stay blocked, same
-        // honest behavior as the pre-item-10c synchronous handler.
-        c->state = CHUNK_ABSENT;
+        // Infeasible at this budget (§7/§11 censoring rule). Revert to ABSENT.
+        // CLEANUP session (7th concurrency-class fix, part a): ALSO UFFDIO_WAKE.
+        // The old comment ("the faulting thread(s) stay blocked, same honest
+        // behavior as the ... synchronous handler") was WRONG for the async
+        // path: the dispatcher already consumed the uffd message, and every
+        // faulter that deduped against this FETCHING episode (handle_fault's
+        // CHUNK_FETCHING branch) is waiting on a CONTINUE that will never come.
+        // pager_abandon_fetch() wakes them so they refault and retry once
+        // budget frees. This is the primary cause of the arm-E r<=0.375
+        // deadlock (see results/cleanup/phase1_deadlock_fix.md).
+        pager_abandon_fetch(r, c); // -> ABSENT, fetching_since_ns=0, UFFDIO_WAKE
         pthread_mutex_unlock(&c->lock);
         return;
     }
@@ -109,6 +117,7 @@ static void do_one_demand(prefetch_pool_t *pool, uint32_t idx) {
     // about to need budget_lock via commit_reserved.
     commit_reserved_and_pin(r, c, c->len); // item 10b fix #3: pin atomically with the commit
     c->state = CHUNK_RESIDENT;
+    c->fetching_since_ns = 0; // CLEANUP session: left FETCHING
     // item 10c: multiple fetch-pool workers now increment these stat
     // counters concurrently (previously only reachable from >1 thread at
     // prefetch_depth>1's OLD prefetch-only pool, and even then this exact
@@ -150,6 +159,16 @@ static void do_one_demand(prefetch_pool_t *pool, uint32_t idx) {
         rec->t_dispatch_enqueue_ns = dispatch_enqueue_ns;
     }
 
+    // CLEANUP session (part a): a demand worker must never leave a chunk in
+    // CHUNK_FETCHING -- every exit path resolves it to RESIDENT (this one) or,
+    // on budget-infeasible, to ABSENT via pager_abandon_fetch(). Held under
+    // c->lock, so no re-fault race.
+    if (c->state == CHUNK_FETCHING) {
+        fprintf(stderr, "PAGER FAILED: do_one_demand left chunk %u in CHUNK_FETCHING "
+                "(7th-bug regression -- an exit path skipped the state reset)\n",
+                (uint32_t)(c - r->chunks));
+        abort();
+    }
     pthread_mutex_unlock(&c->lock);
 }
 
@@ -182,6 +201,7 @@ static void do_one_prefetch(prefetch_pool_t *pool, uint32_t idx) {
     // forward silently.
     pin_chunk(r, target); // I-4: never punched while this prefetch targets it
     target->state = CHUNK_FETCHING;
+    target->fetching_since_ns = t_start; // CLEANUP session: FETCHING watchdog clock
     uint64_t seq = __sync_add_and_fetch(&r->fault_seq, 1); // atomic: shared across workers + handler
     target->last_fault_seq = seq;
     if (r->trace)
@@ -195,12 +215,16 @@ static void do_one_prefetch(prefetch_pool_t *pool, uint32_t idx) {
     int budget_rc = ensure_budget_prefetch(r, target);
 
     if (budget_rc != 0) {
-        // Infeasible: abandon this prefetch, not fatal -- "a prefetch that
-        // would force eviction of a pinned chunk is dropped, not forced"
-        // (ensure_budget's infeasible return already means no evictable,
-        // unpinned victim existed).
-        target->state = CHUNK_ABSENT;
+        // Infeasible / declined: abandon this prefetch, not fatal.
+        // CLEANUP session (part a): reset FETCHING + UFFDIO_WAKE. A demand
+        // fault can dedup against this brief FETCHING window (target->lock is
+        // held throughout, so handle_fault blocks on it and then sees the
+        // reset state -- but pager_abandon_fetch's WAKE also covers a faulter
+        // that got past the lock in the gap between our unlock and its
+        // handle_fault, which the FETCHING watchdog would otherwise have to
+        // catch 30 s later).
         unpin_chunk(r, target); // item 10d: was a bare `target->pin--` -- see pin_chunk()'s note above
+        pager_abandon_fetch(r, target); // -> ABSENT, fetching_since_ns=0, WAKE
         __sync_fetch_and_add(&r->stat_prefetch_infeasible, 1);
         pthread_mutex_unlock(&target->lock);
         return;
@@ -213,6 +237,7 @@ static void do_one_prefetch(prefetch_pool_t *pool, uint32_t idx) {
     // --prefetch-depth 8 in item 10b, not a hypothetical).
     commit_reserved(r, target->len);
     target->state = CHUNK_RESIDENT;
+    target->fetching_since_ns = 0; // CLEANUP session: left FETCHING
     __sync_fetch_and_add(&r->stat_bytes_fetched, target->len); // item 10c: now genuinely concurrent, see do_one_demand's note
     // item 10d Task C (A-9): under --prefetch-retention pinned (the
     // default), keep target pinned and register it in the bounded
@@ -243,6 +268,12 @@ static void do_one_prefetch(prefetch_pool_t *pool, uint32_t idx) {
         rec->bytes_read = target->len;
     }
 
+    // CLEANUP session (part a): same invariant as do_one_demand -- a prefetch
+    // worker must never leave a chunk in CHUNK_FETCHING.
+    if (target->state == CHUNK_FETCHING) {
+        fprintf(stderr, "PAGER FAILED: do_one_prefetch left chunk %u in CHUNK_FETCHING\n", idx);
+        abort();
+    }
     pthread_mutex_unlock(&target->lock);
 }
 

@@ -32,6 +32,15 @@ typedef struct {
     // prefetch_pool.c's do_one_demand()), and both sides hold c->lock.
     uint64_t diag_dispatch_entry_ns;
     uint64_t diag_dispatch_enqueue_ns;
+
+    // CLEANUP session: monotonic ns timestamp of the CHUNK_FETCHING transition
+    // (0 whenever the chunk is not FETCHING). pager_run()'s never-blocking
+    // dispatch loop watchdogs this: any chunk FETCHING longer than
+    // r->fetching_timeout_ms with no worker holding c->lock (checked via
+    // trylock) is an orphaned slot -- reset to ABSENT, wake waiters,
+    // stat_fetching_timeout++. Every transition INTO CHUNK_FETCHING sets this;
+    // every transition OUT (to ABSENT or RESIDENT) clears it to 0.
+    uint64_t fetching_since_ns;
 } chunk_t;
 
 // Forward-declared; concrete definitions live in trace.h / metrics.h / a
@@ -184,6 +193,14 @@ typedef struct {
                                      // pinned) or false (--prefetch-retention
                                      // none, item 10c's immediate-unpin
                                      // behavior).
+
+    // CLEANUP session (7th concurrency-class fix, part b): watchdog on the
+    // CHUNK_FETCHING state. pager_run()'s dispatch loop resets any chunk that
+    // has sat in FETCHING longer than this without a worker owning c->lock.
+    // 0 => region_startup default (30000 ms). Set to a large value to
+    // effectively disable (part a should make it never fire).
+    uint32_t fetching_timeout_ms;
+    uint64_t stat_fetching_timeout;  // # of orphaned FETCHING slots the watchdog reclaimed
 } region_t;
 
 // Startup configuration. Everything the caller must supply to region_startup().
@@ -225,6 +242,9 @@ typedef struct {
     // cover [0, region_len)). NULL/0 => the original uniform table.
     const void *explicit_chunks;    // array of residctl_chunk_spec_t
     uint32_t    n_explicit_chunks;
+
+    // CLEANUP session: 0 => default (30000 ms). See region_t.fetching_timeout_ms.
+    uint32_t fetching_timeout_ms;
 } region_config_t;
 
 // WP2: one entry of an explicit chunk table (region_config_t.explicit_chunks).

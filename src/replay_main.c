@@ -122,6 +122,7 @@ int main(int argc, char **argv) {
     // (layer_order_learned with prefetch off is unaffected by either flag.)
     int consumption_signal_all = 1;  // all-threads: notify fires on full step completion
     int protect_current = 0;         // WP0 heuristic off (redundant with the exact signal)
+    uint32_t fetching_timeout_ms = 0; // CLEANUP session: 0 => region_startup default (30000)
     int nargs = 0;
     char *args[16];
     for (int i = 1; i < argc && nargs < 16; i++) {
@@ -195,6 +196,11 @@ int main(int argc, char **argv) {
             else { fprintf(stderr, "--protect-current must be 'on' or 'off', got '%s'\n", mode); return 2; }
             continue;
         }
+        if (strcmp(argv[i], "--fetching-timeout-ms") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--fetching-timeout-ms requires a number\n"); return 2; }
+            fetching_timeout_ms = (uint32_t)strtoul(argv[++i], NULL, 10);
+            continue;
+        }
         args[nargs++] = argv[i];
     }
 
@@ -234,6 +240,7 @@ int main(int argc, char **argv) {
         .fetch_workers = fetch_workers,                  // item 10c: 0 => region_startup's default (4)
         .prefetch_admission_always = prefetch_admission_always, // item 10c Task B
         .prefetch_retention_none = prefetch_retention_none, // item 10d Task C
+        .fetching_timeout_ms = fetching_timeout_ms,         // CLEANUP session, part b
     };
     run_manifest_t m;
     region_startup(&g_r, &cfg, &m);
@@ -319,9 +326,10 @@ int main(int argc, char **argv) {
            g_r.reconcile_interval, g_r.prefetch_depth,
            g_r.async_handler ? "async" : "sync", g_r.fetch_workers, driver_threads, lookahead_window,
            g_r.prefetch_retention_pinned ? "pinned" : "none");
-    printf("  consumption_signal=%s protect_current=%s\n",
+    printf("  consumption_signal=%s protect_current=%s fetching_timeout_ms=%u\n",
            consumption_signal_all ? "all-threads" : "tid0",
-           policy_get_protect_current() ? "on" : "off");
+           policy_get_protect_current() ? "on" : "off",
+           g_r.fetching_timeout_ms);
 
     // Campaign 11 Phase 2: calibrate the compute-phase loop once, before any
     // driver thread starts, regardless of whether compute_ns_per_mib is
@@ -430,7 +438,7 @@ int main(int argc, char **argv) {
            "handler=%s,fetch_workers=%u,prefetch_admission=%s,prefetch_declined=%llu,"
            "driver_threads=%u,lookahead_window=%u,prefetch_retention=%s,pin_broken=%llu,"
            "compute_ns_per_mib=%llu,compute_achieved_ns_per_mib=%.1f,"
-           "consumption_signal=%s,protect_current=%s\n",
+           "consumption_signal=%s,protect_current=%s,stat_fetching_timeout=%llu\n",
            policy_name, prefetch_arg, (unsigned long long)budget_bytes, res.n_touches,
            (unsigned long long)res.bytes_touched, (unsigned long long)res.wall_ns,
            (unsigned long long)g_r.stat_absent_handled, (unsigned long long)g_r.stat_evictions,
@@ -443,7 +451,8 @@ int main(int argc, char **argv) {
            (unsigned long long)g_r.stat_pin_broken,
            (unsigned long long)compute_ns_per_mib, replay_compute_achieved_ns_per_mib(),
            consumption_signal_all ? "all-threads" : "tid0",
-           policy_get_protect_current() ? "on" : "off");
+           policy_get_protect_current() ? "on" : "off",
+           (unsigned long long)g_r.stat_fetching_timeout);
 
     if (g_r.resident_bytes > g_r.budget_bytes) {
         fprintf(stderr, "FAIL: resident_bytes exceeded budget_bytes -- I-4/§7 violated\n");

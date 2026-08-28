@@ -39,14 +39,26 @@ static int      g_eager_reconcile;
 static char     g_reftrace_path[1024];
 static char     g_fetchtrace_path[1024];   // FINAL SESSION Phase 3
 static char     g_policytrace_path[1024];  // FINAL SESSION Phase 3
-static int      g_protect_current = 0;     // FINAL SESSION Phase 2: default OFF (the
-                                           // per-layer eval callback fires notify AFTER
-                                           // each layer's compute completes across all
-                                           // llama threads -- already the exact
-                                           // "all-threads" signal, so the WP0 heuristic
-                                           // is redundant. protect_current=on in the
-                                           // config restores it. Phase 3 checks this on
-                                           // the real model.
+static uint32_t g_fetching_timeout_ms = 0; // CLEANUP session: 0 => region_startup default (30000)
+static int      g_protect_current = 1;      // CLEANUP session: default ON for the REAL
+                                           // model. FINAL-SESSION Phase 2 flipped this to
+                                           // OFF based on the SYNTHETIC grid -- which has
+                                           // --consumption-signal all-threads to advance
+                                           // the declared cursor only after every driver
+                                           // thread finishes a chunk. The real-model eval
+                                           // callback fires notify AFTER each layer's
+                                           // compute (post-, not pre-consumption), so the
+                                           // cursor LAGS the actual access and there is no
+                                           // all-threads compensation. Measured
+                                           // (results/cleanup/phase1_verify.csv): with
+                                           // protect OFF, arm D reads +67-78% more at
+                                           // every ratio (r0.25: 217 vs 126 GB) -- a large
+                                           // deterministic regression. protect ON is
+                                           // strictly better for arm D and safe (the
+                                           // arm-E livelock needs prefetch; see
+                                           // phase1_deadlock_fix.md). replay_main.c keeps
+                                           // its OFF default (synthetic path). Set
+                                           // protect_current=off in the config to override.
 
 static void load_config(void) {
     const char *cfg = getenv("RESIDCTL_CONFIG");
@@ -72,6 +84,7 @@ static void load_config(void) {
         else if (!strcmp(k, "fetchtrace"))       snprintf(g_fetchtrace_path, sizeof g_fetchtrace_path, "%s", v);
         else if (!strcmp(k, "policytrace"))      snprintf(g_policytrace_path, sizeof g_policytrace_path, "%s", v);
         else if (!strcmp(k, "protect_current"))  g_protect_current = strcmp(v, "off") != 0;
+        else if (!strcmp(k, "fetching_timeout_ms")) g_fetching_timeout_ms = (uint32_t)strtoul(v, NULL, 10);
     }
     fclose(f);
     if (!g_model_path[0] || !g_cgroup[0] || !g_budget_bytes) {
@@ -261,14 +274,29 @@ static policy_trace_t *g_policytrace;  // FINAL SESSION Phase 3
 static void residctl_llama_sigusr1(int sig) {
     (void)sig;
     uint32_t pinned = 0, resident_unpinned = 0, resident = 0, fetching = 0;
+    int64_t  fetching_idx = -1; uint64_t fetching_len = 0;
     for (uint32_t i = 0; i < g_r.n_chunks; i++) {
         chunk_t *c = &g_r.chunks[i];
         if (c->state == CHUNK_RESIDENT) {
             resident++;
             if (c->pin != 0) pinned++; else resident_unpinned++;
         }
-        if (c->state == CHUNK_FETCHING) fetching++;
+        if (c->state == CHUNK_FETCHING) {
+            fetching++;
+            if (fetching_idx < 0) { fetching_idx = (int64_t)i; fetching_len = c->len; }
+        }
     }
+    char xbuf[320];
+    int xn = snprintf(xbuf, sizeof xbuf,
+        "RESIDCTL_SIGDUMP2 reserved_bytes=%llu pinned_prefetch_len=%u fetching_idx=%lld fetching_len=%llu "
+        "stat_prefetch_declined=%llu stat_prefetch_infeasible=%llu stat_dedup_fetching=%llu "
+        "stat_dedup_resident=%llu stat_bytes_fetched=%llu\n",
+        (unsigned long long)g_r.reserved_bytes, g_r.pinned_prefetch_len,
+        (long long)fetching_idx, (unsigned long long)fetching_len,
+        (unsigned long long)g_r.stat_prefetch_declined, (unsigned long long)g_r.stat_prefetch_infeasible,
+        (unsigned long long)g_r.stat_dedup_fetching, (unsigned long long)g_r.stat_dedup_resident,
+        (unsigned long long)g_r.stat_bytes_fetched);
+    if (xn > 0) { ssize_t w = write(2, xbuf, (size_t)xn); (void)w; }
     char buf[512];
     int n = snprintf(buf, sizeof buf,
         "RESIDCTL_SIGDUMP n_chunks=%u resident=%u resident_unpinned=%u pinned=%u fetching=%u "
@@ -313,6 +341,7 @@ void *residctl_llama_mmap(int llama_fd, size_t file_size) {
     cfg.prefetch_retention_none = g_retention_none;
     cfg.explicit_chunks = g_specs;
     cfg.n_explicit_chunks = g_n_specs;
+    cfg.fetching_timeout_ms = g_fetching_timeout_ms; // CLEANUP session, part b
 
     region_startup(&g_r, &cfg, &g_manifest);
 
@@ -469,7 +498,8 @@ void residctl_llama_teardown(void) {
            "region_len=%llu,file_size=%llu,"
            "absent_handled=%llu,evictions=%llu,infeasible=%llu,prefetches=%llu,"
            "pager_bytes_fetched=%llu,dedup_resident=%llu,dedup_fetching=%llu,pin_broken=%llu,"
-           "resident_bytes_end=%llu,memory_peak=%llu,handler_p99_ns=%.0f,notify_layers=%llu\n",
+           "resident_bytes_end=%llu,memory_peak=%llu,handler_p99_ns=%.0f,notify_layers=%llu,"
+           "stat_fetching_timeout=%llu\n",
            g_policy_name, g_prefetch_on ? "on" : "off", (unsigned long long)g_budget_bytes,
            g_r.n_chunks, (long long)g_n_layers,
            (unsigned long long)g_r.region_len, (unsigned long long)g_file_size,
@@ -478,7 +508,8 @@ void residctl_llama_teardown(void) {
            (unsigned long long)g_r.stat_bytes_fetched, (unsigned long long)g_r.stat_dedup_resident,
            (unsigned long long)g_r.stat_dedup_fetching, (unsigned long long)g_r.stat_pin_broken,
            (unsigned long long)g_r.resident_bytes, (unsigned long long)mem_peak, p99,
-           (unsigned long long)g_notify_seq);
+           (unsigned long long)g_notify_seq,
+           (unsigned long long)g_r.stat_fetching_timeout);
     fflush(stdout);
 
     region_teardown(&g_r);
