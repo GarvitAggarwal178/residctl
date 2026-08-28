@@ -48,21 +48,54 @@ static void fetch_read(region_t *r, chunk_t *c) {
                    (void *)dest, (unsigned long long)RESIDCTL_ALIGN,
                    (unsigned long long)c->region_off, (unsigned long long)c->file_off);
 
-    uint64_t read_len = aligned_end - aligned_start;
+    // WP2 (§6.1): a real GGUF is not a 4096 multiple, so the LAST chunk's
+    // 4096-aligned end runs past EOF. Split the read at the last 4096
+    // boundary <= EOF: O_DIRECT for the aligned bulk, one buffered pread for
+    // the sub-4096 tail (O_DIRECT rejects unaligned partial reads), then
+    // zero-fill [file_size, aligned_end) -- padding, never a tensor byte
+    // (the region maps the file 1:1). Guarded by model_file_size != 0 so the
+    // replay path (file_size == region_len, both 4096-aligned) is unchanged.
+    uint64_t direct_end = aligned_end;   // bytes to read via r->model_fd (aligned)
+    uint64_t tail_start = aligned_end, tail_end = aligned_end; // buffered, [tail_start, tail_end)
+    if (r->model_file_size != 0 && aligned_end > r->model_file_size) {
+        uint64_t fs = r->model_file_size;
+        uint64_t last_aligned = align_down(fs, RESIDCTL_ALIGN);
+        direct_end = (last_aligned > aligned_start) ? last_aligned : aligned_start;
+        tail_start = direct_end;
+        tail_end   = fs;
+        memset(dest + (fs - aligned_start), 0, aligned_end - fs); // pad
+    }
+
     uint64_t off = 0;
-    while (off < read_len) {
-        ssize_t n = pread(r->model_fd, dest + off, read_len - off, (off_t)(aligned_start + off));
+    while (aligned_start + off < direct_end) {
+        uint64_t want = direct_end - (aligned_start + off);
+        ssize_t n = pread(r->model_fd, dest + off, want, (off_t)(aligned_start + off));
         if (n < 0) {
             if (errno == EINTR) continue;
             fetch_fail("fetch_read", "pread(off=%llu, len=%llu) failed: %s",
                        (unsigned long long)(aligned_start + off),
-                       (unsigned long long)(read_len - off), strerror(errno));
+                       (unsigned long long)want, strerror(errno));
         }
         if (n == 0)
             fetch_fail("fetch_read", "unexpected EOF at file offset %llu (chunk file_off=%llu len=%llu, model file too short)",
                        (unsigned long long)(aligned_start + off),
                        (unsigned long long)c->file_off, (unsigned long long)c->len);
         off += (uint64_t)n;
+    }
+    // buffered tail (only when the chunk crosses EOF and there is a sub-4096 remainder)
+    while (tail_start < tail_end) {
+        uint64_t dst_off = tail_start - aligned_start;
+        ssize_t n = pread(r->model_fd_buf >= 0 ? r->model_fd_buf : r->model_fd,
+                          dest + dst_off, tail_end - tail_start, (off_t)tail_start);
+        if (n < 0) {
+            if (errno == EINTR) continue;
+            fetch_fail("fetch_read", "buffered tail pread(off=%llu) failed: %s",
+                       (unsigned long long)tail_start, strerror(errno));
+        }
+        if (n == 0)
+            fetch_fail("fetch_read", "unexpected EOF in buffered tail at %llu (file_size=%llu)",
+                       (unsigned long long)tail_start, (unsigned long long)r->model_file_size);
+        tail_start += (uint64_t)n;
     }
 }
 

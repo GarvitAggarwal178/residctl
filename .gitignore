@@ -47,3 +47,8 @@ src/bench_concurrent_read
 src/*_replay
 src/*_solver
 src/*_harness
+third_party/
+models/
+src/wp2_gen
+src/wp2_opt
+src/wp2_obj/

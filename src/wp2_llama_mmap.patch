@@ -1,0 +1,65 @@
+--- /tmp/orig-mmap.cpp	2026-08-28 06:56:51.671382682 +0000
++++ src/llama-mmap.cpp	2026-08-28 06:30:29.363869300 +0000
+@@ -9,6 +9,10 @@
+ #include <stdexcept>
+ #include <cerrno>
+ #include <algorithm>
++#include <cstdlib>   // WP2 residctl: getenv
++#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
++    #include <dlfcn.h>   // WP2 residctl: dlsym(RTLD_DEFAULT, "residctl_llama_mmap")
++#endif
+ 
+ #ifdef __has_include
+     #if __has_include(<unistd.h>)
+@@ -441,12 +445,35 @@
+ struct llama_mmap::impl {
+ #ifdef _POSIX_MAPPED_FILES
+     std::vector<std::pair<size_t, size_t>> mapped_fragments;
++    // WP2 (residctl integration): when RESIDCTL_CONFIG is set and the
++    // executable provides residctl_llama_mmap (resolved via dlsym so there
++    // is no link-time dependency on the residctl pager), the model file is
++    // served by the userfaultfd pager instead of mmap(). The pager owns
++    // addr for the process lifetime -- this impl must not munmap it, and
++    // unmap_fragment() must be a no-op (it would tear holes in the
++    // uffd-registered region).
++    bool residctl_owned = false;
+ 
+     impl(struct llama_file * file, size_t prefetch, bool numa) {
+         size = file->size();
+         int fd = file->file_id();
+         int flags = MAP_SHARED;
+         if (numa) { prefetch = 0; }
++
++        if (getenv("RESIDCTL_CONFIG")) {
++            void * (*rc_mmap)(int, size_t) =
++                (void * (*)(int, size_t)) dlsym(RTLD_DEFAULT, "residctl_llama_mmap");
++            if (rc_mmap) {
++                addr = rc_mmap(fd, file->size());
++                if (addr == MAP_FAILED || addr == nullptr) {
++                    throw std::runtime_error("residctl_llama_mmap failed");
++                }
++                residctl_owned = true;
++                mapped_fragments.emplace_back(0, file->size());
++                return;
++            }
++            LLAMA_LOG_WARN("RESIDCTL_CONFIG set but residctl_llama_mmap not found; using plain mmap\n");
++        }
+ #ifdef __linux__
+         if (posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL)) {
+             LLAMA_LOG_WARN("warning: posix_fadvise(.., POSIX_FADV_SEQUENTIAL) failed: %s\n",
+@@ -488,6 +515,7 @@
+     }
+ 
+     void unmap_fragment(size_t first, size_t last) {
++        if (residctl_owned) { return; } // WP2: the pager owns the region; never punch it
+         int page_size = sysconf(_SC_PAGESIZE);
+         align_range(&first, &last, page_size);
+         size_t len = last - first;
+@@ -524,6 +552,7 @@
+     }
+ 
+     ~impl() {
++        if (residctl_owned) { return; } // WP2: residctl_llama_teardown() frees the region
+         for (const auto & frag : mapped_fragments) {
+             if (munmap((char *) addr + frag.first, frag.second - frag.first)) {
+                 LLAMA_LOG_WARN("warning: munmap failed: %s\n", strerror(errno));

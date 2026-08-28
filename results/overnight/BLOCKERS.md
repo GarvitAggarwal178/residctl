@@ -34,3 +34,76 @@ WP2 output (Figure 6 is simply omitted, per WP3.md).
 **To unblock:** place a 1.5–3 GiB GGUF at `/root/residctl/models/model.gguf`
 and re-run WP2 (`docs/overnight/WP2.md`) as the first task of the next
 session.
+
+**RESOLVED (session 2, 2026-08-28):** BLOCKER 1 is obsolete. Session 2's
+prompt states network access is normal and gave explicit download
+commands; `models/model.gguf` was acquired via `curl` from Hugging Face
+(`Qwen/Qwen2.5-3B-Instruct-GGUF`, `qwen2.5-3b-instruct-q4_k_m.gguf`,
+1.95 GiB). WP2 proceeded. See BLOCKER 2 for the one thing session 2 could
+not resolve.
+
+---
+
+## BLOCKER 2 — Session 2: `docs/overnight/WP0_FIX_AND_MODEL.md` (and the renamed WP2/WP3 files) do not exist
+
+**When:** Start of session 2, before any work.
+
+**Context:** The session-2 prompt instructs: "work through these three work
+packages in order: `docs/overnight/WP0_FIX_AND_MODEL.md` — model
+acquisition and the consumption-signal fix; `docs/overnight/WP2_LLAMACPP.md`;
+`docs/overnight/WP3_FIGURES.md`". It also says "WP0 §0.1 corrects" the
+model-download claim and "WP0 acquires the model, so WP2's gate should
+already be satisfied."
+
+**Observed:** none of `WP0_FIX_AND_MODEL.md`, `WP2_LLAMACPP.md`,
+`WP3_FIGURES.md` exist anywhere on disk (checked `docs/overnight/`,
+`git ls-files docs/`, `/mnt/d/os`). Only the session-1 files are present:
+`Runbook.md`, `WP1.md`, `WP2.md`, `WP3.md` (unchanged, same mtime/size as
+session 1). The user was not available to supply them (unattended session).
+
+**What is decidable and was done:**
+- **Model acquisition (WP0 §0.1):** the prompt gave the exact commands and
+  the network was verified reachable. `models/model.gguf` downloaded. This
+  is unambiguous — done, not blocked.
+- **WP2 (llama.cpp):** `docs/overnight/WP2.md` is a complete spec. Its
+  Phase 2.0 download gate is now satisfied by the model above. Executed
+  per that spec.
+- **WP3 (figures):** `docs/overnight/WP3.md` is a complete spec; the
+  session-2 prompt adds "refresh every figure and table with tonight's
+  data, and add Figure 6 if WP2 produced results". Executed.
+
+**What is NOT decidable — the "consumption-signal fix" (WP0):**
+No spec. Session 1's own `wp1_declared_order.md` and `PROJECT_STATE.md` §2
+identified that `layer_order_declared` is non-deterministic under
+`--driver-threads>1` ∧ `--lookahead-window>0` ∧ `--compute-ns-per-mib>0`
+because `pager_notify_access()` (the consumption signal) fires from driver
+thread 0 only, at the *start* of consuming a chunk, and races the
+concurrently-dispatched faults of the other 7 threads. Two candidate fixes
+were recorded there:
+  1. Driver change: fire `pager_notify_access(r, c)` when chunk `c` is
+     *fully* consumed by all threads (after `lookahead_wait_full`), not at
+     the start — so the declared cursor lags the in-flight window and
+     `select_victim`'s furthest-future pick is genuinely safe to evict.
+  2. Policy change: `select_victim` refuses to evict any chunk within
+     `window+1` positions *behind* the cursor.
+
+Both have real blast radius that no spec constrains: option 1 also changes
+when the prefetch-retention FIFO releases pins (`prefetch_retain_release`
+is called from the same `pager_notify_access`), affecting **arm E under
+every policy**, and would change every WP1 arm-D/E number; option 2
+changes a mechanism decision function. Making an unspecified
+mechanism/driver change in an unattended session violates SESSION RULE
+§0 ("no silently fixing", report contradictions) and RULE 3 (record and
+move on when there is no pre-decided answer).
+
+**Decision:** the consumption-signal fix is **deferred**. `replay.c`,
+`policy.c`'s decision logic, and `pager.c`'s `pager_notify_access` timing
+are unchanged from session 1. WP2 uses `layer_order_declared` exactly as
+session 1 left it (its Phase 2.3 measurement will show whether the same
+non-determinism appears under real inference — a data point for whichever
+fix a future session picks). Recorded here; proceeded to the model
+download and WP2.
+
+**To unblock:** supply `docs/overnight/WP0_FIX_AND_MODEL.md` with the
+specific fix, its acceptance criteria, and its intended blast radius
+(driver-only? policy? must arm E numbers stay comparable?).

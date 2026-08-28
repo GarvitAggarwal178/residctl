@@ -155,6 +155,7 @@ static void register_mapping_a(region_t *r) {
 
 // §4 step 7: open model file O_DIRECT, falling back to buffered + FADV_DONTNEED.
 static void open_model_file(region_t *r, const char *model_path) {
+    r->model_fd_buf = open(model_path, O_RDONLY); // WP2: for the final chunk's sub-4096 tail
     int fd = open(model_path, O_RDONLY | O_DIRECT);
     if (fd >= 0) {
         r->model_fd = fd;
@@ -186,6 +187,60 @@ static void open_model_file(region_t *r, const char *model_path) {
 // mod 4096) and is a legitimate stand-in for every build-order item up to
 // and including the harness (§11) and correctness suite (§13), all of which
 // operate on a region + a source file, not on tensor semantics.
+// WP2: build the chunk table from an explicit, non-uniform spec array
+// (region_config_t.explicit_chunks). Validates that the specs tile
+// [0, region_len) contiguously with region_off == file_off and 4096
+// alignment on every boundary except the final len (which may run to
+// region_len). Aborts on any violation -- a malformed table would make
+// pager_lookup() miss faults or overlap chunks.
+static void build_chunk_table_explicit(region_t *r, const residctl_chunk_spec_t *specs, uint32_t n) {
+    if (n == 0 || n > UINT32_MAX)
+        fail("build_chunk_table_explicit", "explicit chunk count %u out of range", n);
+    chunk_t *chunks = calloc(n, sizeof(chunk_t));
+    if (!chunks)
+        fail("build_chunk_table_explicit", "calloc(%u chunks) failed", n);
+
+    uint64_t expect_off = 0;
+    for (uint32_t i = 0; i < n; i++) {
+        if (specs[i].region_off != expect_off)
+            fail("build_chunk_table_explicit",
+                 "chunk %u region_off=%llu, expected %llu (specs must tile [0,region_len) contiguously)",
+                 i, (unsigned long long)specs[i].region_off, (unsigned long long)expect_off);
+        if (specs[i].file_off != specs[i].region_off)
+            fail("build_chunk_table_explicit",
+                 "chunk %u file_off=%llu != region_off=%llu (§6.1: region maps the file 1:1 in this mode)",
+                 i, (unsigned long long)specs[i].file_off, (unsigned long long)specs[i].region_off);
+        if (specs[i].len == 0)
+            fail("build_chunk_table_explicit", "chunk %u has len 0", i);
+        if (specs[i].region_off % RESIDCTL_ALIGN != 0)
+            fail("build_chunk_table_explicit", "chunk %u region_off=%llu not 4096-aligned (§6.1)",
+                 i, (unsigned long long)specs[i].region_off);
+        if (i + 1 < n && specs[i].len % RESIDCTL_ALIGN != 0)
+            fail("build_chunk_table_explicit",
+                 "chunk %u len=%llu not 4096-aligned and it is not the last chunk (§6.1)",
+                 i, (unsigned long long)specs[i].len);
+        chunks[i].file_off = specs[i].file_off;
+        chunks[i].region_off = specs[i].region_off;
+        chunks[i].len = specs[i].len;
+        chunks[i].layer_id = specs[i].layer_id;
+        chunks[i].state = CHUNK_ABSENT;
+        chunks[i].pin = 0;
+        chunks[i].last_fault_seq = 0;
+        if (pthread_mutex_init(&chunks[i].lock, NULL) != 0)
+            fail("build_chunk_table_explicit", "pthread_mutex_init failed at chunk %u", i);
+        if (pthread_cond_init(&chunks[i].cv, NULL) != 0)
+            fail("build_chunk_table_explicit", "pthread_cond_init failed at chunk %u", i);
+        expect_off += specs[i].len;
+    }
+    if (expect_off != r->region_len)
+        fail("build_chunk_table_explicit",
+             "explicit chunks cover %llu bytes but region_len is %llu",
+             (unsigned long long)expect_off, (unsigned long long)r->region_len);
+
+    r->chunks = chunks;
+    r->n_chunks = n;
+}
+
 static void build_chunk_table(region_t *r, uint64_t requested_chunk_size) {
     uint64_t chunk_size = requested_chunk_size;
     if (chunk_size % RESIDCTL_ALIGN != 0)
@@ -298,7 +353,15 @@ int region_startup(region_t *r, const region_config_t *cfg, run_manifest_t *mani
     disable_thp(r);                          // step 5
     register_mapping_a(r);                   // step 6
     open_model_file(r, cfg->model_path);     // step 7
-    build_chunk_table(r, cfg->chunk_size);   // step 8
+    {
+        struct stat mst;
+        if (fstat(r->model_fd, &mst) == 0) r->model_file_size = (uint64_t)mst.st_size;
+    }
+    if (cfg->n_explicit_chunks > 0)          // step 8 (WP2: real GGUF tensor layout)
+        build_chunk_table_explicit(r, (const residctl_chunk_spec_t *)cfg->explicit_chunks,
+                                   cfg->n_explicit_chunks);
+    else
+        build_chunk_table(r, cfg->chunk_size);
     compute_budget(r, cfg, &m);              // step 9
     // step 10 (start handler thread) intentionally not done here -- item 2.
 
@@ -356,6 +419,7 @@ void region_teardown(region_t *r) {
     if (r->map_a && r->map_a != MAP_FAILED) munmap(r->map_a, r->region_len);
     if (r->map_b && r->map_b != MAP_FAILED) munmap(r->map_b, r->region_len);
     if (r->model_fd > 0) close(r->model_fd);
+    if (r->model_fd_buf > 0) close(r->model_fd_buf);
     if (r->memfd > 0) close(r->memfd);
     if (r->uffd > 0) close(r->uffd);
     memset(r, 0, sizeof *r);

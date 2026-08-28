@@ -52,7 +52,15 @@ typedef struct {
     uint64_t region_len;
     int uffd;                 // O_NONBLOCK (I-2)
     int model_fd;              // O_DIRECT, or buffered fallback (see used_o_direct)
+    int model_fd_buf;          // WP2: always a plain buffered fd, used only for the
+                                // sub-4096 tail of the final chunk (O_DIRECT can't do
+                                // an unaligned partial read). -1 if not opened.
     bool used_o_direct;
+    uint64_t model_file_size;  // WP2: real source-file length. fetch_read() clamps
+                                // reads here and zero-fills the tail padding when a
+                                // chunk's 4096-aligned end runs past EOF (a real GGUF
+                                // is not a 4096 multiple). 0 => no clamp (replay path,
+                                // where file_size == region_len exactly).
     chunk_t *chunks;           // sorted by region_off
     uint32_t n_chunks;
     uint64_t resident_bytes;   // our accounting (I-7)
@@ -209,7 +217,23 @@ typedef struct {
                                      // retention (--prefetch-retention pinned); true =>
                                      // --prefetch-retention none, item 10c's original
                                      // immediate-unpin-after-fetch behavior.
+
+    // WP2 (llama.cpp integration): an explicit, non-uniform chunk table
+    // built from a real GGUF's tensor layout. When n_explicit_chunks > 0,
+    // build_chunk_table() ignores chunk_size and uses these specs verbatim
+    // (they must be sorted by region_off, contiguous, 4096-aligned, and
+    // cover [0, region_len)). NULL/0 => the original uniform table.
+    const void *explicit_chunks;    // array of residctl_chunk_spec_t
+    uint32_t    n_explicit_chunks;
 } region_config_t;
+
+// WP2: one entry of an explicit chunk table (region_config_t.explicit_chunks).
+typedef struct {
+    uint64_t file_off;
+    uint64_t region_off;
+    uint64_t len;
+    uint32_t layer_id;
+} residctl_chunk_spec_t;
 
 // Run manifest, written once per run per §4 step 11.
 typedef struct {
