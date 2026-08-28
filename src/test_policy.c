@@ -129,6 +129,10 @@ int main(void) {
         reset_chunks();
         policy_t *lo = policy_layer_order_declared_create(N);
         g_r.policy = lo;
+        // FINAL SESSION Phase 2 flipped the operational default to protect-off;
+        // this block validates the heuristic's correctness WHEN ENABLED, so
+        // pin it on explicitly (self-documenting, default-independent).
+        policy_set_protect_current(1);
 
         // Declare a non-identity permutation so the test can't pass by
         // accident on chunk_id==position.
@@ -183,6 +187,7 @@ int main(void) {
             reset_chunks();
             policy_t *d2 = policy_layer_order_declared_create(W);
             g_r.policy = d2;
+            policy_set_protect_current(1);   // this cross-check assumes protect-on semantics
             policy_declare_sequence(&g_r, cyc, W);
 
             int xchk_fail = 0;
@@ -215,6 +220,38 @@ int main(void) {
         }
 
         policy_destroy(lo);
+
+        // ---- FINAL SESSION Phase 2: protect-current OFF (the new default) ----
+        // With the heuristic off, the actively-consumed chunk seq[pos] and
+        // seq[pos-1] are NOT special-cased: dist is the plain forward cyclic
+        // scan, so the current chunk is seq_len away (furthest -> top victim),
+        // and select_victim will evict it. This is only safe when the caller's
+        // consumption signal is exact (all chunks fully consumed before the
+        // cursor advances) -- Phase 2 showed it then reads at or below the
+        // protect-on config at every cell.
+        {
+            reset_chunks();
+            policy_set_protect_current(0);
+            policy_t *lo3 = policy_layer_order_declared_create(N);
+            g_r.policy = lo3;
+            const uint32_t decl3[N] = { 0, 2, 4, 6, 1, 3, 5, 7 };
+            policy_declare_sequence(&g_r, decl3, N);
+            lo3->on_access(&g_r, &g_chunks[0]);
+            lo3->on_access(&g_r, &g_chunks[2]);   // position at declared index 1 (chunk 2)
+            if (lo3->next_use_distance(&g_r, &g_chunks[2]) != (int64_t)N) {
+                fprintf(stderr, "FAIL(declared protect-off): dist(2) != %d (should be furthest, not protected)\n", N); local_fail = 1;
+            }
+            if (lo3->next_use_distance(&g_r, &g_chunks[0]) != (int64_t)(N - 1)) {
+                fprintf(stderr, "FAIL(declared protect-off): dist(0) != %d\n", N - 1); local_fail = 1;
+            }
+            if (lo3->next_use_distance(&g_r, &g_chunks[4]) != 1) {
+                fprintf(stderr, "FAIL(declared protect-off): dist(4) != 1\n"); local_fail = 1;
+            }
+            policy_destroy(lo3);
+            policy_set_protect_current(1);   // restore for any later test
+            printf("layer_order_declared protect-current off: %s\n", local_fail ? "FAIL" : "ok");
+        }
+
         printf("layer_order_declared: %s\n", local_fail ? "FAIL" : "ok");
         fail |= local_fail;
     }

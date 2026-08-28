@@ -113,15 +113,22 @@ double replay_compute_achieved_ns_per_mib(void);
 // order chunks are visited in.
 //
 // Also fires pager_notify_access() once per (pass, chunk) reference (item
-// 10d Task C, A-9's "consumed" signal) -- same call, same point in the
-// loop (before that step's read), as replay_cyclic() above.
+// 10d Task C, A-9's "consumed" signal). consumption_signal_all == 0 (default):
+// tid 0 fires it before that step's read, exactly as replay_cyclic() above.
+// consumption_signal_all == 1 (FINAL SESSION Phase 2, --consumption-signal
+// all-threads): fired instead when the step reaches full completion (all
+// n_threads finished it), from whichever thread does the completing
+// increment -- the exact "consumed by everyone" signal. Still exactly once
+// per (pass,chunk) (asserted).
 //
 // n_threads must be >= 2 (replay_main.c routes n_threads<=1 to
 // replay_cyclic() instead, where "lookahead window" has no meaning -- there
-// is only one thread, nothing to overlap with). Caller must have already
-// run region_startup() and started the pager thread.
+// is only one thread, nothing to overlap with; the two consumption-signal
+// modes are trivially identical there since replay_cyclic() is unchanged).
+// Caller must have already run region_startup() and started the pager thread.
 replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_trace,
-                                  uint32_t n_threads, uint32_t window, uint64_t compute_ns_per_mib);
+                                  uint32_t n_threads, uint32_t window, uint64_t compute_ns_per_mib,
+                                  int consumption_signal_all);
 
 // Elision-guard accumulator (Defect 2): callers should print this and
 // confirm it's nonzero and varies run to run, as one piece of evidence the

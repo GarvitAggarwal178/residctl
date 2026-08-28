@@ -176,6 +176,20 @@ typedef struct {
     pthread_cond_t cv;     // broadcast whenever any completed[] entry changes
     uint32_t n_threads;
     uint32_t window;
+    // FINAL SESSION Phase 2: --consumption-signal {tid0,all-threads}.
+    // tid0 (default, notify_all_threads=0): pager_notify_access() fires from
+    //   tid 0 at the START of a step -- the shipped behaviour. The declared
+    //   cursor then advances while the other n_threads-1 threads may still be
+    //   reading that chunk, which is the root cause the WP0 heuristic patched
+    //   from the policy side.
+    // all-threads (notify_all_threads=1): pager_notify_access() fires exactly
+    //   once per (pass,chunk), from whichever thread performs the increment
+    //   that makes completed[s]==n_threads -- i.e. when the chunk is genuinely
+    //   consumed by everyone. This is the exact signal; the driver already
+    //   tracks completed[].
+    region_t *r;
+    int      notify_all_threads;
+    uint64_t notify_count;    // all-threads mode: asserted == total_steps at the end
 } lookahead_state_t;
 
 // Blocks the calling thread until it may BEGIN step s. Per §11 Amendment
@@ -212,11 +226,27 @@ static void lookahead_wait_to_start(lookahead_state_t *st, int64_t s) {
 // only event any waiter (lookahead_wait_to_start or the tid-0-only wait
 // below) actually cares about.
 static void lookahead_mark_done(lookahead_state_t *st, uint32_t s) {
+    int now_full = 0;
     pthread_mutex_lock(&st->lock);
     st->completed[s]++;
-    if (st->completed[s] == st->n_threads)
+    if (st->completed[s] == st->n_threads) {
+        now_full = 1;
+        if (st->notify_all_threads) st->notify_count++;
         pthread_cond_broadcast(&st->cv);
+    }
     pthread_mutex_unlock(&st->lock);
+
+    // FINAL SESSION Phase 2, --consumption-signal all-threads: the chunk for
+    // step s is consumed only once EVERY thread has finished it. The `==
+    // n_threads` test (not `>=`) makes exactly one thread per step see
+    // now_full -- so this fires exactly once per (pass,chunk), asserted via
+    // notify_count at the end of replay_cyclic_mt(). Fired outside st->lock,
+    // same as the tid-0 path's notify, so the pager's own locks never nest
+    // under the lookahead lock.
+    if (now_full && st->notify_all_threads) {
+        uint32_t i = s % st->r->n_chunks;
+        pager_notify_access(st->r, &st->r->chunks[i]);
+    }
 }
 
 // tid 0 only. The reference trace must still be emitted "once per (pass,
@@ -260,9 +290,12 @@ static void *replay_thread_main(void *argp) {
 
         lookahead_wait_to_start(ctx->la, (int64_t)s); // A-10: bounded lookahead, replaces the old hard barrier
 
-        // "Consumed" signal (A-9) -- fired once per (pass, chunk) by the
-        // coordinator only, same timing as before (right before the read).
-        if (tid == 0) pager_notify_access(r, c);
+        // "Consumed" signal (A-9). Default (--consumption-signal tid0): fired
+        // once per (pass, chunk) by the coordinator only, right before the
+        // read, same timing as every prior item. Under --consumption-signal
+        // all-threads it fires from lookahead_mark_done() instead, when the
+        // chunk reaches full completion -- so nothing here.
+        if (tid == 0 && !ctx->la->notify_all_threads) pager_notify_access(r, c);
 
         // Partition WITHIN this chunk's page range: thread `tid` takes
         // every nt-th page, starting at page tid. Covers every page
@@ -309,7 +342,8 @@ static void *replay_thread_main(void *argp) {
 }
 
 replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_trace,
-                                  uint32_t n_threads, uint32_t window, uint64_t compute_ns_per_mib) {
+                                  uint32_t n_threads, uint32_t window, uint64_t compute_ns_per_mib,
+                                  int consumption_signal_all) {
     uint64_t t_start = now_ns();
 
     uint32_t total_steps = n_passes * r->n_chunks;
@@ -320,6 +354,9 @@ replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_tr
     pthread_cond_init(&la.cv, NULL);
     la.n_threads = n_threads;
     la.window = window;
+    la.r = r;
+    la.notify_all_threads = consumption_signal_all ? 1 : 0;
+    la.notify_count = 0;
 
     pthread_t *tids = calloc(n_threads, sizeof(pthread_t));
     replay_thread_ctx_t *ctxs = calloc(n_threads, sizeof(replay_thread_ctx_t));
@@ -342,6 +379,16 @@ replay_result_t replay_cyclic_mt(region_t *r, uint32_t n_passes, trace_t *ref_tr
     replay_thread_main(&ctxs[0]); // run tid 0 on the calling thread itself
     for (uint32_t t = 1; t < n_threads; t++)
         pthread_join(tids[t], NULL);
+
+    // FINAL SESSION Phase 2: prove the exact consumption signal fired exactly
+    // once per (pass,chunk) -- not zero (missed a step), not more (double-fired
+    // a race). Only meaningful in all-threads mode; tid0 mode leaves this 0.
+    if (la.notify_all_threads && la.notify_count != total_steps) {
+        fprintf(stderr, "replay_cyclic_mt: consumption-signal all-threads fired %llu times, "
+                "expected exactly %u (one per pass,chunk)\n",
+                (unsigned long long)la.notify_count, total_steps);
+        abort();
+    }
 
     pthread_mutex_destroy(&la.lock);
     pthread_cond_destroy(&la.cv);

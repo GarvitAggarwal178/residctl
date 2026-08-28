@@ -113,6 +113,15 @@ int main(int argc, char **argv) {
     int prefetch_retention_none = 0; // item 10d Task C: 0 => pinned (default)
     uint32_t lookahead_window = 0; // item 10e Task A: default 0 => item 10d's hard-barrier behavior exactly
     uint64_t compute_ns_per_mib = 0; // Campaign 11 Phase 2: default 0 => no compute phase, unchanged
+    // FINAL SESSION Phase 2 outcome: the exact all-threads consumption signal
+    // makes layer_order_declared deterministic at ALL six Campaign-13-Phase-A
+    // cells (n=5) and reads <= tid0+protect-on at every sweep cell, so the WP0
+    // protect-current heuristic is unnecessary. Defaults flipped accordingly.
+    // Pin `--consumption-signal tid0 --protect-current on` to reproduce a
+    // pre-Phase-2 layer_order_declared or arm-E number exactly.
+    // (layer_order_learned with prefetch off is unaffected by either flag.)
+    int consumption_signal_all = 1;  // all-threads: notify fires on full step completion
+    int protect_current = 0;         // WP0 heuristic off (redundant with the exact signal)
     int nargs = 0;
     char *args[16];
     for (int i = 1; i < argc && nargs < 16; i++) {
@@ -168,6 +177,22 @@ int main(int argc, char **argv) {
         if (strcmp(argv[i], "--compute-ns-per-mib") == 0) {
             if (i + 1 >= argc) { fprintf(stderr, "--compute-ns-per-mib requires a number\n"); return 2; }
             compute_ns_per_mib = strtoull(argv[++i], NULL, 10);
+            continue;
+        }
+        if (strcmp(argv[i], "--consumption-signal") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--consumption-signal requires tid0|all-threads\n"); return 2; }
+            const char *mode = argv[++i];
+            if (strcmp(mode, "tid0") == 0) consumption_signal_all = 0;
+            else if (strcmp(mode, "all-threads") == 0) consumption_signal_all = 1;
+            else { fprintf(stderr, "--consumption-signal must be 'tid0' or 'all-threads', got '%s'\n", mode); return 2; }
+            continue;
+        }
+        if (strcmp(argv[i], "--protect-current") == 0) {
+            if (i + 1 >= argc) { fprintf(stderr, "--protect-current requires on|off\n"); return 2; }
+            const char *mode = argv[++i];
+            if (strcmp(mode, "on") == 0) protect_current = 1;
+            else if (strcmp(mode, "off") == 0) protect_current = 0;
+            else { fprintf(stderr, "--protect-current must be 'on' or 'off', got '%s'\n", mode); return 2; }
             continue;
         }
         args[nargs++] = argv[i];
@@ -233,6 +258,10 @@ int main(int argc, char **argv) {
     }
     g_r.policy = policy;
 
+    // FINAL SESSION Phase 2: apply the --protect-current toggle before the
+    // first touch. Affects layer_order_declared only; harmless for the others.
+    policy_set_protect_current(protect_current);
+
     // WP1 (A-12): the replay driver knows its own access sequence -- a
     // single cyclic pass over chunks 0..n_chunks-1. Declare it now, before
     // the first touch, so layer_order_declared has it in hand. No-op for
@@ -290,6 +319,9 @@ int main(int argc, char **argv) {
            g_r.reconcile_interval, g_r.prefetch_depth,
            g_r.async_handler ? "async" : "sync", g_r.fetch_workers, driver_threads, lookahead_window,
            g_r.prefetch_retention_pinned ? "pinned" : "none");
+    printf("  consumption_signal=%s protect_current=%s\n",
+           consumption_signal_all ? "all-threads" : "tid0",
+           policy_get_protect_current() ? "on" : "off");
 
     // Campaign 11 Phase 2: calibrate the compute-phase loop once, before any
     // driver thread starts, regardless of whether compute_ns_per_mib is
@@ -309,7 +341,8 @@ int main(int argc, char **argv) {
     // the default preserves current behaviour byte-for-byte, per spec.
     replay_result_t res = (driver_threads <= 1)
         ? replay_cyclic(&g_r, n_passes, ref_trace, compute_ns_per_mib)
-        : replay_cyclic_mt(&g_r, n_passes, ref_trace, driver_threads, lookahead_window, compute_ns_per_mib);
+        : replay_cyclic_mt(&g_r, n_passes, ref_trace, driver_threads, lookahead_window, compute_ns_per_mib,
+                           consumption_signal_all);
 
     stop = 1;
     pthread_join(pager_thread, NULL);
@@ -396,7 +429,8 @@ int main(int argc, char **argv) {
            "pager_bytes_fetched=%llu,io_read_bytes_delta=%llu,dedup_resident=%llu,dedup_fetching=%llu,"
            "handler=%s,fetch_workers=%u,prefetch_admission=%s,prefetch_declined=%llu,"
            "driver_threads=%u,lookahead_window=%u,prefetch_retention=%s,pin_broken=%llu,"
-           "compute_ns_per_mib=%llu,compute_achieved_ns_per_mib=%.1f\n",
+           "compute_ns_per_mib=%llu,compute_achieved_ns_per_mib=%.1f,"
+           "consumption_signal=%s,protect_current=%s\n",
            policy_name, prefetch_arg, (unsigned long long)budget_bytes, res.n_touches,
            (unsigned long long)res.bytes_touched, (unsigned long long)res.wall_ns,
            (unsigned long long)g_r.stat_absent_handled, (unsigned long long)g_r.stat_evictions,
@@ -407,7 +441,9 @@ int main(int argc, char **argv) {
            g_r.prefetch_admission_always ? "always" : "guarded", (unsigned long long)g_r.stat_prefetch_declined,
            driver_threads, lookahead_window, g_r.prefetch_retention_pinned ? "pinned" : "none",
            (unsigned long long)g_r.stat_pin_broken,
-           (unsigned long long)compute_ns_per_mib, replay_compute_achieved_ns_per_mib());
+           (unsigned long long)compute_ns_per_mib, replay_compute_achieved_ns_per_mib(),
+           consumption_signal_all ? "all-threads" : "tid0",
+           policy_get_protect_current() ? "on" : "off");
 
     if (g_r.resident_bytes > g_r.budget_bytes) {
         fprintf(stderr, "FAIL: resident_bytes exceeded budget_bytes -- I-4/§7 violated\n");

@@ -91,6 +91,13 @@ policy_t *policy_layer_order_declared_create(uint32_t n_chunks);
 // Call once at startup, before the first touch.
 void policy_declare_sequence(region_t *r, const uint32_t *chunk_ids, uint32_t n);
 
+// FINAL SESSION Phase 2: --protect-current {on,off}. Toggles the session-2 WP0
+// heuristic in layer_order_declared's lo_declared_dist() (return 0 for
+// seq[pos]/seq[pos-1]). Default on. Set once at startup, before the first
+// touch. No effect on lru or layer_order_learned.
+void policy_set_protect_current(int on);
+int  policy_get_protect_current(void);
+
 void policy_destroy(policy_t *p);
 
 #endif

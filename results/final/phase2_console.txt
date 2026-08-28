@@ -1,0 +1,283 @@
+=== fresh start ===
+=== machine exclusivity (before) ===
+ 15:33:22 up  2:05,  1 user,  load average: 1.12, 1.15, 2.50
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       14891 50.0  0.0   4948  3644 ?        Ss   15:33   0:00 bash src/run_final_phase2.sh
+root       14860  1.4  0.0   5600  4316 pts/0    Ss+  15:33   0:00 bash -lc cd /root/residctl && rm -f results/final/phase2_*.csv results/final/phase2_log.txt && setsid bash src/phase2_supervisor.sh > results/final/phase2_supervisor.log 2>&1 < /dev/null & disown; sleep 8; echo "=== launched ==="; pgrep -af "phase2_supervisor|run_final_phase2|replay_main" | head; echo "---"; tail -3 results/final/phase2_supervisor.log 2>/dev/null; wc -l results/final/phase2_determinism.csv 2>/dev/null
+root           7  0.0  0.0   4216  2488 hvc0     Sl+  13:28   0:04 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root        2061  0.0  0.1  35428 12380 ?        Ss   13:36   0:01 /usr/lib/systemd/systemd-udevd
+(clean)
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep1 rc=0 ---
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep2 rc=0 ---
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep3 rc=0 ---
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep4 rc=0 ---
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep5 rc=0 ---
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep1 rc=0 ---
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep2 rc=0 ---
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep3 rc=0 ---
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep4 rc=0 ---
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep5 rc=0 ---
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep1 rc=0 ---
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep2 rc=0 ---
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep3 rc=0 ---
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep4 rc=0 ---
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep5 rc=0 ---
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep1 rc=0 ---
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep2 rc=0 ---
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep3 rc=0 ---
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep4 rc=0 ---
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep5 rc=0 ---
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep1 rc=0 ---
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep2 rc=0 ---
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep3 rc=0 ---
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep4 rc=0 ---
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep5 rc=0 ---
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep1 rc=0 ---
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep2 rc=0 ---
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep3 rc=0 ---
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep4 rc=0 ---
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep5 rc=0 ---
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep1 rc=0 ---
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep2 rc=0 ---
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep3 rc=0 ---
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep4 rc=0 ---
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep5 rc=0 ---
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep1 rc=0 ---
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep2 rc=0 ---
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep3 rc=0 ---
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep4 rc=0 ---
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep5 rc=0 ---
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep1 rc=0 ---
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep2 rc=0 ---
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep3 rc=0 ---
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep4 rc=0 ---
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep5 rc=0 ---
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep1 rc=0 ---
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep2 rc=0 ---
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep3 rc=0 ---
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep4 rc=0 ---
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep5 rc=0 ---
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep1 rc=0 ---
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep2 rc=0 ---
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep3 rc=0 ---
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep4 rc=0 ---
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep5 rc=0 ---
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep1 rc=0 ---
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep2 rc=0 ---
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep3 rc=0 ---
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep4 rc=0 ---
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep5 rc=0 ---
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep1 rc=0 ---
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep2 rc=0 ---
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep3 rc=0 ---
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep4 rc=0 ---
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep5 rc=0 ---
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep1 rc=0 ---
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep2 rc=0 ---
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep3 rc=0 ---
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep4 rc=0 ---
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep5 rc=0 ---
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep1 rc=0 ---
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep2 rc=0 ---
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep3 rc=0 ---
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep4 rc=0 ---
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep5 rc=0 ---
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep1 rc=0 ---
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep2 rc=0 ---
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep3 rc=0 ---
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep4 rc=0 ---
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep5 rc=0 ---
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep1 rc=0 ---
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep2 rc=0 ---
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep3 rc=0 ---
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep4 rc=0 ---
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep5 rc=0 ---
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep1 rc=0 ---
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep2 rc=0 ---
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep3 rc=0 ---
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep4 rc=0 ---
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep5 rc=0 ---
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep1 rc=0 ---
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep2 rc=0 ---
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep3 rc=0 ---
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep4 rc=0 ---
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep5 rc=0 ---
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep1 rc=0 ---
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep2 rc=0 ---
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep3 rc=0 ---
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep4 rc=0 ---
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep5 rc=0 ---
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep1 rc=0 ---
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep2 rc=0 ---
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep3 rc=0 ---
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep4 rc=0 ---
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep5 rc=0 ---
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep1 rc=0 ---
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep2 rc=0 ---
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep3 rc=0 ---
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep4 rc=0 ---
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep5 rc=0 ---
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep1 rc=0 ---
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep2 rc=0 ---
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep3 rc=0 ---
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep4 rc=0 ---
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep5 rc=0 ---
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep1 rc=0 ---
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep2 rc=0 ---
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep3 rc=0 ---
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep4 rc=0 ---
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep5 rc=0 ---
+--- OPT cs=8388608 r=0.25 ---
+--- OPT cs=8388608 r=0.5 ---
+--- OPT cs=8388608 r=0.75 ---
+--- OPT cs=134217728 r=0.25 ---
+--- OPT cs=134217728 r=0.5 ---
+--- OPT cs=134217728 r=0.75 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=400000 rep3 rc=0 ---
+
+=== machine exclusivity (after) ===
+ 16:01:25 up  2:33,  1 user,  load average: 2.08, 1.40, 1.47
+=== Phase 2 complete: /root/residctl/results/final/phase2_determinism.csv / /root/residctl/results/final/phase2_sweep.csv / /root/residctl/results/final/phase2_opt.csv ===

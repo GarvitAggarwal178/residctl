@@ -1,0 +1,553 @@
+=== fresh start ===
+=== machine exclusivity (before) ===
+ 15:33:22 up  2:05,  1 user,  load average: 1.12, 1.15, 2.50
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       14891 50.0  0.0   4948  3644 ?        Ss   15:33   0:00 bash src/run_final_phase2.sh
+root       14860  1.4  0.0   5600  4316 pts/0    Ss+  15:33   0:00 bash -lc cd /root/residctl && rm -f results/final/phase2_*.csv results/final/phase2_log.txt && setsid bash src/phase2_supervisor.sh > results/final/phase2_supervisor.log 2>&1 < /dev/null & disown; sleep 8; echo "=== launched ==="; pgrep -af "phase2_supervisor|run_final_phase2|replay_main" | head; echo "---"; tail -3 results/final/phase2_supervisor.log 2>/dev/null; wc -l results/final/phase2_determinism.csv 2>/dev/null
+root           7  0.0  0.0   4216  2488 hvc0     Sl+  13:28   0:04 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root        2061  0.0  0.1  35428 12380 ?        Ss   13:36   0:01 /usr/lib/systemd/systemd-udevd
+(clean)
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=5223760676,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4860412349,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4481900711,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=5162482507,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell1 t=1 w=0 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4201711799,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10675675248,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=696933.8,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=12035158824,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=772435.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10075716990,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=665510.3,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10213886000,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=674648.9,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell2 t=1 w=0 c=400000 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10369284727,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=685501.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4333102807,absent_handled=51,evictions=43,infeasible=0,prefetches=0,pager_bytes_fetched=6845104128,io_read_bytes_delta=6845104128,dedup_resident=12,dedup_fetching=317,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4031099121,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=20,dedup_fetching=311,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3869969925,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=26,dedup_fetching=278,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3358861031,absent_handled=51,evictions=43,infeasible=0,prefetches=0,pager_bytes_fetched=6845104128,io_read_bytes_delta=6845104128,dedup_resident=27,dedup_fetching=291,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell3 t=8 w=0 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3212642775,absent_handled=51,evictions=43,infeasible=0,prefetches=0,pager_bytes_fetched=6845104128,io_read_bytes_delta=6845104128,dedup_resident=32,dedup_fetching=281,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3659363272,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=53,dedup_fetching=129,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3569331421,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=55,dedup_fetching=113,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3597533634,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=55,dedup_fetching=117,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3601974156,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=55,dedup_fetching=131,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell4 t=8 w=1 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4058306059,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=55,dedup_fetching=131,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4854122843,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=55,dedup_fetching=33,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=879073.2,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=5335317893,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=55,dedup_fetching=41,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=885203.6,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4554589604,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=55,dedup_fetching=43,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=777698.1,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4552479531,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=55,dedup_fetching=78,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=622360.3,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell5 t=8 w=1 c=400000 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4793527650,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=54,dedup_fetching=55,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=775737.3,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=5444887600,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=768,dedup_fetching=1479,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=798277.8,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=5221298655,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=767,dedup_fetching=1181,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=767848.7,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=5164836183,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=767,dedup_fetching=1101,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=781824.1,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=5144718164,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=766,dedup_fetching=1143,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=783550.8,consumption_signal=tid0,protect_current=on
+--- det tid0_on cell6 t=8 w=1 c=400000 cs=8388608 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=4917111538,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=767,dedup_fetching=1151,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=772948.2,consumption_signal=tid0,protect_current=on
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3380671364,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3548769774,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3443220845,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3405340125,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell1 t=1 w=0 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3254735942,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10267944572,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=659085.5,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10381267663,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=678993.8,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10315873747,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=682940.9,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10114368311,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=653622.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell2 t=1 w=0 c=400000 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10486180358,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=681597.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3409704955,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=21,dedup_fetching=272,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3405288987,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=20,dedup_fetching=285,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3462294423,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=27,dedup_fetching=256,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3339326079,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=20,dedup_fetching=276,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell3 t=8 w=0 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3392133475,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=21,dedup_fetching=272,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3544164578,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=48,dedup_fetching=116,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3451373857,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=48,dedup_fetching=97,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3256426793,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=48,dedup_fetching=109,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3511042158,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=47,dedup_fetching=113,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell4 t=8 w=1 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3430545063,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=47,dedup_fetching=132,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=6658984530,absent_handled=87,evictions=79,infeasible=0,prefetches=0,pager_bytes_fetched=11676942336,io_read_bytes_delta=11676942336,dedup_resident=37,dedup_fetching=193,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1983118.0,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=6447011195,absent_handled=83,evictions=75,infeasible=0,prefetches=0,pager_bytes_fetched=11140071424,io_read_bytes_delta=11140071424,dedup_resident=34,dedup_fetching=161,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1683030.9,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=6930710830,absent_handled=91,evictions=83,infeasible=0,prefetches=0,pager_bytes_fetched=12213813248,io_read_bytes_delta=12213813248,dedup_resident=32,dedup_fetching=202,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=2116344.7,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=6784825843,absent_handled=91,evictions=83,infeasible=0,prefetches=0,pager_bytes_fetched=12213813248,io_read_bytes_delta=12213813248,dedup_resident=34,dedup_fetching=205,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=2033963.9,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell5 t=8 w=1 c=400000 cs=134217728 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=8375462833,absent_handled=90,evictions=82,infeasible=0,prefetches=0,pager_bytes_fetched=12079595520,io_read_bytes_delta=12079595520,dedup_resident=31,dedup_fetching=207,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=2434814.8,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep1 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=7015495970,absent_handled=1391,evictions=1263,infeasible=0,prefetches=0,pager_bytes_fetched=11668553728,io_read_bytes_delta=11668553728,dedup_resident=436,dedup_fetching=3385,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1367111.2,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep2 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=7085434708,absent_handled=1395,evictions=1267,infeasible=0,prefetches=0,pager_bytes_fetched=11702108160,io_read_bytes_delta=11702108160,dedup_resident=437,dedup_fetching=3341,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1314063.5,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep3 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=7024045237,absent_handled=1388,evictions=1260,infeasible=0,prefetches=0,pager_bytes_fetched=11643387904,io_read_bytes_delta=11643387904,dedup_resident=425,dedup_fetching=3393,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1344148.1,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep4 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=7242961365,absent_handled=1395,evictions=1267,infeasible=0,prefetches=0,pager_bytes_fetched=11702108160,io_read_bytes_delta=11702108160,dedup_resident=419,dedup_fetching=3394,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1395302.9,consumption_signal=tid0,protect_current=off
+--- det tid0_off cell6 t=8 w=1 c=400000 cs=8388608 rep5 rc=0 ---
+  consumption_signal=tid0 protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=7140595331,absent_handled=1398,evictions=1270,infeasible=0,prefetches=0,pager_bytes_fetched=11727273984,io_read_bytes_delta=11727273984,dedup_resident=449,dedup_fetching=3315,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1369657.1,consumption_signal=tid0,protect_current=off
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3707510838,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3187148348,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3242797112,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3184211850,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell1 t=1 w=0 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3022069272,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=9572658465,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=613334.1,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10055298349,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=670087.3,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10678647138,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=700215.7,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=11515539841,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=763573.6,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell2 t=1 w=0 c=400000 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=13401820610,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=862302.2,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4591681393,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=28,dedup_fetching=264,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3183144672,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=28,dedup_fetching=277,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4480649232,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=27,dedup_fetching=254,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4460221854,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=29,dedup_fetching=264,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell3 t=8 w=0 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4455541379,absent_handled=48,evictions=40,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=19,dedup_fetching=263,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4774818997,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=50,dedup_fetching=105,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4553319630,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=50,dedup_fetching=114,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4396420236,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=49,dedup_fetching=120,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4669366686,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=49,dedup_fetching=130,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell4 t=8 w=1 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4556075319,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=50,dedup_fetching=122,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=6350123449,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=50,dedup_fetching=27,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1097932.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=6273152710,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=49,dedup_fetching=29,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1097895.0,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=5827023796,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=50,dedup_fetching=26,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=990676.9,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=6452099364,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=50,dedup_fetching=32,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=1019593.9,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell5 t=8 w=1 c=400000 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=5892996599,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=50,dedup_fetching=25,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=976147.3,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=6278137440,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=765,dedup_fetching=1414,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=821817.5,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=6596686633,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=767,dedup_fetching=1483,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=793303.5,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=6143787267,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=763,dedup_fetching=1182,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=743397.5,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=6093815337,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=765,dedup_fetching=1514,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=694581.8,consumption_signal=all-threads,protect_current=off
+--- det allthreads_off cell6 t=8 w=1 c=400000 cs=8388608 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=off
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=6695553323,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=766,dedup_fetching=1600,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=938123.6,consumption_signal=all-threads,protect_current=off
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4610639028,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4344227179,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3841577094,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3982393504,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell1 t=1 w=0 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3752898228,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=11048012281,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=680550.7,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=11188256632,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=698999.6,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=11735803169,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=747303.4,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10422943606,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=661257.2,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell2 t=1 w=0 c=400000 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=10331411016,absent_handled=50,evictions=42,infeasible=0,prefetches=0,pager_bytes_fetched=6710886400,io_read_bytes_delta=6710886400,dedup_resident=0,dedup_fetching=0,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=1,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=679656.5,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3420402347,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=32,dedup_fetching=302,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3504768847,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=36,dedup_fetching=290,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3536181679,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=37,dedup_fetching=290,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3406696200,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=34,dedup_fetching=295,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell3 t=8 w=0 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3528658349,absent_handled=55,evictions=47,infeasible=0,prefetches=0,pager_bytes_fetched=7381975040,io_read_bytes_delta=7381975040,dedup_resident=39,dedup_fetching=280,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=0,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3525916682,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=55,dedup_fetching=83,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3446974213,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=56,dedup_fetching=70,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3403246891,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=55,dedup_fetching=79,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3611562959,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=55,dedup_fetching=86,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell4 t=8 w=1 c=0 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=3620156620,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=55,dedup_fetching=92,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=0,compute_achieved_ns_per_mib=0.0,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4473053554,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=56,dedup_fetching=62,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=695915.6,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4366966809,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=55,dedup_fetching=60,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=675739.2,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4505683003,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=56,dedup_fetching=74,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=760573.5,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4732524053,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=56,dedup_fetching=65,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=765006.3,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell5 t=8 w=1 c=400000 cs=134217728 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=80,bytes_touched=10737418240,wall_ns=4591278982,absent_handled=56,evictions=48,infeasible=0,prefetches=0,pager_bytes_fetched=7516192768,io_read_bytes_delta=7516192768,dedup_resident=55,dedup_fetching=64,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=761667.9,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep1 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=4399546643,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=767,dedup_fetching=879,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=663712.8,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep2 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=4868432173,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=767,dedup_fetching=940,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=683952.1,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep3 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=4645201240,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=768,dedup_fetching=870,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=667090.6,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep4 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=4408082142,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=768,dedup_fetching=956,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=660900.6,consumption_signal=all-threads,protect_current=on
+--- det allthreads_on cell6 t=8 w=1 c=400000 cs=8388608 rep5 rc=0 ---
+  consumption_signal=all-threads protect_current=on
+ARM_CSV,policy=layer_order_declared,prefetch=off,budget_bytes=1073741824,touches=1280,bytes_touched=10737418240,wall_ns=5957371453,absent_handled=768,evictions=640,infeasible=0,prefetches=0,pager_bytes_fetched=6442450944,io_read_bytes_delta=6442450944,dedup_resident=767,dedup_fetching=1363,handler=async,fetch_workers=4,prefetch_admission=guarded,prefetch_declined=0,driver_threads=8,lookahead_window=1,prefetch_retention=pinned,pin_broken=0,compute_ns_per_mib=400000,compute_achieved_ns_per_mib=910405.8,consumption_signal=all-threads,protect_current=on
+--- OPT cs=8388608 r=0.25 ---
+loaded 1280 ground-truth references from /root/residctl/scratch/p2_ref_cs8388608_r0.25.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=256 passes=5 capacity=64 floor=1024 actual_misses=1024 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/p2_ref_cs8388608_r0.25.reftrace chunk_size=8388608 budget_bytes=536870912 capacity=64 chunks
+  total_refs=1280 minimum_misses=1024 minimum_bytes_fetched=8589934592 hit_rate=0.2000
+--- OPT cs=8388608 r=0.5 ---
+loaded 1280 ground-truth references from /root/residctl/scratch/p2_ref_cs8388608_r0.5.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=256 passes=5 capacity=128 floor=768 actual_misses=768 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/p2_ref_cs8388608_r0.5.reftrace chunk_size=8388608 budget_bytes=1073741824 capacity=128 chunks
+  total_refs=1280 minimum_misses=768 minimum_bytes_fetched=6442450944 hit_rate=0.4000
+--- OPT cs=8388608 r=0.75 ---
+loaded 1280 ground-truth references from /root/residctl/scratch/p2_ref_cs8388608_r0.75.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=256 passes=5 capacity=192 floor=512 actual_misses=512 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/p2_ref_cs8388608_r0.75.reftrace chunk_size=8388608 budget_bytes=1610612736 capacity=192 chunks
+  total_refs=1280 minimum_misses=512 minimum_bytes_fetched=4294967296 hit_rate=0.6000
+--- OPT cs=134217728 r=0.25 ---
+loaded 80 ground-truth references from /root/residctl/scratch/p2_ref_cs134217728_r0.25.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=4 floor=64 actual_misses=65 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/p2_ref_cs134217728_r0.25.reftrace chunk_size=134217728 budget_bytes=536870912 capacity=4 chunks
+  total_refs=80 minimum_misses=65 minimum_bytes_fetched=8724152320 hit_rate=0.1875
+--- OPT cs=134217728 r=0.5 ---
+loaded 80 ground-truth references from /root/residctl/scratch/p2_ref_cs134217728_r0.5.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=8 floor=48 actual_misses=48 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/p2_ref_cs134217728_r0.5.reftrace chunk_size=134217728 budget_bytes=1073741824 capacity=8 chunks
+  total_refs=80 minimum_misses=48 minimum_bytes_fetched=6442450944 hit_rate=0.4000
+--- OPT cs=134217728 r=0.75 ---
+loaded 80 ground-truth references from /root/residctl/scratch/p2_ref_cs134217728_r0.75.reftrace (TRACE_TYPE_REFERENCE)
+cyclic-scan floor check: n=16 passes=5 capacity=12 floor=32 actual_misses=32 -- OK
+OPT (Belady) result
+  trace=/root/residctl/scratch/p2_ref_cs134217728_r0.75.reftrace chunk_size=134217728 budget_bytes=1610612736 capacity=12 chunks
+  total_refs=80 minimum_misses=32 minimum_bytes_fetched=4294967296 hit_rate=0.6000
+--- sweep tid0_on cs=8388608 r=0.25 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=8388608 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=0 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=0 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=0 rep3 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep tid0_on cs=134217728 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=8388608 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=0 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=0 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=0 rep3 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep tid0_off cs=134217728 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=8388608 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=0 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=0 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=0 rep3 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep allthreads_off cs=134217728 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=8388608 r=0.75 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.25 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.5 c=400000 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=0 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=0 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=0 rep3 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=400000 rep1 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=400000 rep2 rc=0 ---
+--- sweep allthreads_on cs=134217728 r=0.75 c=400000 rep3 rc=0 ---
+
+=== machine exclusivity (after) ===
+ 16:01:25 up  2:33,  1 user,  load average: 2.08, 1.40, 1.47
+=== Phase 2 complete: /root/residctl/results/final/phase2_determinism.csv / /root/residctl/results/final/phase2_sweep.csv / /root/residctl/results/final/phase2_opt.csv ===

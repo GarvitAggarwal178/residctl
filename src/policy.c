@@ -9,6 +9,15 @@ static uint32_t chunk_index(region_t *r, chunk_t *c) {
     return (uint32_t)(c - r->chunks);
 }
 
+// FINAL SESSION Phase 2: --protect-current {on,off}. Default on -- the shipped
+// session-2 WP0 heuristic (lo_declared_dist returns 0 for seq[pos]/seq[pos-1]).
+// Turned off to measure what the exact all-threads consumption signal
+// (replay.c --consumption-signal all-threads) contributes on its own, without
+// the heuristic masking it. Affects layer_order_declared only.
+static int g_lo_protect_current = 1;
+void policy_set_protect_current(int on) { g_lo_protect_current = on ? 1 : 0; }
+int  policy_get_protect_current(void)   { return g_lo_protect_current; }
+
 // ---- lru --------------------------------------------------------------
 
 static uint32_t lru_select_victim(region_t *r) {
@@ -223,8 +232,15 @@ static int64_t lo_declared_dist(lo_declared_state_t *st, uint32_t x) {
     // post-compute), so "current" per the policy lags reality by ~1; (2) a
     // single transformer layer whose weights the GGUF split across two
     // non-contiguous file chunks -- both are live while that layer computes.
-    if (st->seq[base % st->seq_len] == x) return 0;
-    if (base > 0 && st->seq[(base - 1) % st->seq_len] == x) return 0;
+    // FINAL SESSION Phase 2: the protection is a heuristic (--protect-current,
+    // default on). With --consumption-signal all-threads the driver only
+    // advances the cursor once every thread has finished a chunk, so seq[pos]
+    // is genuinely safe to treat as "just consumed" and the heuristic may be
+    // unnecessary -- turn it off to measure that.
+    if (g_lo_protect_current) {
+        if (st->seq[base % st->seq_len] == x) return 0;
+        if (base > 0 && st->seq[(base - 1) % st->seq_len] == x) return 0;
+    }
     for (uint32_t d = 1; d <= st->seq_len; d++) {
         if (st->seq[(base + d) % st->seq_len] == x) return (int64_t)d;
     }

@@ -7,6 +7,8 @@
 #include "policy.h"
 #include "metrics.h"
 #include "trace.h"
+#include "fetch_trace.h"   // FINAL SESSION Phase 3
+#include "policy_trace.h"  // FINAL SESSION Phase 3
 
 #include "gguf.h"   // third_party/llama.cpp/ggml/include
 
@@ -35,6 +37,16 @@ static int      g_retention_none;          // 0 => pinned (default)
 static uint32_t g_fetch_workers = 4;
 static int      g_eager_reconcile;
 static char     g_reftrace_path[1024];
+static char     g_fetchtrace_path[1024];   // FINAL SESSION Phase 3
+static char     g_policytrace_path[1024];  // FINAL SESSION Phase 3
+static int      g_protect_current = 0;     // FINAL SESSION Phase 2: default OFF (the
+                                           // per-layer eval callback fires notify AFTER
+                                           // each layer's compute completes across all
+                                           // llama threads -- already the exact
+                                           // "all-threads" signal, so the WP0 heuristic
+                                           // is redundant. protect_current=on in the
+                                           // config restores it. Phase 3 checks this on
+                                           // the real model.
 
 static void load_config(void) {
     const char *cfg = getenv("RESIDCTL_CONFIG");
@@ -57,6 +69,9 @@ static void load_config(void) {
         else if (!strcmp(k, "fetch_workers"))    g_fetch_workers = (uint32_t)strtoul(v, NULL, 10);
         else if (!strcmp(k, "eager_reconcile"))  g_eager_reconcile = !strcmp(v, "1");
         else if (!strcmp(k, "reftrace"))         snprintf(g_reftrace_path, sizeof g_reftrace_path, "%s", v);
+        else if (!strcmp(k, "fetchtrace"))       snprintf(g_fetchtrace_path, sizeof g_fetchtrace_path, "%s", v);
+        else if (!strcmp(k, "policytrace"))      snprintf(g_policytrace_path, sizeof g_policytrace_path, "%s", v);
+        else if (!strcmp(k, "protect_current"))  g_protect_current = strcmp(v, "off") != 0;
     }
     fclose(f);
     if (!g_model_path[0] || !g_cgroup[0] || !g_budget_bytes) {
@@ -234,6 +249,38 @@ static pthread_t    g_pager_thread;
 static volatile sig_atomic_t g_stop;
 static int          g_started;
 static uint64_t     g_notify_seq;
+static fetch_trace_t  *g_fetchtrace;   // FINAL SESSION Phase 3
+static policy_trace_t *g_policytrace;  // FINAL SESSION Phase 3
+
+// FINAL SESSION Phase 3: on SIGUSR1, dump the residency state the arm-E
+// collapse characterisation needs -- how many chunks are pinned, how many
+// RESIDENT+unpinned, stat_pin_broken/infeasible, and the pager's own view.
+// Async-signal-safety: only read plain scalars and write() a preformatted-ish
+// line; snprintf is not strictly async-signal-safe but is used the same way
+// item 10b's watchdog dump did, and this is a diagnostic path.
+static void residctl_llama_sigusr1(int sig) {
+    (void)sig;
+    uint32_t pinned = 0, resident_unpinned = 0, resident = 0, fetching = 0;
+    for (uint32_t i = 0; i < g_r.n_chunks; i++) {
+        chunk_t *c = &g_r.chunks[i];
+        if (c->state == CHUNK_RESIDENT) {
+            resident++;
+            if (c->pin != 0) pinned++; else resident_unpinned++;
+        }
+        if (c->state == CHUNK_FETCHING) fetching++;
+    }
+    char buf[512];
+    int n = snprintf(buf, sizeof buf,
+        "RESIDCTL_SIGDUMP n_chunks=%u resident=%u resident_unpinned=%u pinned=%u fetching=%u "
+        "resident_bytes=%llu budget_bytes=%llu stat_pin_broken=%llu stat_infeasible=%llu "
+        "stat_absent_handled=%llu stat_evictions=%llu stat_prefetches=%llu\n",
+        g_r.n_chunks, resident, resident_unpinned, pinned, fetching,
+        (unsigned long long)g_r.resident_bytes, (unsigned long long)g_r.budget_bytes,
+        (unsigned long long)g_r.stat_pin_broken, (unsigned long long)g_r.stat_infeasible,
+        (unsigned long long)g_r.stat_absent_handled, (unsigned long long)g_r.stat_evictions,
+        (unsigned long long)g_r.stat_prefetches);
+    if (n > 0) { ssize_t w = write(2, buf, (size_t)n); (void)w; }
+}
 
 typedef struct { region_t *r; volatile sig_atomic_t *stop; } pager_args_t;
 static void *pager_trampoline(void *a) {
@@ -280,6 +327,7 @@ void *residctl_llama_mmap(int llama_fd, size_t file_size) {
     else { fprintf(stderr, "residctl_llama: unknown policy '%s'\n", g_policy_name); _exit(3); }
     g_r.policy = g_policy;
     g_r.prefetch_enabled = g_prefetch_on ? true : false;
+    policy_set_protect_current(g_protect_current);  // FINAL SESSION Phase 2/3
 
     if (g_policy && g_policy->declare_sequence) {
         // WP2: declared sequence = the real per-token consumption order
@@ -296,6 +344,15 @@ void *residctl_llama_mmap(int llama_fd, size_t file_size) {
     if (g_reftrace_path[0]) {
         g_reftrace = trace_open(g_reftrace_path, TRACE_TYPE_REFERENCE);
     }
+    if (g_fetchtrace_path[0]) {   // FINAL SESSION Phase 3
+        g_fetchtrace = fetch_trace_open(g_fetchtrace_path, 2000000);
+        g_r.diag_fetch_trace = g_fetchtrace;
+    }
+    if (g_policytrace_path[0]) {  // FINAL SESSION Phase 3
+        g_policytrace = policy_trace_open(g_policytrace_path, 2000000);
+        g_r.diag_policy_trace = g_policytrace;
+    }
+    signal(SIGUSR1, residctl_llama_sigusr1);  // FINAL SESSION Phase 3 watchdog dump
 
     pager_args_t *pa = malloc(sizeof *pa);
     pa->r = &g_r; pa->stop = &g_stop;
@@ -396,6 +453,14 @@ void residctl_llama_teardown(void) {
     g_stop = 1;
     pthread_join(g_pager_thread, NULL);
     if (g_reftrace) { trace_close(g_reftrace); g_reftrace = NULL; }
+    if (g_fetchtrace) {   // FINAL SESSION Phase 3: once, after the pager stopped
+        fetch_trace_flush(g_fetchtrace); fetch_trace_close(g_fetchtrace);
+        g_r.diag_fetch_trace = NULL; g_fetchtrace = NULL;
+    }
+    if (g_policytrace) {
+        policy_trace_flush(g_policytrace); policy_trace_close(g_policytrace);
+        g_r.diag_policy_trace = NULL; g_policytrace = NULL;
+    }
 
     uint64_t mem_peak = cgroup_u64("memory.peak");
     double p99 = (double)latency_hist_percentile_ns(&g_metrics.handler_latency, 0.99);
