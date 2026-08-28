@@ -1,0 +1,22 @@
+# Table 2 (FINAL) — environment and configuration
+
+| parameter | value |
+|---|---|
+| kernel release | 6.18.33.2-microsoft-standard-WSL2 (WSL2 guest; bare metal out of scope) |
+| CPU / RAM | 16 logical cores / 7 GiB |
+| model file (WP2 / Phase 1 / Phase 3) | Qwen2.5-3B-Instruct-GGUF q4_k_m, 2,104,932,768 B |
+| model sha256 | 626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d |
+| model layout | 435 tensors / 36 layers; 41 chunks (min 0.01 / median 41.5 / max 243 MiB); tensors in name-lexicographic not layer order; layer 21 split across 2 non-contiguous chunks |
+| weight region | 2,104,934,400 B = align_up(file, 4096) |
+| cgroup | v2; memory.swap.max = 0 (I-3) |
+| equal-budget setup (Phase 1) | arm A: memory.max = B (= ratio x region). pager arms: budget_bytes = B, memory.max = B + 128 MiB (uniform, llama non-weight footprint). residual ~50 MiB weight-cache asymmetry favours the pager arms. |
+| ratios | Phase 1 real model: {0.25, 0.375, 0.5, 0.625, 0.75}, n=3. Phase 2 synthetic: {0.25, 0.5, 0.75} x compute {0, 400000}, n=3. |
+| tokens generated | 64, fixed prompt (16 tokens), greedy/deterministic |
+| llama threads | 8 (-t 8), n_gpu_layers = 0, load mode mmap/residctl |
+| policy (final default) | layer_order_declared, --consumption-signal all-threads, --protect-current off (Phase 2 outcome). layer_order_learned retained as comparison arm. |
+| fetch workers | 4; async dispatch-only handler (A-5) |
+| prefetch (arm E) | depth 2, retention pinned -- EXCEPT r <= 0.375 where the recommendation is prefetch off (Phase 3: default config deadlocks; fallback = retention none, still no benefit) |
+| per-layer compute (measured) | ~51,000 ns/MiB (13.2 t/s baseline / 36 layers / 41.5 MiB per layer chunk) |
+| O_DIRECT bandwidth ceiling | 3396 MiB/s; Phase 1 arm A achieved 920-1310 MiB/s (fault-stall-bound, no contamination) |
+| T-1..T-7 | PASS with --eager-reconcile, after every Phase 2 code change and at session end |
+| disk free | 923G |
