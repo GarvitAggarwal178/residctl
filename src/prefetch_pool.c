@@ -225,6 +225,7 @@ static void do_one_prefetch(prefetch_pool_t *pool, uint32_t idx) {
         // catch 30 s later).
         unpin_chunk(r, target); // item 10d: was a bare `target->pin--` -- see pin_chunk()'s note above
         pager_abandon_fetch(r, target); // -> ABSENT, fetching_since_ns=0, WAKE
+        target->decline_until_ns = now_ns() + 100 * 1000 * 1000ULL; // Defect 3: 100 ms backoff
         __sync_fetch_and_add(&r->stat_prefetch_infeasible, 1);
         pthread_mutex_unlock(&target->lock);
         return;
@@ -395,7 +396,8 @@ void prefetch_pool_top_up(region_t *r, chunk_t *just_resident) {
         pthread_mutex_lock(&pool->lock);
         bool already = pool->pf_tracked[idx];
         chunk_state_t st = cursor->state; // benign racy read: worst case we enqueue a now-resident chunk, do_one_prefetch drops it harmlessly
-        if (!already && st == CHUNK_ABSENT && pool->pf_len < pool->pf_cap) {
+        bool backoff = cursor->decline_until_ns > now_ns(); // Defect 3: recently declined -- don't re-enqueue yet
+        if (!already && st == CHUNK_ABSENT && !backoff && pool->pf_len < pool->pf_cap) {
             pool->pf_tracked[idx] = 1;
             pool->pf_queue[(pool->pf_head + pool->pf_len) % pool->pf_cap] = idx;
             pool->pf_len++;

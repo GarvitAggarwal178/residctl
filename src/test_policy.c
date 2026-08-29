@@ -133,6 +133,9 @@ int main(void) {
         // this block validates the heuristic's correctness WHEN ENABLED, so
         // pin it on explicitly (self-documenting, default-independent).
         policy_set_protect_current(1);
+        // LIVELOCK FIX Defect 1: this block asserts post-consumption semantics
+        // (d starts at 1, seq[pos] furthest). Pin the mode explicitly.
+        policy_set_signal_mode(0);
 
         // Declare a non-identity permutation so the test can't pass by
         // accident on chunk_id==position.
@@ -188,6 +191,7 @@ int main(void) {
             policy_t *d2 = policy_layer_order_declared_create(W);
             g_r.policy = d2;
             policy_set_protect_current(1);   // this cross-check assumes protect-on semantics
+            policy_set_signal_mode(0);        // post-consumption (d starts at 1)
             policy_declare_sequence(&g_r, cyc, W);
 
             int xchk_fail = 0;
@@ -214,24 +218,58 @@ int main(void) {
                     }
                 }
             }
-            printf("declared next-use vs naive Belady scan: %s\n", xchk_fail ? "DISAGREE" : "agree (all positions, all chunks)");
+            printf("declared next-use vs naive Belady scan (post, protect-on): %s\n", xchk_fail ? "DISAGREE" : "agree (all positions, all chunks)");
             if (xchk_fail) local_fail = 1;
             policy_destroy(d2);
+
+            // LIVELOCK FIX Defect 1: the SAME cross-check in PRE-consumption
+            // mode with protect OFF -- the mode the real model uses after
+            // Defect 2. Naive reference: smallest k >= 0 with cyc[(step+k)%W]
+            // == x (so seq[pos] itself -> 0). The existing post-mode check
+            // above was insensitive to the d0 change: protect-on short-circuits
+            // seq[pos] and seq[pos-1] to 0, and those are the only inputs where
+            // starting at 0 vs 1 differs.
+            {
+                reset_chunks();
+                policy_t *d3 = policy_layer_order_declared_create(W);
+                g_r.policy = d3;
+                policy_set_protect_current(0);
+                policy_set_signal_mode(1);   // pre-consumption (d starts at 0)
+                policy_declare_sequence(&g_r, cyc, W);
+                int xf = 0;
+                for (uint32_t step = 0; step < W; step++) {
+                    d3->on_access(&g_r, &g_chunks[cyc[step]]);
+                    for (uint32_t x = 0; x < W; x++) {
+                        int64_t got = d3->next_use_distance(&g_r, &g_chunks[x]);
+                        int64_t want = -1;
+                        for (uint32_t k = 0; k < W; k++)
+                            if (cyc[(step + k) % W] == x) { want = (int64_t)k; break; }
+                        if (got != want) {
+                            fprintf(stderr, "FAIL(declared xcheck pre): step=%u chunk=%u got=%lld want=%lld\n",
+                                    step, x, (long long)got, (long long)want);
+                            xf = 1;
+                        }
+                    }
+                }
+                printf("declared next-use vs naive Belady scan (pre, protect-off): %s\n", xf ? "DISAGREE" : "agree (all positions, all chunks)");
+                if (xf) local_fail = 1;
+                policy_destroy(d3);
+                policy_set_protect_current(1);
+                policy_set_signal_mode(0);
+            }
         }
 
         policy_destroy(lo);
 
-        // ---- FINAL SESSION Phase 2: protect-current OFF (the new default) ----
-        // With the heuristic off, the actively-consumed chunk seq[pos] and
-        // seq[pos-1] are NOT special-cased: dist is the plain forward cyclic
-        // scan, so the current chunk is seq_len away (furthest -> top victim),
-        // and select_victim will evict it. This is only safe when the caller's
-        // consumption signal is exact (all chunks fully consumed before the
-        // cursor advances) -- Phase 2 showed it then reads at or below the
-        // protect-on config at every cell.
+        // ---- protect-current OFF, POST-consumption mode ----
+        // Heuristic off + d starts at 1: the actively-consumed chunk seq[pos]
+        // is seq_len away (furthest -> top victim), seq[pos-1] is seq_len-1.
+        // This is the synthetic --consumption-signal all-threads path and is
+        // byte-for-byte the pre-Defect-1 behaviour.
         {
             reset_chunks();
             policy_set_protect_current(0);
+            policy_set_signal_mode(0);   // post-consumption
             policy_t *lo3 = policy_layer_order_declared_create(N);
             g_r.policy = lo3;
             const uint32_t decl3[N] = { 0, 2, 4, 6, 1, 3, 5, 7 };
@@ -239,19 +277,86 @@ int main(void) {
             lo3->on_access(&g_r, &g_chunks[0]);
             lo3->on_access(&g_r, &g_chunks[2]);   // position at declared index 1 (chunk 2)
             if (lo3->next_use_distance(&g_r, &g_chunks[2]) != (int64_t)N) {
-                fprintf(stderr, "FAIL(declared protect-off): dist(2) != %d (should be furthest, not protected)\n", N); local_fail = 1;
+                fprintf(stderr, "FAIL(declared post protect-off): dist(2) != %d (should be furthest)\n", N); local_fail = 1;
             }
             if (lo3->next_use_distance(&g_r, &g_chunks[0]) != (int64_t)(N - 1)) {
-                fprintf(stderr, "FAIL(declared protect-off): dist(0) != %d\n", N - 1); local_fail = 1;
+                fprintf(stderr, "FAIL(declared post protect-off): dist(0) != %d\n", N - 1); local_fail = 1;
             }
             if (lo3->next_use_distance(&g_r, &g_chunks[4]) != 1) {
-                fprintf(stderr, "FAIL(declared protect-off): dist(4) != 1\n"); local_fail = 1;
+                fprintf(stderr, "FAIL(declared post protect-off): dist(4) != 1\n"); local_fail = 1;
             }
             policy_destroy(lo3);
-            policy_set_protect_current(1);   // restore for any later test
-            printf("layer_order_declared protect-current off: %s\n", local_fail ? "FAIL" : "ok");
+            policy_set_protect_current(1);
+            printf("layer_order_declared post protect-off: %s\n", local_fail ? "FAIL" : "ok");
         }
 
+        // ---- LIVELOCK FIX Defect 1: protect-current OFF, PRE-consumption ----
+        // Heuristic off + d starts at 0: seq[pos] is imminent (dist 0),
+        // seq[pos+1] is 1, seq[pos-1] is seq_len-1, a chunk absent from the
+        // declared sequence is INT64_MAX. This is the real-model path after
+        // Defect 2 moves the notify onto the pre-compute callback pass.
+        {
+            reset_chunks();
+            policy_set_protect_current(0);
+            policy_set_signal_mode(1);   // pre-consumption
+            policy_t *lo4 = policy_layer_order_declared_create(N);
+            g_r.policy = lo4;
+            // 7 distinct chunks declared; chunk 5 is deliberately absent.
+            const uint32_t decl4[7] = { 0, 2, 4, 6, 1, 3, 7 };
+            policy_declare_sequence(&g_r, decl4, 7);
+            lo4->on_access(&g_r, &g_chunks[0]);
+            lo4->on_access(&g_r, &g_chunks[2]);   // pos = declared index 1 (chunk 2)
+            if (lo4->next_use_distance(&g_r, &g_chunks[2]) != 0) {
+                fprintf(stderr, "FAIL(declared pre protect-off): dist(seq[pos]=2) != 0\n"); local_fail = 1;
+            }
+            if (lo4->next_use_distance(&g_r, &g_chunks[4]) != 1) {
+                fprintf(stderr, "FAIL(declared pre protect-off): dist(seq[pos+1]=4) != 1\n"); local_fail = 1;
+            }
+            if (lo4->next_use_distance(&g_r, &g_chunks[0]) != 6) {
+                fprintf(stderr, "FAIL(declared pre protect-off): dist(seq[pos-1]=0) != seq_len-1 (6)\n"); local_fail = 1;
+            }
+            if (lo4->next_use_distance(&g_r, &g_chunks[5]) != (int64_t)INT64_MAX) {
+                fprintf(stderr, "FAIL(declared pre protect-off): dist(5, absent from seq) != INT64_MAX\n"); local_fail = 1;
+            }
+            // select_victim: residents {4,0}. dist(4)=1, dist(0)=6 -> evict 0.
+            g_chunks[4].state = CHUNK_RESIDENT;
+            g_chunks[0].state = CHUNK_RESIDENT;
+            if (lo4->select_victim(&g_r) != 0) {
+                fprintf(stderr, "FAIL(declared pre protect-off): select_victim != 0 (furthest)\n"); local_fail = 1;
+            }
+            policy_destroy(lo4);
+            printf("layer_order_declared pre protect-off: %s\n", local_fail ? "FAIL" : "ok");
+        }
+
+        // ---- LIVELOCK FIX Defect 1: protect-current ON must still work in
+        // BOTH modes -- seq[pos] and seq[pos-1] forced to 0 regardless.
+        {
+            reset_chunks();
+            const uint32_t decl5[7] = { 0, 2, 4, 6, 1, 3, 7 };
+            for (int mode = 0; mode <= 1; mode++) {
+                reset_chunks();
+                policy_set_protect_current(1);
+                policy_set_signal_mode(mode);
+                policy_t *lo5 = policy_layer_order_declared_create(7);
+                g_r.policy = lo5;
+                policy_declare_sequence(&g_r, decl5, 7);
+                lo5->on_access(&g_r, &g_chunks[0]);
+                lo5->on_access(&g_r, &g_chunks[2]);
+                if (lo5->next_use_distance(&g_r, &g_chunks[2]) != 0 ||
+                    lo5->next_use_distance(&g_r, &g_chunks[0]) != 0) {
+                    fprintf(stderr, "FAIL(declared protect-on mode=%d): seq[pos]/seq[pos-1] not both 0\n", mode);
+                    local_fail = 1;
+                }
+                if (lo5->next_use_distance(&g_r, &g_chunks[5]) != (int64_t)INT64_MAX) {
+                    fprintf(stderr, "FAIL(declared protect-on mode=%d): dist(absent) != INT64_MAX\n", mode);
+                    local_fail = 1;
+                }
+                policy_destroy(lo5);
+            }
+            printf("layer_order_declared protect-on both modes: %s\n", local_fail ? "FAIL" : "ok");
+        }
+
+        policy_set_signal_mode(0);   // restore default for any later test
         printf("layer_order_declared: %s\n", local_fail ? "FAIL" : "ok");
         fail |= local_fail;
     }

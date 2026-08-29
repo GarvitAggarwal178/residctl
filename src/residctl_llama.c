@@ -378,6 +378,12 @@ void *residctl_llama_mmap(int llama_fd, size_t file_size) {
     g_r.policy = g_policy;
     g_r.prefetch_enabled = g_prefetch_on ? true : false;
     policy_set_protect_current(g_protect_current);  // FINAL SESSION Phase 2/3
+    // LIVELOCK FIX Defect 1 + Defect 2: wp2_gen.cpp:eval_cb() now fires the
+    // consumption signal on the eval callback's PRE-compute pass, so the
+    // signal precedes the weight read -> pre-consumption mode (seq[pos] has
+    // next-use distance 0). This is what makes --protect-current redundant on
+    // the real-model path; Phase 3 measures with it off.
+    policy_set_signal_mode(1);
 
     if (g_policy && g_policy->declare_sequence) {
         // WP2: declared sequence = the real per-token consumption order
@@ -542,7 +548,7 @@ void residctl_llama_teardown(void) {
            "absent_handled=%llu,evictions=%llu,infeasible=%llu,prefetches=%llu,"
            "pager_bytes_fetched=%llu,dedup_resident=%llu,dedup_fetching=%llu,pin_broken=%llu,"
            "resident_bytes_end=%llu,memory_peak=%llu,handler_p99_ns=%.0f,notify_layers=%llu,"
-           "stat_fetching_timeout=%llu\n",
+           "stat_fetching_timeout=%llu,protect_current=%s,signal_mode=%s,stat_prefetch_declined=%llu\n",
            g_policy_name, g_prefetch_on ? "on" : "off", (unsigned long long)g_budget_bytes,
            g_r.n_chunks, (long long)g_n_layers,
            (unsigned long long)g_r.region_len, (unsigned long long)g_file_size,
@@ -552,7 +558,10 @@ void residctl_llama_teardown(void) {
            (unsigned long long)g_r.stat_dedup_fetching, (unsigned long long)g_r.stat_pin_broken,
            (unsigned long long)g_r.resident_bytes, (unsigned long long)mem_peak, p99,
            (unsigned long long)g_notify_seq,
-           (unsigned long long)g_r.stat_fetching_timeout);
+           (unsigned long long)g_r.stat_fetching_timeout,
+           policy_get_protect_current() ? "on" : "off",
+           policy_get_signal_mode() ? "pre" : "post",
+           (unsigned long long)g_r.stat_prefetch_declined);
     fflush(stdout);
 
     region_teardown(&g_r);

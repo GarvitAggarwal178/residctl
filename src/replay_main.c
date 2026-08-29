@@ -269,6 +269,15 @@ int main(int argc, char **argv) {
     // first touch. Affects layer_order_declared only; harmless for the others.
     policy_set_protect_current(protect_current);
 
+    // LIVELOCK FIX Defect 1: signal mode. all-threads notifies AFTER a step is
+    // fully consumed by every driver thread -> post-consumption (d starts at
+    // 1, byte-for-byte the pre-fix behaviour). tid0 notifies before the read
+    // -> pre-consumption (d starts at 0). The serial replay_cyclic() path
+    // ignores consumption_signal_all and thus stays post under the default
+    // all-threads -- a deliberate baseline-continuity choice, see
+    // docs/design-history.md.
+    policy_set_signal_mode(consumption_signal_all ? 0 : 1);
+
     // WP1 (A-12): the replay driver knows its own access sequence -- a
     // single cyclic pass over chunks 0..n_chunks-1. Declare it now, before
     // the first touch, so layer_order_declared has it in hand. No-op for
@@ -326,9 +335,10 @@ int main(int argc, char **argv) {
            g_r.reconcile_interval, g_r.prefetch_depth,
            g_r.async_handler ? "async" : "sync", g_r.fetch_workers, driver_threads, lookahead_window,
            g_r.prefetch_retention_pinned ? "pinned" : "none");
-    printf("  consumption_signal=%s protect_current=%s fetching_timeout_ms=%u\n",
+    printf("  consumption_signal=%s protect_current=%s signal_mode=%s fetching_timeout_ms=%u\n",
            consumption_signal_all ? "all-threads" : "tid0",
            policy_get_protect_current() ? "on" : "off",
+           policy_get_signal_mode() ? "pre" : "post",
            g_r.fetching_timeout_ms);
 
     // Campaign 11 Phase 2: calibrate the compute-phase loop once, before any
@@ -438,7 +448,7 @@ int main(int argc, char **argv) {
            "handler=%s,fetch_workers=%u,prefetch_admission=%s,prefetch_declined=%llu,"
            "driver_threads=%u,lookahead_window=%u,prefetch_retention=%s,pin_broken=%llu,"
            "compute_ns_per_mib=%llu,compute_achieved_ns_per_mib=%.1f,"
-           "consumption_signal=%s,protect_current=%s,stat_fetching_timeout=%llu\n",
+           "consumption_signal=%s,protect_current=%s,signal_mode=%s,stat_fetching_timeout=%llu\n",
            policy_name, prefetch_arg, (unsigned long long)budget_bytes, res.n_touches,
            (unsigned long long)res.bytes_touched, (unsigned long long)res.wall_ns,
            (unsigned long long)g_r.stat_absent_handled, (unsigned long long)g_r.stat_evictions,
@@ -452,6 +462,7 @@ int main(int argc, char **argv) {
            (unsigned long long)compute_ns_per_mib, replay_compute_achieved_ns_per_mib(),
            consumption_signal_all ? "all-threads" : "tid0",
            policy_get_protect_current() ? "on" : "off",
+           policy_get_signal_mode() ? "pre" : "post",
            (unsigned long long)g_r.stat_fetching_timeout);
 
     if (g_r.resident_bytes > g_r.budget_bytes) {

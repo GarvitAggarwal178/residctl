@@ -47,7 +47,14 @@ static int node_layer(const char * nm) {
 }
 
 static bool eval_cb(struct ggml_tensor * t, bool ask, void * ud) {
-    if (ask) return true;
+    // LIVELOCK FIX Defect 2: act on the PRE-compute pass (ask == true), not
+    // the post pass. ggml_backend_sched fires the eval callback twice per
+    // node -- ask==true before it computes, ask==false after. Notifying on
+    // the post pass means the pager learns "layer N about to be read" only
+    // after layer N's weights have already been read; firing on the pre pass
+    // makes the consumption signal actually precede the read, which is what
+    // lo_declared_dist()'s pre-consumption mode (Defect 1) assumes.
+    if (!ask) return true;
     auto * st = (cb_state *) ud;
     const char * nm = t->name;
     int layer = node_layer(nm);

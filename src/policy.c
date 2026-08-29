@@ -18,6 +18,25 @@ static int g_lo_protect_current = 1;
 void policy_set_protect_current(int on) { g_lo_protect_current = on ? 1 : 0; }
 int  policy_get_protect_current(void)   { return g_lo_protect_current; }
 
+// LIVELOCK FIX Defect 1: the next-use-distance origin in lo_declared_dist()
+// depends on WHEN the workload's consumption signal (pager_notify_access())
+// fires relative to the read it announces.
+//   0 = post-consumption (default): the signal fires after seq[pos] has been
+//       fully read; its next use is a whole cycle away -> the loop starts at
+//       d = 1 and seq[pos] returns seq_len. This is the synthetic
+//       --consumption-signal all-threads path AND byte-for-byte what every
+//       caller got before this fix (the old unconditional `for d = 1..seq_len`).
+//   1 = pre-consumption: the signal fires just before seq[pos] is read; its
+//       use is imminent -> the loop starts at d = 0 and seq[pos] returns 0.
+//       This is the real model once Defect 2 moves the eval-callback notify
+//       onto the pre-compute pass, and the synthetic single-thread / tid0
+//       paths (which notify before the read) -- though replay_main keeps the
+//       serial path on mode 0 for baseline continuity; see docs/design-history.md.
+// Set once at startup, before the first touch. No effect on lru / learned.
+static int g_lo_signal_pre = 0;
+void policy_set_signal_mode(int pre_consumption) { g_lo_signal_pre = pre_consumption ? 1 : 0; }
+int  policy_get_signal_mode(void)                { return g_lo_signal_pre; }
+
 // ---- lru --------------------------------------------------------------
 
 static uint32_t lru_select_victim(region_t *r) {
@@ -209,19 +228,14 @@ typedef struct {
 // next_use_distance both go through it, so a prefetch's admission decision
 // can never silently disagree with the policy's own eviction ranking (A-6).
 //
-// WP0 consumption-signal fix (session 2): the chunk the consumption signal
-// currently points at (seq[pos]) is the one being consumed RIGHT NOW -- its
-// next use is imminent, not one full cycle away. Return 0 for it so
-// select_victim never evicts the actively-consumed chunk. Without this, the
-// `for d = 1..seq_len` loop matched seq[pos] only on the full wrap (d ==
-// seq_len), making the actively-consumed chunk the *furthest*-future and
-// therefore the top eviction victim -- WP2's real-inference measurement
-// showed layer_order_declared then re-faulting its own working set roughly
-// 1.8x per pass (arm D read 1.5x more bytes than "refetch everything").
-// This does not change the WP1 synthetic path: there the consumption signal
-// fires just before the read, so seq[pos] is pinned throughout the window
-// this could matter (verified: WP1 §1.2 gate + §1.3 determinism grid
-// unchanged after this fix).
+// The origin of the scan depends on the signal mode (LIVELOCK FIX Defect 1,
+// policy_set_signal_mode): pre-consumption -> seq[pos] returns 0 (imminent
+// use); post-consumption -> seq[pos] returns seq_len (a full cycle away).
+// The --protect-current heuristic below is a separate, older mechanism that
+// forces seq[pos] and seq[pos-1] to 0 regardless of mode; it was session 2's
+// blunt fix for the real-model signal lagging the read, and is redundant on
+// the pre-consumption path once Defect 2 lands (see docs/design-history.md
+// and results/livelock/).
 static int64_t lo_declared_dist(lo_declared_state_t *st, uint32_t x) {
     if (st->seq_len == 0) return INT64_MAX;
     uint64_t base = (st->pos < 0) ? 0 : (uint64_t)st->pos;
@@ -241,7 +255,14 @@ static int64_t lo_declared_dist(lo_declared_state_t *st, uint32_t x) {
         if (st->seq[base % st->seq_len] == x) return 0;
         if (base > 0 && st->seq[(base - 1) % st->seq_len] == x) return 0;
     }
-    for (uint32_t d = 1; d <= st->seq_len; d++) {
+    // Defect 1: origin depends on the signal mode (see policy_set_signal_mode).
+    // Both branches scan exactly seq_len distinct positions (one full cycle),
+    // so every chunk in the sequence is found and anything absent from it
+    // falls through to INT64_MAX. d0 == 1 reproduces the old
+    // `for d = 1..seq_len` exactly (seq[pos] -> seq_len).
+    uint32_t d0 = g_lo_signal_pre ? 0u : 1u;
+    for (uint32_t k = 0; k < st->seq_len; k++) {
+        uint32_t d = d0 + k;
         if (st->seq[(base + d) % st->seq_len] == x) return (int64_t)d;
     }
     return INT64_MAX;

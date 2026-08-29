@@ -98,6 +98,15 @@ void policy_declare_sequence(region_t *r, const uint32_t *chunk_ids, uint32_t n)
 void policy_set_protect_current(int on);
 int  policy_get_protect_current(void);
 
+// LIVELOCK FIX Defect 1: tell layer_order_declared whether the workload's
+// consumption signal (pager_notify_access()) fires BEFORE the read it
+// announces (pre_consumption != 0 -> next-use distance of seq[pos] is 0) or
+// AFTER (pre_consumption == 0, the default -> distance seq_len, byte-for-byte
+// the pre-fix behaviour). Set once at startup, before the first touch. No
+// effect on lru or layer_order_learned.
+void policy_set_signal_mode(int pre_consumption);
+int  policy_get_signal_mode(void);
+
 void policy_destroy(policy_t *p);
 
 #endif

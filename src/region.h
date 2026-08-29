@@ -41,6 +41,14 @@ typedef struct {
     // stat_fetching_timeout++. Every transition INTO CHUNK_FETCHING sets this;
     // every transition OUT (to ABSENT or RESIDENT) clears it to 0.
     uint64_t fetching_since_ns;
+
+    // LIVELOCK FIX Defect 3: a prefetch of this chunk that ensure_budget_
+    // prefetch() declined (or found infeasible) sets this to now + 100 ms.
+    // prefetch_pool_top_up() skips any candidate whose decline_until_ns is
+    // still in the future, so a declined prefetch is not re-enqueued on the
+    // very next top_up to be declined again -- the busy-loop that ran
+    // stat_prefetch_declined to 2104 while stat_prefetches stayed at 77.
+    uint64_t decline_until_ns;
 } chunk_t;
 
 // Forward-declared; concrete definitions live in trace.h / metrics.h / a

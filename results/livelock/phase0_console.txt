@@ -1,7 +1,7 @@
 === Phase 0 cursor diagnostic (UNMODIFIED code) ===
 model=/root/residctl/models/model.gguf file_size=2104932768 region=2104934400 ratio=0.5 B=1052467200 (1003 MiB) memory.max=1131 MiB
 === machine exclusivity (before) ===
- 09:31:22 up 11:44,  1 user,  load average: 0.27, 0.17, 0.10
+ 09:39:58 up 11:52,  1 user,  load average: 0.22, 0.16, 0.12
 (clean)
 --- config ---
     model=/root/residctl/models/model.gguf
@@ -17,13 +17,13 @@ model=/root/residctl/models/model.gguf file_size=2104932768 region=2104934400 ra
     policytrace=/root/residctl/results/livelock/phase0_policytrace.bin
 --- rc=0 ---
 residctl_llama: file=2104932768 region=2104934400 data_off=5956000 tensors=435 layers=36 chunks=41 declared_len=40 split_layers=1 embd_chunk=2 out_chunk=1
-residctl_llama: region up. policy=layer_order_declared prefetch=on depth=2 retention=pinned budget=1052467200 n_chunks=41 map_a=0x7d3ca67b5000
+residctl_llama: region up. policy=layer_order_declared prefetch=on depth=2 retention=pinned budget=1052467200 n_chunks=41 map_a=0x70a7d87b5000
 residctl_llama: consumption-signal audit OK -- all 40 declared chunks signalled within 2 passes (80 notifies)
 WP2_TOKENS,13 576 1156 12677 311 5545 264 11580
-WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=8,layer_transitions=288,load_s=0.192,ttft_ms=1035.75,p99_inter_ms=685.377,wall_s=4.941,tokens_s=1.619,io_read_bytes_load=8941568,io_read_bytes_gen=11384971264
-WP2_RSS,vmhwm_kb=2134252
-RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=1052467200,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=95,evictions=206,infeasible=0,prefetches=127,pager_bytes_fetched=11384975360,dedup_resident=89,dedup_fetching=21,pin_broken=0,resident_bytes_end=1041797120,memory_peak=1158754304,handler_p99_ns=134217727,notify_layers=320,stat_fetching_timeout=0
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=8,layer_transitions=288,load_s=0.193,ttft_ms=1091.72,p99_inter_ms=657.253,wall_s=5.002,tokens_s=1.599,io_read_bytes_load=8937472,io_read_bytes_gen=11168382976
+WP2_RSS,vmhwm_kb=2134116
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=on,budget_bytes=1052467200,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=88,evictions=204,infeasible=0,prefetches=132,pager_bytes_fetched=11217715200,dedup_resident=99,dedup_fetching=21,pin_broken=0,resident_bytes_end=1024086016,memory_peak=1159569408,handler_p99_ns=134217727,notify_layers=320,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
 
 === machine exclusivity (after) ===
- 09:31:27 up 11:44,  1 user,  load average: 1.05, 0.33, 0.15
+ 09:40:04 up 11:52,  1 user,  load average: 0.91, 0.30, 0.16
 rc=0  -- analysis: python3 /root/residctl/src/livelock_phase0_analyze.py
