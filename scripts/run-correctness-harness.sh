@@ -8,7 +8,7 @@ GEN=$RESIDCTL/src/gen_pattern
 MODEL=$RESIDCTL/scratch/pattern_16m.bin
 RESULTS=$RESIDCTL/results
 CGROUP=/sys/fs/cgroup/residctl_correctness
-OUT=$RESULTS/correctness_harness_log.txt
+OUT=$RESIDCTL/experiments/logs/correctness_harness_log.txt
 > "$OUT"
 
 mkdir -p "$RESIDCTL/scratch" "$RESULTS"

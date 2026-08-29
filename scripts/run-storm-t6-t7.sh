@@ -5,7 +5,7 @@ GEN=$RESIDCTL/src/gen_pattern
 MODEL=$RESIDCTL/scratch/pattern_16m.bin
 RESULTS=$RESIDCTL/results
 CGROUP=/sys/fs/cgroup/residctl_t6t7
-OUT=$RESULTS/t6_t7_log.txt
+OUT=$RESIDCTL/experiments/logs/t6_t7_log.txt
 > "$OUT"
 
 mkdir -p "$RESIDCTL/scratch" "$RESULTS"
