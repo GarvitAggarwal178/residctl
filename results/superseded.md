@@ -8,7 +8,13 @@ quietly deleted.
 
 Each row: the superseded quantity, where it was published, what supersedes it,
 and the reason. Filenames in the older rows are pre-restructure paths; see
-`experiments/README.md` for where each report lives now.
+`experiments/README.md` for where each report lives now. `PROJECT_STATE §N` and
+`MECHANISM_SPEC.md §N` in the "published in" column point at the archived
+originals of those two documents
+(`/root/residctl-archive/rewritten-sources/`); their content was split into
+`findings.md` / this file / `docs/05-limitations.md` and rewritten into
+`docs/02-design.md` / `docs/design-history.md` respectively, but the section
+numbers refer to the archived text.
 
 | superseded | published in | superseded by | reason |
 |---|---|---|---|
