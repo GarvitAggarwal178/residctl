@@ -64,9 +64,11 @@ One line per result. Start from the problem, end at the payoff.
    **fixed** — arm E now completes at every ratio in either setting (Claim 6;
    Claim 10).
 8. **The payoff is throughput that scales with memory.** Give the kernel more
-   budget and tokens/s does not move (arm A ~0.7, arm C ~1.0 t/s across a 3×
-   budget range); give the app-authoritative pager more budget and tokens/s
-   rises 2.5× (Claim 9; Figure 7). *This is the closing figure.*
+   budget and tokens/s does not move — each kernel arm is flat across a 3×
+   budget range (arm A ~0.7, arm C ~1.0 t/s; A and C are from different sessions
+   so their absolute gap is not like-for-like — the flatness of each is the
+   point). Give the app-authoritative pager more budget and tokens/s rises 2.5×
+   (Claim 9; Figure 7). *This is the closing figure.*
 
 ---
 

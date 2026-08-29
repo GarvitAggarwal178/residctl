@@ -364,10 +364,14 @@ Strength: **strong.** Deterministic direction, five ratios, clean separation
 between the kernel arms (flat) and the informed arms (rising).
 
 Caveats: WSL2-only, one 3B dense model, CPU-only. Arm A's absolute tokens/s is
-reclaim-noisy (run-to-run ~2×); the flatness is the robust part. Arm D now rises
-monotonically across all five ratios (the Phase 1 r=0.5→0.625 dip did not
-reproduce in the Phase 3 re-run); the r=0.25 vs r=0.75 endpoints are 2.5× apart
-and clean.
+reclaim-noisy (run-to-run ~2×); the flatness is the robust part. **Arm A is a
+different run (Phase 1) than arms C/D/E (Phase 3), on a session that was ~20 %
+faster overall** — that is why arm C reads ~1.0 t/s here vs ~0.8 in Phase 1
+(byte-identical thrashing). The A-vs-C *absolute* gap is therefore not a
+like-for-like comparison; what is robust is that **each** kernel arm is flat
+across a 3× budget range while D and E rise. Arm D now rises monotonically
+across all five ratios (the Phase 1 r=0.5→0.625 dip did not reproduce); the
+r=0.25 vs r=0.75 endpoints are 2.5× apart and clean.
 
 Superseded prior claims: the Phase 1 arm-D throughput row
 0.91 / 1.20 / 1.57 / 1.51 / 1.95 t/s (2.1×, `protect_current` on) — the LIVELOCK

@@ -592,8 +592,9 @@ def figure6_final():
     fig.suptitle('Figure 6 — llama.cpp (Qwen2.5-3B Q4_K_M), equal budget', fontsize=12)
     fig.text(0.5, 0.02, 'memory.max = B for arm A (phase1); budget_bytes = B (+128 MiB memory.max) for the pager '
              'arms (phase3, all four LIVELOCK FIX defects + protect_current=off). Arm D beats arm A on bytes at '
-             'every ratio; D/OPT = 1.10-1.15. Arm E completes at every ratio incl. r=0.25 (was a livelock with '
-             'protect_current on). A/C flat in throughput; D/E scale.', ha='center', fontsize=7)
+             'every ratio; D/OPT = 1.08-1.13 (65-pass). Arm E completes at every ratio incl. r=0.25 (was a livelock '
+             'with protect_current on). A/C flat in throughput; D/E scale. Arm A is a different (Phase 1) run than '
+             'C/D/E; compare shapes, not A-vs-C absolute throughput.', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.07,1,0.94])
     fig.savefig(f'{OUT}/figure6_llamacpp.png', dpi=200); plt.close(fig)
     with open(f'{OUT}/figure6_llamacpp.csv','w',newline='') as f:
@@ -628,9 +629,9 @@ def figure7():
                  fontsize=11)
     ax.grid(alpha=0.3); ax.legend(fontsize=9)
     fig.text(0.5, 0.01, 'Qwen2.5-3B Q4_K_M, CPU, 64 tokens, n=3, equal budget. Arm A: phase1; arms C/D/E: '
-             'phase3 (LIVELOCK FIX, protect_current=off). Arms A and C are horizontal (0.6-1.0 t/s at every '
-             'budget); arm D rises 1.12 -> 2.85 t/s (2.5x). Arm A absolute values are reclaim-noisy; the flat '
-             'trend is the robust result.', ha='center', fontsize=7)
+             'phase3 (LIVELOCK FIX, protect_current=off) -- a different run, faster machine, so the A-vs-C '
+             'absolute gap is not like-for-like; each arm\'s flatness is the robust part. Arms A and C horizontal '
+             '(~0.7 / ~1.0 t/s); arm D rises 1.12 -> 2.85 t/s (2.5x).', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.06,1,0.96])
     fig.savefig(f'{OUT}/figure7_throughput_scaling.png', dpi=200); plt.close(fig)
     with open(f'{OUT}/figure7_throughput_scaling.csv','w',newline='') as f:

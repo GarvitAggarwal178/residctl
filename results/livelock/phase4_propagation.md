@@ -11,10 +11,10 @@ downstream artifact.
 (the cleanup-session "+67–78 % for protect-off" is a Defect-2/Defect-4 artifact;
 Phase 3c: on vs off ≤ 1.8 %). Rebuilt `wp2_gen`.
 
-**Flip smoke** (`$CLAUDE_JOB_DIR/tmp/p4_smoke.sh`): arm D, r=0.5, config with
-**no** `protect_current` key → uses the new default. `pager_bytes_fetched =
-78 895 448 064` — byte-identical to Phase 3's explicit `protect_current=off`
-run. Startup audit: "all 40 declared chunks signalled within 2 passes". PASS.
+**Flip smoke**: arm D, r=0.5, config with **no** `protect_current` key → uses
+the new default. `pager_bytes_fetched = 78 895 448 064` — byte-identical to
+Phase 3's explicit `protect_current=off` run. Startup audit: "all 40 declared
+chunks signalled within 2 passes". PASS.
 
 **Regression gates** (post-flip): `test_policy` PASS (both signal modes);
 T-1..T-5 (`run_correctness_harness.sh`) PASS; T-6/T-7 (`run_t6_t7.sh`) PASS,
