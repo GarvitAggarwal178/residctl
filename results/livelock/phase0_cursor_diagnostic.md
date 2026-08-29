@@ -58,6 +58,11 @@ declared order, once per token. So:
 `notify_layers` (`RESIDCTL_STATS`) = 312, `n_decoded` = 8 → 39 notifies per
 decode, confirming the reftrace count.
 
+**The count check was load-bearing, not informational.** `notify_layers /
+n_decoded` = 312 / 8 = **39**, not 40. That one-short result is what first
+exposed the gap; item 2 then identified *which* chunk (2 / `token_embd`). The
+spec framed the count as a non-gate; in practice it was the tell.
+
 ### Item 3 (NOT a gate) — `layer_transitions` vs `declared_len`
 
 `layer_transitions` = 288 = 8 × 36. As predicted, this counts only `blk.N`
@@ -188,6 +193,59 @@ and this diagnostic shows no such stray index exists (`node_NNN` ops use a `_`
 separator, which `node_layer()` correctly rejects at the `nm[i-1] != '-'` check).
 
 ---
+
+## Decision required (this is a fork, not a status report)
+
+**Option (a) — recommended.** Add the fourth fix
+(`!strcmp(nm,"inp_embd") || !strcmp(nm,"embd")` in `eval_cb`, on the same
+callback-pass choice Defect 2 makes), re-run Phase 0, confirm the reftrace
+period is 40 with chunk 2 leading every token and the cursor sitting at declared
+position 0 once per token, then apply Defects 1–3 and run Phases 1–5. Record all
+four under spec amendment A-14. Rationale: without it the spec's own premise —
+"`pos` points at the chunk about to be read and its distance is 0 by
+construction" — is false for `token_embd`, the single largest chunk in the
+region (~175 MiB), and Phase 3's headline expectations (arm E completes at
+r = 0.25; arm D reads fewer bytes) would be measured against a consumption model
+that still thrashes it.
+
+**Option (b).** Proceed with the three fixes exactly as written, accept that
+`token_embd` keeps thrashing, and carry it as a documented confound on every
+Phase 3 number. Cheaper, but the re-measurement then can't cleanly answer
+"is `protect_current` now redundant?" — the question the session exists to
+settle.
+
+## Note for Phase 2, whichever option is chosen
+
+Defect 1's `d = 0` loop is correct **only on the real-model path once Defect 2
+(and the fourth fix) land**. On the synthetic `--consumption-signal all-threads`
+path, `replay.c:lookahead_mark_done()` fires `pager_notify_access()` when
+`completed[s] == n_threads` — i.e. **after** every driver thread has read *and*
+computed over the chunk. There `seq[pos]` is genuinely just-consumed, its next
+use is a full lap away, and the current `d = 1..seq_len` loop returning
+`seq_len` for it is **correct Belady**. Defect 1's fix makes it distance 0 —
+protecting the chunk that should be the top eviction victim — and Defect 2 does
+not reach that path. So **Phase 2 expectation 3 ("128 MiB D/OPT improves on
+1.08 / 1.04 / 1.00") is likely to come out backwards.** Per the spec's "do not
+soften a result that comes back worse," that would be a legitimate finding
+(Defect 1 applied without its timing partner on a path Defect 2 can't reach),
+not a bug — but the user may want to rewrite that expectation before
+authorising.
+
+## Environment finding — `$?` is unreliable through the shell wrapper
+
+Empirically verified this session: when `$?` (or any `$var` the inner shell
+should expand) appears **literally in an inline `wsl.exe -- bash -lc '...'`
+string**, the Git Bash tool layer expands it *before* `wsl.exe` runs — even
+inside single quotes and quoted heredocs — yielding `0` or empty. A script
+**written to disk** (Write tool) and run as `bash -lc 'bash /path/script.sh'`
+behaves correctly: `false` → 1, `timeout` kill → 124, `python3 sys.exit(7)` → 7.
+
+**Impact on Phases 3+:** every sweep script records `rc=$?` after
+`timeout … wp2_gen` to tell a completed run from a timed-out one (rc 124) —
+which is how a livelock is detected. Any such logic MUST live in an on-disk
+script, never in an inline command. The existing `run_final_phase*.sh` and this
+session's `livelock_phase0.sh` are on-disk and safe. Also logged in
+`results/livelock/BLOCKERS.md`.
 
 ## Machine state
 
