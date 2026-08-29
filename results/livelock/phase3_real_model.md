@@ -32,28 +32,33 @@ Defect 2's pre-compute notify is compute-equivalent.
 
 ---
 
-## The grid (median of n=3; decimal GB; OPT = 64-pass `phase1_opt.csv`)
+## The grid (median of n=3; decimal GB; `X/OPT` = read ÷ 65-pass `phase1_opt.csv`)
 
-| r | arm | reps rc | read (GB) | demand faults | prefetches | declined | tok/s | D/OPT |
+Main grid: `--protect-current off` (the new A-14 default). Arm A is unchanged
+and stays in `phase1_equal_budget.csv` (129.1 / 110.4 / 111.3 / 105.1 / 83.3 GB;
+0.65 / 0.79 / 0.62 / 0.64 / 0.75 tok/s).
+
+| r | arm | reps rc | read (GB) | demand faults | prefetches | declined | tok/s | X/OPT |
 |---|---|---|---|---|---|---|---|---|
-| 0.25 | C | 0,0,0 | 144.4 | 2817 | – | – | 0.97 | 1.325 |
-| 0.25 | **D** | 0,0,0 | **124.9** | 2689 | 0 | 0 | 1.12 | **1.146** |
-| 0.25 | E | 0,0,0 | 142.1 | 1055 | ~1700 | 20 | 1.22 | 1.303 |
-| 0.375 | C | 0,0,0 | 143.2 | 2753 | – | – | 0.96 | 1.613 |
-| 0.375 | **D** | 0,0,0 | **98.5** | 2141 | 0 | 0 | 1.35 | **1.109** |
-| 0.375 | E | 0,0,0 | 111.1 | 937 | ~1400 | 0 | 1.53 | 1.252 |
-| 0.5 | C | 0,0,0 | 134.5 | 2561 | – | – | 1.01 | 1.887 |
-| 0.5 | **D** | 0,0,0 | **78.9** | 1734 | 0 | 0 | 1.65 | **1.107** |
-| 0.5 | E | 0,0,0 | 84.9 | 766 | ~1020 | 0 | 1.88 | 1.191 |
-| 0.625 | C | 0,0,0 | 134.5 | 2561 | – | – | 0.99 | 2.473 |
-| 0.625 | **D** | 0,0,0 | **59.7** | 1300 | 0 | 0 | 2.17 | **1.098** |
-| 0.625 | E | 0,0,0 | 62.9 | 653 | ~680 | 0 | 2.34 | 1.156 |
-| 0.75 | C | 0,0,0 | 134.5 | 2561 | – | – | 0.97 | 3.586 |
-| 0.75 | **D** | 0,0,0 | **41.9** | 915 | 0 | 0 | 2.85 | **1.118** |
-| 0.75 | E | 0,0,0 | 43.3 | 489 | ~430 | 0 | 3.06 | 1.156 |
+| 0.25 | C | 0,0,0 | 144.4 | 2817 | – | – | 0.97 | 1.305 |
+| 0.25 | **D** | 0,0,0 | **125.0** | 2689 | 0 | 0 | 1.12 | **1.130** |
+| 0.25 | E | 0,0,0 | 142.1 | 1055 | ~1690 | 20 | 1.22 | 1.284 |
+| 0.375 | C | 0,0,0 | 143.2 | 2753 | – | – | 0.96 | 1.588 |
+| 0.375 | **D** | 0,0,0 | **98.5** | 2141 | 0 | 0 | 1.35 | **1.093** |
+| 0.375 | E | 0,0,0 | 111.1 | 937 | ~1400 | 0 | 1.53 | 1.233 |
+| 0.5 | C | 0,0,0 | 134.5 | 2561 | – | – | 1.01 | 1.852 |
+| 0.5 | **D** | 0,0,0 | **78.9** | 1734 | 0 | 0 | 1.65 | **1.086** |
+| 0.5 | E | 0,0,0 | 84.9 | 766 | ~1020 | 0 | 1.88 | 1.169 |
+| 0.625 | C | 0,0,0 | 134.5 | 2561 | – | – | 0.99 | 2.437 |
+| 0.625 | **D** | 0,0,0 | **59.7** | 1300 | 0 | 0 | 2.17 | **1.081** |
+| 0.625 | E | 0,0,0 | 62.9 | 653 | ~680 | 0 | 2.34 | 1.140 |
+| 0.75 | C | 0,0,0 | 134.5 | 2561 | – | – | 0.97 | 3.511 |
+| 0.75 | **D** | 0,0,0 | **41.9** | 915 | 0 | 0 | 2.85 | **1.095** |
+| 0.75 | E | 0,0,0 | 43.3 | 489 | ~430 | 0 | 3.06 | 1.132 |
 
 **`stat_infeasible = 0`, `stat_pin_broken = 0`, `stat_fetching_timeout = 0` on
 every one of the 45 runs.** No WATCHDOG fired (140 s; a healthy run is ~20–70 s).
+D/OPT range **1.08–1.13** (was 1.09–1.14 at the pre-fix protect-on baseline).
 
 ---
 
@@ -138,17 +143,19 @@ regime, confirmed: faults ~halved — r=0.5: E 766 vs D 1734).
 bytes-for-latency choice at *every* ratio, not only r ≥ 0.5. It is still not
 the byte-efficiency choice anywhere.
 
-### 5. D/OPT improves on the ~1.09–1.16 baseline — **HELD at 4/5 ratios.**
+### 5. D/OPT improves on the 1.09–1.14 baseline — **HELD (65-pass OPT).**
 
-| r | D/OPT (this session) | baseline | |
+| r | D/OPT (this session, protect-off + fixes) | baseline (protect-on, pre-fix) | |
 |---|---|---|---|
-| 0.25  | 1.146 | 1.157 | improved |
-| 0.375 | 1.109 | 1.108 | flat |
-| 0.5   | 1.107 | 1.112 | improved |
-| 0.625 | 1.098 | 1.114 | improved |
-| 0.75  | 1.118 | 1.156 | improved |
+| 0.25  | 1.130 | 1.140 | improved |
+| 0.375 | 1.093 | 1.091 | flat (+0.2 %) |
+| 0.5   | 1.086 | 1.091 | improved |
+| 0.625 | 1.081 | 1.098 | improved |
+| 0.75  | 1.095 | 1.132 | improved |
 
-Small but consistent. New range **1.10–1.15** (was 1.09–1.16).
+Small but consistent. New range **1.08–1.13** (was 1.09–1.14). All D/OPT here
+use the canonical 65-pass `phase1_opt.csv` (prompt scan + 64 decode scans),
+matching Table 1 and Figure 6.
 
 ---
 

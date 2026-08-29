@@ -9,14 +9,14 @@ reference for the writeup. Every number below traces to a named cell.
 
 | quantity | value | source |
 |---|---|---|
-| Byte reduction, app-authoritative vs kernel LRU (arm D vs arm C), real model | **12–68 %** (r=0.25 → 0.75: D 126.1 vs C 144.4; D 43.4 vs C 134.5 GB) | `phase1_equal_budget.csv` / Table 1 (FINAL) |
-| Byte reduction, arm D vs kernel mmap (arm A), real model, equal budget | **2–48 %** (D/A = 0.98 / 0.89 / 0.71 / 0.58 / 0.52 at r = 0.25 … 0.75) | `phase1_equal_budget.csv` |
-| Distance from offline optimum, arm D, real model | **D/OPT = 1.09–1.14** at all 5 ratios | `phase1_equal_budget.csv` + `phase1_opt.csv` |
-| Distance from optimum, arm D, synthetic, final policy config | **D/OPT = 1.00** at 8 MiB (256 chunks), **1.00–1.08** at 128 MiB (16 chunks), both compute levels, deterministic — `--consumption-signal all-threads --protect-current off` (synthetic path only; the real model keeps `protect-current on`) | `phase2_sweep.csv`, `phase2_opt.csv` |
-| Throughput scaling, arm D, real model | **0.91 → 1.95 tokens/s** (2.1×) as budget goes r=0.25 → 0.75; kernel arms flat at **0.6–0.9 t/s** at every budget | `phase1_equal_budget.csv` / Figure 7 |
-| Kernel LRU miss rate (arm C), real model | **~1.00 at every budget ratio including 0.75** (`absent_handled` 2561–2817 vs 2304 layer transitions); reads 134–144 GB every run | `phase1_equal_budget.csv` |
+| Byte reduction, app-authoritative vs kernel LRU (arm D vs arm C), real model | **13–69 %** (r=0.25 → 0.75: D 125.0 vs C 144.4; D 41.9 vs C 134.5 GB) | `results/livelock/phase3_real_model.csv` / Table 1 (FINAL) |
+| Byte reduction, arm D vs kernel mmap (arm A), real model, equal budget | **3–50 %** (D/A = 0.97 / 0.89 / 0.71 / 0.57 / 0.50 at r = 0.25 … 0.75) | `phase3_real_model.csv` (D) + `phase1_equal_budget.csv` (A) |
+| Distance from offline optimum, arm D, real model | **D/OPT = 1.08–1.13** at all 5 ratios (65-pass OPT), deterministic | `phase3_real_model.csv` + `phase1_opt.csv` |
+| Distance from optimum, arm D, synthetic, final policy config | **D/OPT = 1.00** at 8 MiB (256 chunks), **1.00–1.08** at 128 MiB (16 chunks), both compute levels, deterministic — `--consumption-signal all-threads --protect-current off`. The real model is also `--protect-current off` (LIVELOCK FIX A-14) — its eval-callback signal now fires pre-compute | `phase2_sweep.csv`, `phase2_opt.csv` |
+| Throughput scaling, arm D, real model | **1.12 → 2.85 tokens/s** (2.5×, monotone) as budget goes r=0.25 → 0.75; kernel arms flat (arm A 0.6–0.8, arm C ~1.0 t/s) at every budget | `phase3_real_model.csv` (C/D) + `phase1_equal_budget.csv` (A) / Figure 7 |
+| Kernel LRU miss rate (arm C), real model | **~1.00 at every budget ratio including 0.75** (`absent_handled` 2561–2817 vs 2304 layer transitions); reads 134–144 GB every run | `phase3_real_model.csv` |
 | Reclaim-authority counters (`memory.swap.max = 0`) | `pgscan = pgsteal = 0`, `memory.events[high] = 37`; with swap: `pgscan ≈ 120,687`, `pgsteal ≈ 60,141`, ~236 MiB shmem reclaimed | spike S3d / S3e, `figure4_reclaim_authority.csv` |
-| Correctness | byte-identical token sequences, `--load-mode mmap` vs `residctl`, 32 tokens; T-1..T-7 PASS after every code change | `wp2_gate_log.txt`, `correctness_harness_log.txt`, `t6_t7_log.txt` |
+| Correctness | byte-identical token sequences, `--load-mode mmap` vs `residctl`, 32 tokens; T-1..T-7 PASS after every code change (incl. the LIVELOCK FIX); a startup audit aborts if any declared chunk gets zero consumption signals in the first 2 passes | `wp2_gate_log.txt`, `phase3_correctness_gate.txt`, `correctness_harness_log.txt`, `t6_t7_log.txt` |
 | Model | Qwen2.5-3B-Instruct Q4_K_M, 2,104,932,768 B, sha256 `626b4a66…62d`, CPU-only | `table2_final_environment.csv` |
 | Per-layer compute (measured) | ~51,000 ns/MiB (≈ 2.1 ms/layer at the 13.2 t/s baseline) | `wp2_llamacpp.md` §2.4 |
 
@@ -35,33 +35,38 @@ One line per result. Start from the problem, end at the payoff.
    ~1 t/s, at r = 0.75 (Claim 8; Figure 6).
 3. **The application knows its access order in advance.** Declaring the layer
    sequence to the pager (`layer_order_declared`) lets it keep the *right*
-   chunks resident: arm D reads 12–68 % fewer bytes than arm C and beats the
+   chunks resident: arm D reads 13–69 % fewer bytes than arm C and beats the
    kernel-mmap baseline at every budget (Claims 2, 7; Figure 6).
-4. **It is close to the offline optimum.** D/OPT = 1.09–1.14 on the real model,
+4. **It is close to the offline optimum.** D/OPT = 1.08–1.13 on the real model,
    and exactly 1.00 on the synthetic workload at realistic chunk counts once the
    consumption signal is exact (Claims 4, 7).
-5. **The consumption signal must be exact.** The naïve "thread 0 started this
-   chunk" signal races the other driver threads and makes the policy
-   non-deterministic under concurrency + compute; firing it only when *all*
-   threads finish the chunk restores determinism at all six stress cells and
-   removes the last D/OPT gap at small chunk counts (Phase 2). On the synthetic
-   path that exact signal makes the heuristic redundant; on the real model the
-   eval-callback signal lags the access, so the heuristic (`protect_current on`)
-   is retained there — it is load-bearing (Cleanup Phase 1: off ⇒ arm D +67–78 %
-   bytes).
+5. **The consumption signal must be exact — on both paths.** Synthetic: the
+   naïve "thread 0 started this chunk" signal races the other driver threads;
+   firing it only when *all* threads finish the chunk restores determinism at
+   all six stress cells and removes the last D/OPT gap at small chunk counts
+   (Phase 2). Real model: the eval callback originally fired *after* each
+   layer's compute and matched the wrong graph-node name, so the declared cursor
+   lagged a full layer and `token_embd` was never signalled — the LIVELOCK FIX
+   makes it fire pre-compute and match `"embd"`, and adds a startup audit that
+   aborts on any zero-signal declared chunk. With an accurate signal on both
+   paths the `protect_current` heuristic is redundant everywhere and defaults
+   **off** (A-14); the cleanup session's "off ⇒ arm D +67–78 %" was an artifact
+   of the two bugs the fix removes (Claims 7, 10).
 6. **Eviction only works because `memory.swap.max = 0`.** Without it the kernel
    reclaims the pager's shmem pages to swap and the authority leaks; with it the
    kernel enters reclaim, finds nothing eligible, and the application's hole-punch
    is the only thing that frees memory (Claim 3; Figure 4).
-7. **Prefetch is a narrow tool.** It trades ~7–13 % more bytes for ~2× fewer
-   demand faults and lower tail latency at r ≥ 0.5; at r ≤ 0.375 it has no
-   advantageous configuration — with `protect_current on` it *livelocks*
-   (~90× I/O amplification), with it off it completes but reads 37–43 % more
-   than arm D. Run arm D there (Claim 6; Claim 10).
+7. **Prefetch is a narrow tool.** It trades ~4–8 % more bytes for ~2× fewer
+   demand faults and lower tail latency at r ≥ 0.5; at r ≤ 0.375 it completes
+   but reads ~13 % more than arm D for only a modest latency gain — run arm D
+   there. The earlier tight-budget *livelock* (~90× I/O amplification with
+   `protect_current on`) was two application bugs feeding each other and is
+   **fixed** — arm E now completes at every ratio in either setting (Claim 6;
+   Claim 10).
 8. **The payoff is throughput that scales with memory.** Give the kernel more
-   budget and tokens/s does not move (arm A/C flat at 0.6–0.9 t/s across a 3×
+   budget and tokens/s does not move (arm A ~0.7, arm C ~1.0 t/s across a 3×
    budget range); give the app-authoritative pager more budget and tokens/s
-   rises 2.1× (Claim 9; Figure 7). *This is the closing figure.*
+   rises 2.5× (Claim 9; Figure 7). *This is the closing figure.*
 
 ---
 
@@ -74,12 +79,12 @@ For someone writing at 2 a.m. From PROJECT_STATE §6 + this session.
 | Item 10 **V1** OPT values, fault-count rankings, "`MADV_RANDOM` fastest" | 3 defects: circular OPT input, arms not doing equal work, wrong metric | HARNESS_REPORT_V2 |
 | **Prefetch hit rate** ("14–46 % ceiling") as a mechanism property | artefact of its own denominator (Campaign 13 Phase B) | total fetches (demand + prefetch) |
 | Campaign 11 Phase 3/4 **arm A/B `read_bytes = 0`** | guest-side `drop_caches` redirect bug | Campaign 12 Phase A re-run |
-| "**Arm D is 1.07–1.78× OPT**" as a property of the informed policy | true only for `layer_order_learned` and compute=400000; declared is 1.00–1.14 | regime-specific: learned vs declared, compute level |
+| "**Arm D is 1.07–1.78× OPT**" as a property of the informed policy | true only for `layer_order_learned` and compute=400000; declared is 1.00–1.13 | regime-specific: learned vs declared, compute level |
 | "**Declared order is worse than the learned hedge under a compute phase**" (session-1 WP1) | reversed by the WP0 fix, then by Phase 2's exact signal | Phase 2 (synthetic, `all-threads` signal): declared is deterministic and ≤ learned everywhere |
-| "**The WP0 / protect-current heuristic is unnecessary**" (final-session Phase 2) | true only on the synthetic path (exact `all-threads` signal available); on the **real model** the eval-callback signal lags and the heuristic is load-bearing | Cleanup Phase 1: real-model default reverted to `protect_current on`; off ⇒ arm D +67–78 % bytes |
+| "**The protect-current heuristic is load-bearing on the real model; off ⇒ arm D +67–78 %**" (cleanup session) | that regression was a Defect-2 (post-compute consumption signal) + Defect-4 (`token_embd` never signalled) artifact — the cursor lagged a full layer so protect-off had nothing shielding the in-use chunk | LIVELOCK FIX: `--protect-current off` on both paths (A-14); with the fixes, on vs off moves arm D by ≤ 1.8 % (`phase3c_arm_d_protect_on.csv`) |
 | "**Arm E beats arm D on bytes under a compute phase**" (synthetic, Campaign 11/13) | does not transfer — real compute ~51 k ns/MiB, ~30× lighter than the synthetic "heavy" setting | real model: E never beats D on bytes |
 | "**Arm D ≈ arm A at r=0.25**" (WP2) | WP2 gave arm A a 256 MiB `memory.max` margin | Phase 1 equal budget: D beats A at every ratio |
-| WP2's "**arm E collapsed — prefetch retention + current-chunk protection over-constrain the budget**", *and* Phase 3's "it is a **hard deadlock / orphaned `FETCHING` slot**" | both wrong — Cleanup Phase 1's gdb + 420 s counter trace show a **livelock**: steady forward progress (`stat_absent_handled` 239 → 4250 linear), ~90× I/O amplification, `stat_infeasible = 0`, would finish in ~6 h | Cleanup Phase 1 / Claim 10: livelock; run arm D at r ≤ 0.375; BLOCKERS.md FINDING 1 |
+| WP2's "**arm E collapsed — retention × current-chunk protection over-constrain the budget**"; Phase 3's "**hard deadlock / orphaned `FETCHING` slot**"; the cleanup session's "**a livelock from two correct mechanisms — recorded, not fixed; mitigate with `protect_current on`**" | all superseded — source review found the cause: an off-by-one distance origin (`lo_declared_dist` scanned `d = 1..seq_len`) + a post-compute consumption signal. Both fixed | LIVELOCK FIX / Claim 10: arm E completes at every ratio, `protect_current` on **or** off (Phase 3b); run arm D at r ≤ 0.375 for bytes |
 | The 5 Campaign-12-Phase-D **non-deterministic arm D cells' exact numbers** | one sample from a distribution (Campaign 13 Phase A) | excluded from any comparison needing a deterministic D |
 | Any **bare-metal** number | none exist — every measurement is one shared WSL2 VM | say so |
 | `layer_order_learned`'s **fault-dispatch-order chain** as "the application knows its order" | it infers from the past; only `layer_order_declared` is told | declared policy |
@@ -109,7 +114,10 @@ For someone writing at 2 a.m. From PROJECT_STATE §6 + this session.
   no page served stale (T-1/2), no hang (T-3), equal work across arms (T-4),
   the Belady self-test (T-5), the dedup branches fire under load (T-6), and no
   fault is ever lost in a 60 s storm with a 120 s watchdog (T-7). Re-run after
-  every code change this session — all PASS, `mismatches = 0`.
+  every code change through the final, cleanup, and LIVELOCK FIX sessions — all
+  PASS, `mismatches = 0`. The real-model integration additionally has a startup
+  audit that aborts if any workload-declared chunk receives zero consumption
+  signals within the first two decode passes.
 - **Pre-registration discipline.** Every phase states its expectations before
   the run; the report marks each HELD / DID NOT HOLD / PARTIAL against a
   measured value, and failures are reported with their mechanism, not dropped.
@@ -141,18 +149,22 @@ For someone writing at 2 a.m. From PROJECT_STATE §6 + this session.
 4. **`layer_order_declared`'s determinism guarantee holds only where the
    consumption signal is exact.** On the synthetic path (`--consumption-signal
    all-threads`) Phase 2 made all six Campaign-13-Phase-A stress cells
-   deterministic. On the **real model** the eval-callback signal fires
-   post-compute (lags the access), so the `protect_current on` heuristic is
-   retained there and is load-bearing (Cleanup Phase 1: off ⇒ arm D +67–78 %
-   bytes, deterministically). A workload that declares its sequence imprecisely
-   weakens the guarantee further.
-5. **Prefetch (arm E) has no advantageous configuration at r ≤ 0.375** on this
-   model. With `protect_current on` it **livelocks** (~90× I/O amplification,
-   steady progress, would finish in ~6 h — Cleanup Phase 1, not a hard
-   deadlock); with it off it completes but reads 37–43 % more than arm D. The
-   `pager_abandon_fetch` + FETCHING-watchdog fix (Cleanup Phase 1) closes the
-   latent orphaned-slot paths but is not a fix for the livelock. Mitigation:
-   run arm D (prefetch off), `protect_current on`, at r ≤ 0.375.
+   deterministic. On the **real model** the LIVELOCK FIX makes the eval-callback
+   signal fire pre-compute and match the `"embd"` node, with a startup audit
+   that aborts on any zero-signal declared chunk — all three Phase 3 reps are
+   byte-identical at every ratio, `--protect-current off`. A workload that
+   declares its sequence imprecisely (out-of-order or skipped chunks) still
+   weakens the guarantee; the forward-search path in `lo_declared_on_access`
+   exists for that case but is lightly tested.
+5. **Prefetch (arm E) has no *byte* advantage at r ≤ 0.375** on this model — it
+   completes there (3/3 reps) but reads ~13 % more than arm D for a modest
+   latency gain. The earlier tight-budget **livelock** (~90× I/O amplification
+   with `protect_current on`) was root-caused to two application bugs — an
+   off-by-one in `lo_declared_dist` and a post-compute consumption signal — and
+   is **fixed**: arm E completes at every ratio with `protect_current` on or off
+   (Phase 3b). The `pager_abandon_fetch` + FETCHING-watchdog fix (A-13) remains,
+   independently, as the fix for a real latent orphaned-slot class.
+   Recommendation: run arm D (prefetch off) at r ≤ 0.375.
 6. **Region and chunk scale are mostly fixed** — 2 GiB region throughout;
    chunk size varied only in dedicated sweeps.
 7. **Ratios {0.375, 0.625} are real-model-only** — the synthetic declared-vs-
@@ -187,18 +199,22 @@ For someone writing at 2 a.m. From PROJECT_STATE §6 + this session.
    exploit — the "device-busy flat regardless of `--fetch-workers`" result was
    measuring the driver, not the architecture. Replaced by the bounded
    lookahead window.
-5. **Arm E collapses at a tight budget** (Phase 3 → Cleanup Phase 1). *Taught:*
-   two individually sound mechanisms (pinned prefetch retention, current-chunk
-   protection) combine into a **livelock** — the budget can't retain the two
-   large chunks alongside the layers, they are re-fetched every token, and
-   `protect_current` on also makes `prefetch_admit` decline nearly every
-   prefetch so the prefetcher spins (~90× I/O amplification, `stat_infeasible =
-   0`, steady forward progress). *Also taught:* Phase 3's SIGUSR1 dump read
-   `resident_bytes` well under budget as "the pager is idle → deadlock" — it was
-   actually churning; thread-state (gdb) and a long counter trace were needed to
-   tell a livelock from a hang. Recorded as a 7th concurrency-class issue; the
-   `FETCHING` watchdog + `pager_abandon_fetch` fix (Cleanup Phase 1) is a safety
-   net for the *orphaned-slot* class, not for this livelock.
+5. **Arm E "collapsed" at a tight budget — and it was our bug, not a mechanism
+   interaction** (Phase 3 → Cleanup Phase 1 → LIVELOCK FIX). *Taught:* three
+   successive sessions mislabelled it — "over-constrained budget" (WP2), "hard
+   deadlock / orphaned `FETCHING` slot" (Phase 3), "a livelock from two
+   individually-correct mechanisms, mitigate by config" (cleanup session). A
+   source review then found the cause: `lo_declared_dist` scanned `d = 1..seq_len`
+   so the chunk in use ranked as the *coldest*, and the consumption signal fired
+   *after* each layer's compute so the cursor lagged a full layer (and
+   `token_embd`, matched by the wrong node name, was never signalled at all).
+   Fixing those three made arm E complete at every ratio in ~50 s. *Also taught:*
+   Phase 3's SIGUSR1 dump read `resident_bytes` under budget as "pager idle →
+   deadlock" when it was churning — thread state (gdb) + a long counter trace
+   were needed to see it was a livelock, and even then the *why* was wrong.
+   Instrument the symptom, but root-cause to the line before claiming a
+   mechanism is at fault. The `FETCHING` watchdog + `pager_abandon_fetch` (A-13)
+   stays as a real fix for a *separate* latent orphaned-slot class.
 
 ---
 

@@ -528,29 +528,40 @@ def _p1opt():
             d[o['ratio']] = int(o['opt_missed_bytes'])
     return d
 
+# LIVELOCK FIX Phase 4: arms C/D/E on the real model are re-measured with all
+# four fixes + the A-14 protect_current=off default. Arm A has no pager and is
+# unchanged -- still sourced from phase1_equal_budget.csv.
+def _p3rows():
+    return rows_(f'{R}/livelock/phase3_real_model.csv')
+
+def _p3cell(ra, arm):
+    """median (pager_bytes, tokens_s, demand_faults, p99) over rc==0 reps."""
+    rs = [r for r in _p3rows() if r['ratio'] == ra and r['arm'] == arm and r['rc'] == '0']
+    if not rs:
+        return None
+    return (_med([int(r['pager_bytes_fetched']) for r in rs]),
+            _med([float(r['tokens_s']) for r in rs]),
+            _med([int(r['absent_handled']) for r in rs]),
+            _med([float(r['p99_inter_ms']) for r in rs]))
+
 def _med(xs):
     xs = sorted(x for x in xs if x is not None)
     return xs[len(xs)//2] if xs else None
 
 def figure6_final():
-    """llama.cpp real model, EQUAL BUDGET (Phase 1). bytes read + tokens/s vs
-    budget ratio; arms A/C/D/E + OPT. 5 ratios. Arm E at r=0.25 is the Phase 3
-    fallback config (protect-off + retention-none), marked distinctly."""
+    """llama.cpp real model, EQUAL BUDGET. bytes read + tokens/s vs budget ratio;
+    arms A/C/D/E + OPT. 5 ratios. Arm A: phase1_equal_budget (no pager, unchanged
+    by the LIVELOCK FIX). Arms C/D/E: phase3_real_model (all four fixes + the
+    A-14 protect_current=off default). Arm E now completes at r=0.25 in its
+    default config -- no fallback point."""
     pr = _p1rows(); opt = _p1opt()
     RA = ['0.25','0.375','0.5','0.625','0.75']
-    def cell(ra, arm):
-        rs = [r for r in pr if r['ratio']==ra and r['arm']==arm and r['rc']=='0']
+    def cellA(ra):
+        rs = [r for r in pr if r['ratio']==ra and r['arm']=='A' and r['rc']=='0']
         if not rs: return None
-        fld = 'io_gen_bytes' if arm=='A' else 'pager_bytes_fetched'
-        rb = _med([int(r[fld]) for r in rs if r[fld] not in ('','n/a')])
+        rb = _med([int(r['io_gen_bytes']) for r in rs if r['io_gen_bytes'] not in ('','n/a')])
         ts = _med([float(r['tokens_s']) for r in rs if r['tokens_s'] not in ('','n/a')])
-        df = _med([int(r['absent_handled']) for r in rs if r['absent_handled'] not in ('','n/a')]) if arm!='A' else None
-        return rb, ts, df
-    # Phase 3 fallback point for arm E at r=0.25 (off_retention_none, median)
-    p3 = [r for r in rows_(f'{F}/phase3_arm_e.csv') if r['config']=='off_retention_none' and r['rc']=='0']
-    e025 = (_med([int(r['pager_bytes_fetched']) for r in p3]),
-            _med([float(r['tokens_s']) for r in p3]),
-            _med([int(r['absent_handled']) for r in p3])) if p3 else None
+        return rb, ts, None
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
     csv_rows = [('ratio','arm','read_GB','read_per_OPT','tokens_s','demand_faults','note','source')]
@@ -559,21 +570,16 @@ def figure6_final():
     for arm,(st,col,lab) in style.items():
         xr,yb,yt = [],[],[]
         for ra in RA:
-            c = cell(ra, arm)
-            if arm=='E' and ra=='0.25':
-                if e025 is None: continue
-                rb,ts,df = e025
-                ax1.plot([0.25],[rb/1e9], marker='*', ms=16, color=col, mec='k', mew=0.6, zorder=6)
-                ax2.plot([0.25],[ts], marker='*', ms=16, color=col, mec='k', mew=0.6, zorder=6)
-                ob = opt.get(ra)
-                csv_rows.append((ra,arm,f'{rb/1e9:.1f}',f'{rb/ob:.3f}' if ob else '',f'{ts:.2f}',df,
-                                 'Phase3 fallback: protect-off + retention-none (collapses in default config)','phase3_arm_e'))
-                continue
+            if arm == 'A':
+                c = cellA(ra); src = 'phase1_equal_budget'
+            else:
+                c = _p3cell(ra, arm); src = 'phase3_real_model'
+                if c is not None: c = (c[0], c[1], c[2])
             if c is None: continue
             rb,ts,df = c
             xr.append(float(ra)); yb.append(rb/1e9); yt.append(ts)
             ob = opt.get(ra)
-            csv_rows.append((ra,arm,f'{rb/1e9:.1f}',f'{rb/ob:.3f}' if ob else '',f'{ts:.2f}',df,'','phase1_equal_budget'))
+            csv_rows.append((ra,arm,f'{rb/1e9:.1f}',f'{rb/ob:.3f}' if ob else '',f'{ts:.2f}',df,'',src))
         ax1.plot(xr,yb,st,color=col,label=lab); ax2.plot(xr,yt,st,color=col,label=lab)
     xr = [float(r) for r in RA if r in opt]; yb = [opt[r]/1e9 for r in RA if r in opt]
     ax1.plot(xr,yb,'--',color='k',label='OPT (Belady, declared seq)')
@@ -583,11 +589,11 @@ def figure6_final():
     ax1.set_title('bytes read, 64 tokens (equal budget)'); ax1.grid(alpha=0.3); ax1.legend(fontsize=8)
     ax2.set_xlabel('budget ratio (of weight region)'); ax2.set_ylabel('tokens / s')
     ax2.axhline(13.2, ls=':', color='gray'); ax2.set_title('generation throughput'); ax2.grid(alpha=0.3); ax2.legend(fontsize=8)
-    fig.suptitle('Figure 6 — llama.cpp (Qwen2.5-3B Q4_K_M), equal budget (Phase 1)', fontsize=12)
-    fig.text(0.5, 0.02, 'memory.max = B for arm A; budget_bytes = B (+128 MiB memory.max) for the pager arms. '
-             'Arm D beats arm A on bytes at every ratio (D/A 0.98..0.52); D/OPT = 1.09-1.14. '
-             'Arm E * at r=0.25 = Phase 3 fallback (protect-off + retention-none); the default arm-E config '
-             'deadlocks there. A/C flat in throughput; D/E scale.', ha='center', fontsize=7)
+    fig.suptitle('Figure 6 — llama.cpp (Qwen2.5-3B Q4_K_M), equal budget', fontsize=12)
+    fig.text(0.5, 0.02, 'memory.max = B for arm A (phase1); budget_bytes = B (+128 MiB memory.max) for the pager '
+             'arms (phase3, all four LIVELOCK FIX defects + protect_current=off). Arm D beats arm A on bytes at '
+             'every ratio; D/OPT = 1.10-1.15. Arm E completes at every ratio incl. r=0.25 (was a livelock with '
+             'protect_current on). A/C flat in throughput; D/E scale.', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.07,1,0.94])
     fig.savefig(f'{OUT}/figure6_llamacpp.png', dpi=200); plt.close(fig)
     with open(f'{OUT}/figure6_llamacpp.csv','w',newline='') as f:
@@ -597,7 +603,7 @@ def figure6_final():
 def figure7():
     """Throughput scaling -- the project's strongest single result. x: budget
     ratio; y: tokens/s; lines A/C/D/E, real model, equal budget."""
-    pr = _p1rows()
+    pr = _p1rows(); p3 = _p3rows()
     RA = ['0.25','0.375','0.5','0.625','0.75']
     fig, ax = plt.subplots(figsize=(9, 5.5))
     csv_rows = [('ratio','arm','tokens_s_median','tokens_s_reps','source')]
@@ -606,12 +612,14 @@ def figure7():
     for arm,(st,col,lab) in style.items():
         xr,yt = [],[]
         for ra in RA:
-            rs = [r for r in pr if r['ratio']==ra and r['arm']==arm and r['rc']=='0']
+            src = 'phase1_equal_budget' if arm == 'A' else 'phase3_real_model'
+            pool = pr if arm == 'A' else p3
+            rs = [r for r in pool if r['ratio']==ra and r['arm']==arm and r['rc']=='0']
             reps = [float(r['tokens_s']) for r in rs if r['tokens_s'] not in ('','n/a')]
             if not reps: continue
             m = _med(reps)
             xr.append(float(ra)); yt.append(m)
-            csv_rows.append((ra,arm,f'{m:.3f}','|'.join(f'{x:.3f}' for x in reps),'phase1_equal_budget'))
+            csv_rows.append((ra,arm,f'{m:.3f}','|'.join(f'{x:.3f}' for x in reps),src))
         if xr: ax.plot(xr,yt,st,color=col,label=lab, lw=2, ms=8)
     ax.axhline(13.2, ls=':', color='gray', label='unconstrained baseline (13.2 t/s)')
     ax.set_xlabel('budget ratio (fraction of the 2.10 GB weight region)')
@@ -619,9 +627,10 @@ def figure7():
     ax.set_title('Figure 7 — The kernel cannot turn memory into throughput; the app-authoritative pager can',
                  fontsize=11)
     ax.grid(alpha=0.3); ax.legend(fontsize=9)
-    fig.text(0.5, 0.01, 'Qwen2.5-3B Q4_K_M, CPU, 64 tokens, n=3, equal budget (Phase 1). Arms A and C are '
-             'horizontal (0.6-0.9 t/s at every budget); arm D rises 0.91 -> 1.95 t/s (2.1x). Arm A absolute '
-             'values are reclaim-noisy; the flat trend is the robust result.', ha='center', fontsize=7)
+    fig.text(0.5, 0.01, 'Qwen2.5-3B Q4_K_M, CPU, 64 tokens, n=3, equal budget. Arm A: phase1; arms C/D/E: '
+             'phase3 (LIVELOCK FIX, protect_current=off). Arms A and C are horizontal (0.6-1.0 t/s at every '
+             'budget); arm D rises 1.12 -> 2.85 t/s (2.5x). Arm A absolute values are reclaim-noisy; the flat '
+             'trend is the robust result.', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.06,1,0.96])
     fig.savefig(f'{OUT}/figure7_throughput_scaling.png', dpi=200); plt.close(fig)
     with open(f'{OUT}/figure7_throughput_scaling.csv','w',newline='') as f:
@@ -629,35 +638,31 @@ def figure7():
     print("figure7 done")
 
 def table1_final():
-    """Real-model main results at equal budget (Phase 1) + the Phase 2 synthetic
-    D/OPT for the final policy config. Footnote key inline."""
-    pr = _p1rows(); opt = _p1opt()
+    """Real-model main results at equal budget. Arm A: phase1 (no pager). Arms
+    C/D/E: phase3_real_model (all four LIVELOCK FIX defects + A-14
+    protect_current=off). Footnote key inline."""
+    pr = _p1rows(); p3 = _p3rows(); opt = _p1opt()
     RA = ['0.25','0.375','0.5','0.625','0.75']
     hdr = ['ratio','arm','config','read_GB','read/OPT','demand_faults','tokens_s_med','p99_inter_ms_med','note']
     out=[hdr]
     for ra in RA:
         ob = opt.get(ra)
         for arm in ('A','C','D','E'):
-            rs = [r for r in pr if r['ratio']==ra and r['arm']==arm and r['rc']=='0']
+            pool = pr if arm == 'A' else p3
+            rs = [r for r in pool if r['ratio']==ra and r['arm']==arm and r['rc']=='0']
             note=''
-            if arm=='E' and not rs:
-                p3=[r for r in rows_(f'{F}/phase3_arm_e.csv') if r['config']=='off_retention_none' and r['rc']=='0']
-                if p3:
-                    rb=_med([int(r['pager_bytes_fetched']) for r in p3]); ts=_med([float(r['tokens_s']) for r in p3])
-                    dfx=_med([int(r['absent_handled']) for r in p3]); p99='-'
-                    note='COLLAPSES in default config; Phase 3 fallback protect-off+retention-none'
-                    out.append([ra,arm,'prefetch on (fallback)',f'{rb/1e9:.1f}',f'{rb/ob:.3f}' if ob else '-',dfx,f'{ts:.2f}',p99,note]);
-                continue
             if not rs: continue
             fld='io_gen_bytes' if arm=='A' else 'pager_bytes_fetched'
             rb=_med([int(r[fld]) for r in rs if r[fld] not in ('','n/a')])
             ts=_med([float(r['tokens_s']) for r in rs if r['tokens_s'] not in ('','n/a')])
             p99=_med([float(r['p99_inter_ms']) for r in rs if r['p99_inter_ms'] not in ('','n/a')])
             dfx=_med([int(r['absent_handled']) for r in rs if r['absent_handled'] not in ('','n/a')]) if arm!='A' else '-'
-            cfg={'A':'kernel mmap, memory.max=B','C':'lru','D':'layer_order_declared, prefetch off','E':'declared + prefetch d2 pinned'}[arm]
+            cfg={'A':'kernel mmap, memory.max=B','C':'lru','D':'layer_order_declared, prefetch off','E':'declared + prefetch d2 pinned, protect off'}[arm]
             if arm=='A':
                 ach=_med([float(r['achieved_mibs']) for r in rs if r['achieved_mibs'] not in ('','n/a')])
                 note=f'achieved {ach:.0f} MiB/s (< 3396 ceiling, no host-cache flag)'
+            if arm=='E' and ra in ('0.25','0.375'):
+                note='completes (was a livelock with protect_current on); prefetch non-advantageous vs D here'
             out.append([ra,arm,cfg,f'{rb/1e9:.1f}',f'{rb/ob:.3f}' if ob else '-',dfx,f'{ts:.2f}',
                         f'{p99:.0f}' if p99 else '-',note])
         if ob: out.append([ra,'OPT','belady, declared seq, 65 passes',f'{ob/1e9:.1f}','1.000','-','-','-',''])
@@ -694,11 +699,12 @@ def table2_final():
                    'Phase 2 synthetic: {0.25, 0.5, 0.75} x compute {0, 400000}, n=3.'),
         ('tokens generated', '64, fixed prompt (16 tokens), greedy/deterministic'),
         ('llama threads', '8 (-t 8), n_gpu_layers = 0, load mode mmap/residctl'),
-        ('policy (final default)', 'layer_order_declared, --consumption-signal all-threads, --protect-current off '
-                                   '(Phase 2 outcome). layer_order_learned retained as comparison arm.'),
+        ('policy (final default)', 'layer_order_declared; consumption signal fires pre-compute (real model) / '
+                                   '--consumption-signal all-threads (synthetic); --protect-current OFF on both paths '
+                                   '(LIVELOCK FIX A-14). layer_order_learned retained as comparison arm.'),
         ('fetch workers', '4; async dispatch-only handler (A-5)'),
-        ('prefetch (arm E)', 'depth 2, retention pinned -- EXCEPT r <= 0.375 where the recommendation is prefetch off '
-                             '(Phase 3: default config deadlocks; fallback = retention none, still no benefit)'),
+        ('prefetch (arm E)', 'depth 2, retention pinned. Completes at every ratio incl. r <= 0.375 (LIVELOCK FIX); '
+                             'prefetch remains non-advantageous vs arm D at r <= 0.375 -- run arm D there.'),
         ('per-layer compute (measured)', '~51,000 ns/MiB (13.2 t/s baseline / 36 layers / 41.5 MiB per layer chunk)'),
         ('O_DIRECT bandwidth ceiling', '3396 MiB/s; Phase 1 arm A achieved 920-1310 MiB/s (fault-stall-bound, no contamination)'),
         ('T-1..T-7', 'PASS with --eager-reconcile, after every Phase 2 code change and at session end'),
@@ -712,7 +718,16 @@ def table2_final():
         for k,v in env: f.write(f'| {k} | {v} |\n')
     print("table2_final done")
 
-figure1(); figure2(); figure3(); figure4(); figure5(); figure6()
-table1(); table2()
-figure6_final(); figure7(); table1_final(); table2_final()
-print("ALL DONE ->", OUT)
+import sys as _sys
+_ALL = {'figure1':figure1,'figure2':figure2,'figure3':figure3,'figure4':figure4,
+        'figure5':figure5,'figure6':figure6,'table1':table1,'table2':table2,
+        'figure6_final':figure6_final,'figure7':figure7,'table1_final':table1_final,
+        'table2_final':table2_final}
+_sel = _sys.argv[1:]
+if _sel:
+    for _n in _sel: _ALL[_n]()
+else:
+    figure1(); figure2(); figure3(); figure4(); figure5(); figure6()
+    table1(); table2()
+    figure6_final(); figure7(); table1_final(); table2_final()
+print("DONE ->", OUT)

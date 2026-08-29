@@ -40,25 +40,24 @@ static char     g_reftrace_path[1024];
 static char     g_fetchtrace_path[1024];   // FINAL SESSION Phase 3
 static char     g_policytrace_path[1024];  // FINAL SESSION Phase 3
 static uint32_t g_fetching_timeout_ms = 0; // CLEANUP session: 0 => region_startup default (30000)
-static int      g_protect_current = 1;      // CLEANUP session: default ON for the REAL
-                                           // model. FINAL-SESSION Phase 2 flipped this to
-                                           // OFF based on the SYNTHETIC grid -- which has
-                                           // --consumption-signal all-threads to advance
-                                           // the declared cursor only after every driver
-                                           // thread finishes a chunk. The real-model eval
-                                           // callback fires notify AFTER each layer's
-                                           // compute (post-, not pre-consumption), so the
-                                           // cursor LAGS the actual access and there is no
-                                           // all-threads compensation. Measured
-                                           // (results/cleanup/phase1_verify.csv): with
-                                           // protect OFF, arm D reads +67-78% more at
-                                           // every ratio (r0.25: 217 vs 126 GB) -- a large
-                                           // deterministic regression. protect ON is
-                                           // strictly better for arm D and safe (the
-                                           // arm-E livelock needs prefetch; see
-                                           // phase1_deadlock_fix.md). replay_main.c keeps
-                                           // its OFF default (synthetic path). Set
-                                           // protect_current=off in the config to override.
+static int      g_protect_current = 0;      // LIVELOCK FIX A-14: default OFF. The eval
+                                           // callback now fires notify on the PRE-compute
+                                           // pass (Defect 2) and matches the "embd" node
+                                           // (Defect 4), so the declared cursor tracks the
+                                           // real read frontier and seq[pos] is distance 0
+                                           // by construction -- the heuristic is redundant,
+                                           // exactly as on replay_main.c's --consumption-
+                                           // signal all-threads path. The cleanup session's
+                                           // "protect OFF => arm D +67-78%" was a Defect-2/
+                                           // Defect-4 artifact (cursor lagged a full layer,
+                                           // token_embd never signalled); with the fixes,
+                                           // protect on vs off is within +-1.8% at every
+                                           // ratio (results/livelock/phase3c_arm_d_protect_
+                                           // on.csv). On the pre-consumption path the
+                                           // heuristic's residual effect -- pinning
+                                           // seq[pos-1], the previous layer -- is a
+                                           // mis-rank. protect_current=on in the config
+                                           // still forces it on.
 
 static void load_config(void) {
     const char *cfg = getenv("RESIDCTL_CONFIG");

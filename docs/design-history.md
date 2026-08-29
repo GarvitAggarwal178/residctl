@@ -67,6 +67,13 @@ non-default driver mode. An explicit `--consumption-signal tid0` with
 `seq[pos-1]` to distance 0) is redundant on the pre-consumption path once
 Defect 2 lands: `seq[pos]` is already 0 by construction, and `seq[pos-1]` is the
 *previous* layer, whose next use is a full lap away — protecting it is
-counter-productive. Phase 3 measures the real model with `--protect-current off`;
-whether the `residctl_llama.c` default flips is settled in Phase 4 / spec
-amendment A-14 on that data, not pre-emptively.
+counter-productive.
+
+**Resolved (Phase 3c / A-14).** `residctl_llama.c`'s `protect_current` default
+flips to **off** — both paths now default off. Phase 3c measured arm D with
+`--protect-current on` and all four fixes: on vs off moves arm D by ≤ 1.8 % at
+every ratio (`results/livelock/phase3c_arm_d_protect_on.csv`). The cleanup
+session's "off ⇒ arm D +67–78 %" — the sole reason it was `on` — was an artifact
+of the two bugs this session fixes (post-compute notify + the unsignalled
+`token_embd`). `--protect-current` and its unit tests stay for a caller whose
+consumption signal is genuinely inexact.

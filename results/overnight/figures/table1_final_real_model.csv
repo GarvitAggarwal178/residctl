@@ -1,26 +1,26 @@
 ratio,arm,config,read_GB,read/OPT,demand_faults,tokens_s_med,p99_inter_ms_med,note
 0.25,A,"kernel mmap, memory.max=B",129.1,1.167,-,0.65,1922,"achieved 1244 MiB/s (< 3396 ceiling, no host-cache flag)"
-0.25,C,lru,144.4,1.305,2817,0.82,1337,
-0.25,D,"layer_order_declared, prefetch off",126.1,1.140,2499,0.91,1359,
-0.25,E,prefetch on (fallback),166.5,1.505,1605,1.02,-,COLLAPSES in default config; Phase 3 fallback protect-off+retention-none
+0.25,C,lru,144.4,1.305,2817,0.97,1090,
+0.25,D,"layer_order_declared, prefetch off",125.0,1.130,2689,1.12,927,
+0.25,E,"declared + prefetch d2 pinned, protect off",142.1,1.284,1055,1.22,881,completes (was a livelock with protect_current on); prefetch non-advantageous vs D here
 0.25,OPT,"belady, declared seq, 65 passes",110.6,1.000,-,-,-,
 0.375,A,"kernel mmap, memory.max=B",110.4,1.225,-,0.79,1496,"achieved 1298 MiB/s (< 3396 ceiling, no host-cache flag)"
-0.375,C,lru,143.2,1.589,2753,0.85,1325,
-0.375,D,"layer_order_declared, prefetch off",98.4,1.091,2030,1.20,942,
-0.375,E,declared + prefetch d2 pinned,111.1,1.233,895,1.33,892,
+0.375,C,lru,143.2,1.589,2753,0.96,1077,
+0.375,D,"layer_order_declared, prefetch off",98.5,1.093,2141,1.35,804,
+0.375,E,"declared + prefetch d2 pinned, protect off",111.1,1.233,937,1.53,735,completes (was a livelock with protect_current on); prefetch non-advantageous vs D here
 0.375,OPT,"belady, declared seq, 65 passes",90.1,1.000,-,-,-,
 0.5,A,"kernel mmap, memory.max=B",111.3,1.532,-,0.62,1820,"achieved 1020 MiB/s (< 3396 ceiling, no host-cache flag)"
-0.5,C,lru,134.5,1.852,2561,0.81,1511,
-0.5,D,"layer_order_declared, prefetch off",79.3,1.092,1614,1.57,680,
-0.5,E,declared + prefetch d2 pinned,86.2,1.187,757,1.24,970,
+0.5,C,lru,134.5,1.852,2561,1.01,1015,
+0.5,D,"layer_order_declared, prefetch off",78.9,1.086,1734,1.65,689,
+0.5,E,"declared + prefetch d2 pinned, protect off",84.9,1.169,766,1.88,661,
 0.5,OPT,"belady, declared seq, 65 passes",72.6,1.000,-,-,-,
 0.625,A,"kernel mmap, memory.max=B",105.1,1.904,-,0.64,1687,"achieved 999 MiB/s (< 3396 ceiling, no host-cache flag)"
-0.625,C,lru,134.5,2.438,2561,0.72,1657,
-0.625,D,"layer_order_declared, prefetch off",60.6,1.098,1236,1.51,766,
-0.625,E,declared + prefetch d2 pinned,64.7,1.173,623,1.56,741,
+0.625,C,lru,134.5,2.438,2561,0.99,1056,
+0.625,D,"layer_order_declared, prefetch off",59.7,1.081,1300,2.17,506,
+0.625,E,"declared + prefetch d2 pinned, protect off",62.9,1.139,653,2.34,485,
 0.625,OPT,"belady, declared seq, 65 passes",55.2,1.000,-,-,-,
 0.75,A,"kernel mmap, memory.max=B",83.3,2.175,-,0.75,1876,"achieved 927 MiB/s (< 3396 ceiling, no host-cache flag)"
-0.75,C,lru,134.5,3.511,2561,0.73,1542,
-0.75,D,"layer_order_declared, prefetch off",43.4,1.132,871,1.95,596,
-0.75,E,declared + prefetch d2 pinned,46.2,1.207,431,2.28,588,
+0.75,C,lru,134.5,3.511,2561,0.97,1157,
+0.75,D,"layer_order_declared, prefetch off",41.9,1.095,915,2.85,409,
+0.75,E,"declared + prefetch d2 pinned, protect off",43.4,1.132,489,3.06,403,
 0.75,OPT,"belady, declared seq, 65 passes",38.3,1.000,-,-,-,

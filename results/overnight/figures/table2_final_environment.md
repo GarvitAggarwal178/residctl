@@ -13,9 +13,9 @@
 | ratios | Phase 1 real model: {0.25, 0.375, 0.5, 0.625, 0.75}, n=3. Phase 2 synthetic: {0.25, 0.5, 0.75} x compute {0, 400000}, n=3. |
 | tokens generated | 64, fixed prompt (16 tokens), greedy/deterministic |
 | llama threads | 8 (-t 8), n_gpu_layers = 0, load mode mmap/residctl |
-| policy (final default) | layer_order_declared, --consumption-signal all-threads, --protect-current off (Phase 2 outcome). layer_order_learned retained as comparison arm. |
+| policy (final default) | layer_order_declared; consumption signal fires pre-compute (real model) / --consumption-signal all-threads (synthetic); --protect-current OFF on both paths (LIVELOCK FIX A-14). layer_order_learned retained as comparison arm. |
 | fetch workers | 4; async dispatch-only handler (A-5) |
-| prefetch (arm E) | depth 2, retention pinned -- EXCEPT r <= 0.375 where the recommendation is prefetch off (Phase 3: default config deadlocks; fallback = retention none, still no benefit) |
+| prefetch (arm E) | depth 2, retention pinned. Completes at every ratio incl. r <= 0.375 (LIVELOCK FIX); prefetch remains non-advantageous vs arm D at r <= 0.375 -- run arm D there. |
 | per-layer compute (measured) | ~51,000 ns/MiB (13.2 t/s baseline / 36 layers / 41.5 MiB per layer chunk) |
 | O_DIRECT bandwidth ceiling | 3396 MiB/s; Phase 1 arm A achieved 920-1310 MiB/s (fault-stall-bound, no contamination) |
 | T-1..T-7 | PASS with --eager-reconcile, after every Phase 2 code change and at session end |

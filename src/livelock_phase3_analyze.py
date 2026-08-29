@@ -5,7 +5,7 @@ import csv, pathlib, statistics, sys
 
 LL  = pathlib.Path("/root/residctl/results/livelock")
 FIN = pathlib.Path("/root/residctl/results/final")
-GB  = 1024**3
+GB  = 1e9   # decimal GB, matching phase3_real_model.md / Table 1 / Figure 6
 
 def rows(p):
     with open(p) as f: return list(csv.DictReader(f))
@@ -24,9 +24,10 @@ d_base = {}   # ratio -> pager_bytes (protect-on, phase1)
 for r in rows(FIN / "phase1_equal_budget.csv"):
     if r["arm"] == "D":
         d_base[r["ratio"]] = float(r["pager_bytes_fetched"])
-opt = {}      # ratio -> opt_missed_bytes for 64 passes
+opt = {}      # ratio -> opt_missed_bytes, 65 passes (prompt scan + 64 decode
+              # scans) -- the canonical count used by Table 1 and Figure 6.
 for r in rows(FIN / "phase1_opt.csv"):
-    if r["passes"] == "64":
+    if r["passes"] == "65":
         opt[r["ratio"]] = float(r["opt_missed_bytes"])
 
 ratios = ["0.25", "0.375", "0.5", "0.625", "0.75"]
