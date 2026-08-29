@@ -1,0 +1,62 @@
+# Phase 0 -- distinct compute-graph node names eval_cb() sees (per-layer index collapsed to <il>)
+# residctl_llama build: qwen2.5-3b, 36 layers. Diagnostic run: arm D, r=0.5, -n 3.
+
+## non-per-layer nodes (the ones eval_cb's role branch tries to match):
+ask embd
+ask norm
+ask result_norm
+ask result_output
+eval embd
+eval norm
+eval result_norm
+eval result_output
+
+## does 'inp_embd' ever appear?
+  count = 0
+## does 'embd' appear?
+  ask embd
+  eval embd
+
+## first 42 nodes of one decode, in eval-callback order (ask pass), raw name:
+     1	NODE ask  embd
+     2	NODE ask  norm-0
+     3	NODE ask  attn_norm-0
+     4	NODE ask  Qcur-0
+     5	NODE ask  Vcur-0
+     6	NODE ask  Kcur-0
+     7	NODE ask  Kcur-0 (view)
+     8	NODE ask  cache_k_l0 (view)
+     9	NODE ask  Vcur-0 (view)
+    10	NODE ask  cache_v_l0 (view)
+    11	NODE ask  Qcur-0 (view)
+    12	NODE ask  Qcur-0 (view) (permuted)
+    13	NODE ask  cache_k_l0 (view) (permuted)
+    14	NODE ask  cache_v_l0 (view) (permuted)
+    15	NODE ask  node_24
+    16	NODE ask  kqv_out-0
+    17	NODE ask  node_26
+    18	NODE ask  ffn_inp-0
+    19	NODE ask  ffn_norm-0
+    20	NODE ask  ffn_gate-0
+    21	NODE ask  ffn_up-0
+    22	NODE ask  ffn_swiglu-0
+    23	NODE ask  ffn_out-0
+    24	NODE ask  l_out-0
+    25	NODE ask  norm-1
+    26	NODE ask  attn_norm-1
+    27	NODE ask  Qcur-1
+    28	NODE ask  Vcur-1
+    29	NODE ask  Kcur-1
+    30	NODE ask  Kcur-1 (view)
+    31	NODE ask  cache_k_l1 (view)
+    32	NODE ask  Vcur-1 (view)
+    33	NODE ask  cache_v_l1 (view)
+    34	NODE ask  Qcur-1 (view)
+    35	NODE ask  Qcur-1 (view) (permuted)
+    36	NODE ask  cache_k_l1 (view) (permuted)
+    37	NODE ask  cache_v_l1 (view) (permuted)
+    38	NODE ask  node_58
+    39	NODE ask  kqv_out-1
+    40	NODE ask  node_60
+    41	NODE ask  ffn_inp-1
+    42	NODE ask  ffn_norm-1
