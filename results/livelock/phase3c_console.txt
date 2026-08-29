@@ -1,0 +1,37 @@
+=== fresh 2026-08-29T10:46:08Z ===
+=== machine exclusivity (before) ===
+ 10:46:08 up 12:59,  1 user,  load average: 0.08, 1.61, 2.79
+(clean)
+--- r=0.25 rep1 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.206,ttft_ms=1319.91,p99_inter_ms=1036.896,wall_s=62.932,tokens_s=1.017,io_read_bytes_load=8671232,io_read_bytes_gen=126141042688
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=2499,evictions=2495,infeasible=0,prefetches=0,pager_bytes_fetched=126141046784,dedup_resident=0,dedup_fetching=476,pin_broken=0,resident_bytes_end=479621120,memory_peak=627027968,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+--- r=0.25 rep2 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.202,ttft_ms=1192.66,p99_inter_ms=1019.101,wall_s=61.895,tokens_s=1.034,io_read_bytes_load=8671232,io_read_bytes_gen=126141042688
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=526233600,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=2499,evictions=2495,infeasible=0,prefetches=0,pager_bytes_fetched=126141046784,dedup_resident=1,dedup_fetching=475,pin_broken=0,resident_bytes_end=479621120,memory_peak=627265536,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+--- r=0.375 rep1 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.179,ttft_ms=1257.37,p99_inter_ms=803.720,wall_s=48.795,tokens_s=1.312,io_read_bytes_load=8671232,io_read_bytes_gen=97607458816
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=789350400,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1993,evictions=1983,infeasible=0,prefetches=0,pager_bytes_fetched=97607462912,dedup_resident=0,dedup_fetching=35,pin_broken=0,resident_bytes_end=758005760,memory_peak=893476864,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+--- r=0.375 rep2 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.186,ttft_ms=1369.25,p99_inter_ms=804.128,wall_s=48.817,tokens_s=1.311,io_read_bytes_load=8671232,io_read_bytes_gen=97607458816
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=789350400,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1993,evictions=1983,infeasible=0,prefetches=0,pager_bytes_fetched=97607462912,dedup_resident=0,dedup_fetching=35,pin_broken=0,resident_bytes_end=758005760,memory_peak=893726720,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+--- r=0.5 rep1 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.180,ttft_ms=1347.77,p99_inter_ms=703.128,wall_s=40.805,tokens_s=1.568,io_read_bytes_load=8671232,io_read_bytes_gen=79631601664
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=1052467200,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1614,evictions=1598,infeasible=0,prefetches=0,pager_bytes_fetched=79631605760,dedup_resident=0,dedup_fetching=42,pin_broken=0,resident_bytes_end=1041928192,memory_peak=1159831552,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+--- r=0.5 rep2 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.184,ttft_ms=1365.37,p99_inter_ms=665.258,wall_s=39.831,tokens_s=1.607,io_read_bytes_load=8671232,io_read_bytes_gen=79631601664
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=1052467200,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1614,evictions=1598,infeasible=0,prefetches=0,pager_bytes_fetched=79631605760,dedup_resident=0,dedup_fetching=42,pin_broken=0,resident_bytes_end=1041928192,memory_peak=1159655424,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+--- r=0.625 rep1 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.176,ttft_ms=1283.45,p99_inter_ms=591.644,wall_s=31.596,tokens_s=2.026,io_read_bytes_load=8671232,io_read_bytes_gen=60762337280
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=1315584000,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1235,evictions=1214,infeasible=0,prefetches=0,pager_bytes_fetched=60762341376,dedup_resident=0,dedup_fetching=252,pin_broken=0,resident_bytes_end=1270853632,memory_peak=1422786560,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+--- r=0.625 rep2 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.189,ttft_ms=1334.54,p99_inter_ms=597.252,wall_s=32.192,tokens_s=1.988,io_read_bytes_load=8671232,io_read_bytes_gen=60762337280
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=1315584000,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=1235,evictions=1214,infeasible=0,prefetches=0,pager_bytes_fetched=60762341376,dedup_resident=0,dedup_fetching=252,pin_broken=0,resident_bytes_end=1270853632,memory_peak=1422204928,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+--- r=0.75 rep1 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.192,ttft_ms=1353.53,p99_inter_ms=441.483,wall_s=22.898,tokens_s=2.795,io_read_bytes_load=8671232,io_read_bytes_gen=41654554624
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=1578700800,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=847,evictions=820,infeasible=0,prefetches=0,pager_bytes_fetched=41654558720,dedup_resident=0,dedup_fetching=175,pin_broken=0,resident_bytes_end=1554907136,memory_peak=1686233088,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+--- r=0.75 rep2 rc=0 ---
+WP2_CSV,arm_mode=residctl,n_prompt=16,n_decoded=64,layer_transitions=2304,load_s=0.186,ttft_ms=1364.10,p99_inter_ms=488.391,wall_s=23.704,tokens_s=2.700,io_read_bytes_load=8671232,io_read_bytes_gen=41654554624
+RESIDCTL_STATS,policy=layer_order_declared,prefetch=off,budget_bytes=1578700800,n_chunks=41,n_layers=36,region_len=2104934400,file_size=2104932768,absent_handled=847,evictions=820,infeasible=0,prefetches=0,pager_bytes_fetched=41654558720,dedup_resident=0,dedup_fetching=175,pin_broken=0,resident_bytes_end=1554907136,memory_peak=1686310912,handler_p99_ns=134217727,notify_layers=2560,stat_fetching_timeout=0,protect_current=on,signal_mode=pre,stat_prefetch_declined=0
+=== machine exclusivity (after) ===
+ 10:53:15 up 13:06,  1 user,  load average: 2.98, 2.87, 2.99
+=== Phase 3c complete 2026-08-29T10:53:15Z: /root/residctl/results/livelock/phase3c_arm_d_protect_on.csv ===

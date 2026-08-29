@@ -1,0 +1,5 @@
+ratio,rep,rc,n_decoded,wall_s,tokens_s,pager_bytes_fetched,absent_handled,evictions,prefetches,infeasible,pin_broken,prefetch_declined,fetching_timeout,protect_current,signal_mode
+0.25,1,0,64,54.301,1.179,138811228160,981,2585,1608,0,0,26,0,on,pre
+0.25,2,0,64,53.108,1.205,137444298752,966,2555,1594,0,0,23,0,on,pre
+0.375,1,0,64,44.399,1.441,110949191680,834,2163,1339,0,0,0,0,on,pre
+0.375,2,0,64,43.655,1.466,109796175872,839,2075,1246,0,0,0,0,on,pre
