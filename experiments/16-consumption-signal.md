@@ -149,11 +149,11 @@ the old flags for exact reproduction.
 
 ## Files
 
-- `results/final/phase2_determinism.csv` — 120 rows (4 combos × 6 cells × 5 reps).
-- `results/final/phase2_sweep.csv` — 144 rows (4 combos × 2 cs × 3 r × 2 c × 3 reps).
-- `results/final/phase2_opt.csv` — OPT per (cs, ratio), floor-checked.
-- `results/final/phase2_log.txt` — full run log.
-- `src/run_final_phase2.sh`, `src/phase2_supervisor.sh`, `src/smoke_p2.sh`.
+- `results/data/consumption-signal-determinism-grid.csv` — 120 rows (4 combos × 6 cells × 5 reps).
+- `results/data/consumption-signal-comparison.csv` — 144 rows (4 combos × 2 cs × 3 r × 2 c × 3 reps).
+- `results/data/consumption-signal-opt-bound.csv` — OPT per (cs, ratio), floor-checked.
+- `experiments/logs/final__phase2_log.txt` — full run log.
+- `scripts/run-consumption-signal-sweep.sh`, `scripts/historical/phase2-supervisor.sh`, `scripts/historical/smoke-p2.sh`.
 
 ## Final check
 

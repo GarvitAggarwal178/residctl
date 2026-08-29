@@ -233,7 +233,7 @@ wall-clock) — not cherry-picked to the one cell shown.
 ## Final check
 
 - No number estimated or inferred — every value is a direct read from
-  `results/campaign12_phaseD_paper_table.csv` (median of n=3) or a direct
+  `results/data/synthetic-consolidated-sweep.csv` (median of n=3) or a direct
   computation via `belady_main` (OPT) and `scratch/analyze_c13_phaseC.py`.
 - No test was run; this phase is analysis only, per instruction.
 - Every one of the 5 stated points was checked against measured values

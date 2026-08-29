@@ -11,7 +11,7 @@ REGION=2104934400
 
 python3 - <<'PY'
 import re
-inv = open('/root/residctl/results/overnight/wp2_tensor_inventory.txt').read()
+inv = open('/root/residctl/experiments/logs/overnight__wp2_tensor_inventory.txt').read()
 cb = re.search(r'## chunk_bytes.*?\n(.*)', inv, re.S).group(1)
 open('/tmp/p1_cb.txt','w').write('\n'.join(l for l in cb.splitlines() if l.strip().isdigit())+'\n')
 ds = re.search(r'## declared sequence[^\n]*\n\s*([\d ]+)', inv).group(1)

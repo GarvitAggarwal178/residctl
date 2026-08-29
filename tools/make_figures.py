@@ -6,8 +6,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 R = '/root/residctl/results'
-OUT = f'{R}/overnight/figures'
+OUT = f'{R}/figures'
 os.makedirs(OUT, exist_ok=True)
+os.makedirs(f'{OUT}/historical', exist_ok=True)
 MiB = 1048576.0
 OD_CEIL = 3396.0  # spike O_DIRECT max MiB/s -- host-cache contamination signature
 
@@ -23,11 +24,11 @@ def i(x):
     return None if x in (None, '', 'n/a') else int(x)
 
 # ---------------------------------------------------------------- sources
-phaseD = rows(f'{R}/campaign12_phaseD_paper_table.csv')
-wp1    = rows(f'{R}/overnight/wp1_sweep.csv')
-wp1opt = rows(f'{R}/overnight/wp1_sweep_opt.csv')
-phase3 = rows(f'{R}/phase3_chunk_size.csv')
-phaseB = rows(f'{R}/campaign12_phaseB_chunk_floor.csv')
+phaseD = rows(f'{R}/data/synthetic-consolidated-sweep.csv')
+wp1    = rows(f'{R}/data/declared-vs-learned-policy.csv')
+wp1opt = rows(f'{R}/data/declared-vs-learned-opt-bound.csv')
+phase3 = rows(f'{R}/data/synthetic-chunk-size-sweep.csv')
+phaseB = rows(f'{R}/data/synthetic-chunk-size-floor.csv')
 
 OPT_BYTES = {(o['chunk_size'], o['ratio']): int(o['opt_bytes']) for o in wp1opt}
 # ratios not in the WP1 grid: from Campaign 12 Phase D's OPT table
@@ -143,9 +144,9 @@ def figure1():
     fig.text(0.5, 0.02, f'X = arm A point whose achieved bandwidth exceeds the spike {OD_CEIL:.0f} MiB/s '
              'O_DIRECT ceiling -- Windows VHDX host-cache contamination.', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.10,1,0.95])
-    fig.savefig(f'{OUT}/figure1_bytes_per_work.png', dpi=200)
+    fig.savefig(f'{OUT}/01-bytes-vs-budget.png', dpi=200)
     plt.close(fig)
-    with open(f'{OUT}/figure1_bytes_per_work.csv','w',newline='') as f:
+    with open(f'{OUT}/01-bytes-vs-budget.csv','w',newline='') as f:
         csv.writer(f).writerows(csv_rows)
     print("figure1 done")
 
@@ -190,9 +191,9 @@ def figure2():
              'costs more when only ~8 fit). E is below the OPT line because its DEMAND-fault rate excludes '
              'prefetches; E total fetches (demand+prefetch) still >= OPT.', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.07,1,0.95])
-    fig.savefig(f'{OUT}/figure2_miss_rate.png', dpi=200)
+    fig.savefig(f'{OUT}/02-miss-rate-vs-optimal.png', dpi=200)
     plt.close(fig)
-    with open(f'{OUT}/figure2_miss_rate.csv','w',newline='') as f:
+    with open(f'{OUT}/02-miss-rate-vs-optimal.csv','w',newline='') as f:
         csv.writer(f).writerows(csv_rows)
     print("figure2 done")
 
@@ -248,11 +249,11 @@ def figure3():
              ha='center', fontsize=7)
     fig.text(0.5, 0.02, 'Campaign 12 Phase B {4,8,16,32} MiB + Campaign 11 Phase 3 {32,64,128,256} MiB, different '
              'sweeps/scripts; 32 MiB overlap did NOT agree exactly (Phase B 3-7% more bytes, ~10% slower). '
-             'Numbers: figure3_chunk_size_tradeoff.csv.', ha='center', fontsize=6.8)
+             'Numbers: 03-chunk-size-tradeoff.csv.', ha='center', fontsize=6.8)
     fig.tight_layout(rect=[0,0.10,1,0.95])
-    fig.savefig(f'{OUT}/figure3_chunk_size_tradeoff.png', dpi=200)
+    fig.savefig(f'{OUT}/03-chunk-size-tradeoff.png', dpi=200)
     plt.close(fig)
-    with open(f'{OUT}/figure3_chunk_size_tradeoff.csv','w',newline='') as f:
+    with open(f'{OUT}/03-chunk-size-tradeoff.csv','w',newline='') as f:
         csv.writer(f).writerows(csv_rows)
     print("figure3 done; overlap:", overlap)
 
@@ -280,9 +281,9 @@ def figure4():
              f'and finds nothing eligible: pgscan=pgsteal=0, shmem unchanged. With swap available it reclaims '
              f'~{shmem_recl[1]:.0f} MiB of shmem to swap (high={high_ev[1]}).', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.06,1,0.94])
-    fig.savefig(f'{OUT}/figure4_reclaim_authority.png', dpi=200)
+    fig.savefig(f'{OUT}/04-reclaim-authority.png', dpi=200)
     plt.close(fig)
-    with open(f'{OUT}/figure4_reclaim_authority.csv','w',newline='') as f:
+    with open(f'{OUT}/04-reclaim-authority.csv','w',newline='') as f:
         w = csv.writer(f)
         w.writerow(['condition','pgscan','pgsteal','shmem_reclaimed_MiB','memory_events_high'])
         w.writerow(['memory.swap.max=0 (S3d)', 0, 0, 0, 37])
@@ -323,9 +324,9 @@ def figure5():
              'volume metric that replaced it: E beats D only where a compute phase gives prefetch time to land. '
              'Source: Campaign 12 Phase D (layer_order_learned).', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.12,1,0.93])
-    fig.savefig(f'{OUT}/figure5_prefetch_total_fetches.png', dpi=200)
+    fig.savefig(f'{OUT}/05-prefetch-total-fetches.png', dpi=200)
     plt.close(fig)
-    with open(f'{OUT}/figure5_prefetch_total_fetches.csv','w',newline='') as f:
+    with open(f'{OUT}/05-prefetch-total-fetches.csv','w',newline='') as f:
         csv.writer(f).writerows(csv_rows)
     print("figure5 done")
 
@@ -333,8 +334,8 @@ def figure5():
 def figure6():
     """llama.cpp real workload -- same idea as Figure 1, real model. Only if WP2 produced data."""
     import os
-    swp = f'{R}/overnight/wp2_sweep.csv'
-    optp = f'{R}/overnight/wp2_opt.csv'
+    swp = f'{R}/data/real-model-arms.csv'
+    optp = f'{R}/data/real-model-arms-opt-bound.csv'
     if not (os.path.exists(swp) and os.path.exists(optp)):
         print("figure6 SKIPPED -- no WP2 sweep data"); return
     wr = [r for r in rows_(swp) if r['rc'] == '0']
@@ -379,9 +380,9 @@ def figure6():
              'fewer bytes than the kernel at r>=0.5 and D/OPT=1.09-1.14. A/C cannot turn extra budget into '
              'throughput; D/E can. layer_order_declared with the WP0 fix.', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.07,1,0.94])
-    fig.savefig(f'{OUT}/figure6_llamacpp.png', dpi=200)
+    fig.savefig(f'{OUT}/06-real-model-bytes.png', dpi=200)
     plt.close(fig)
-    with open(f'{OUT}/figure6_llamacpp.csv','w',newline='') as f:
+    with open(f'{OUT}/06-real-model-bytes.csv','w',newline='') as f:
         csv.writer(f).writerows(csv_rows)
     print("figure6 done")
 
@@ -455,10 +456,10 @@ def table1():
             if optb:
                 out.append([cslabel, ra, 'OPT', 'belady', 'n/a', f'{optb/tp/MiB:.2f}',
                             OPT_MISS[(cs,ra)], OPT_MISS[(cs,ra)], 'n/a', '1.000', ''])
-    with open(f'{OUT}/table1_main_results.csv','w',newline='') as f:
+    with open(f'{OUT}/historical/table-1-synthetic-main-results.csv','w',newline='') as f:
         csv.writer(f).writerows(out)
     # markdown
-    with open(f'{OUT}/table1_main_results.md','w') as f:
+    with open(f'{OUT}/historical/table-1-synthetic-main-results.md','w') as f:
         f.write('# Table 1 — Main results\n\n')
         f.write('read_bytes per touch (MiB) = pager_bytes_fetched / total references. '
                 'total fetches = demand faults + prefetches. arm/OPT = read_bytes / OPT bytes.\n\n')
@@ -502,10 +503,10 @@ def table2():
         ('O_DIRECT bandwidth ceiling', '3396 MiB/s (spike max; points above = host-cache contamination)'),
         ('model file hash (WP2)', 'n/a — WP2 not run, models/model.gguf absent (BLOCKER 1)'),
     ]
-    with open(f'{OUT}/table2_environment.csv','w',newline='') as f:
+    with open(f'{OUT}/historical/table-2-environment-campaign13.csv','w',newline='') as f:
         w = csv.writer(f); w.writerow(['parameter','value'])
         for k,v in env: w.writerow([k,v])
-    with open(f'{OUT}/table2_environment.md','w') as f:
+    with open(f'{OUT}/historical/table-2-environment-campaign13.md','w') as f:
         f.write('# Table 2 — Environment and configuration\n\n')
         f.write('Every value needed to reproduce the sweeps behind Figures 1–5 and Table 1.\n\n')
         f.write('| parameter | value |\n|---|---|\n')
@@ -516,14 +517,14 @@ def table2():
 # Extends this script (does not rewrite it). Figures 3/4/5 are unchanged
 # (historical data). Figure 6 is regenerated from Phase 1's equal-budget real
 # model sweep; Figure 7 is new. Tables 1/2 get final-session companions.
-F = f'{R}/final'
+F = f'{R}/data'
 
 def _p1rows():
-    return rows_(f'{F}/phase1_equal_budget.csv')
+    return rows_(f'{F}/real-model-bytes-by-budget.csv')
 
 def _p1opt():
     d = {}
-    for o in rows_(f'{F}/phase1_opt.csv'):
+    for o in rows_(f'{F}/real-model-opt-bound.csv'):
         if o['passes'] == '65':
             d[o['ratio']] = int(o['opt_missed_bytes'])
     return d
@@ -532,7 +533,7 @@ def _p1opt():
 # four fixes + the A-14 protect_current=off default. Arm A has no pager and is
 # unchanged -- still sourced from phase1_equal_budget.csv.
 def _p3rows():
-    return rows_(f'{R}/livelock/phase3_real_model.csv')
+    return rows_(f'{R}/data/livelock-real-model-arms.csv')
 
 def _p3cell(ra, arm):
     """median (pager_bytes, tokens_s, demand_faults, p99) over rc==0 reps."""
@@ -596,8 +597,8 @@ def figure6_final():
              'with protect_current on). A/C flat in throughput; D/E scale. Arm A is a different (Phase 1) run than '
              'C/D/E; compare shapes, not A-vs-C absolute throughput.', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.07,1,0.94])
-    fig.savefig(f'{OUT}/figure6_llamacpp.png', dpi=200); plt.close(fig)
-    with open(f'{OUT}/figure6_llamacpp.csv','w',newline='') as f:
+    fig.savefig(f'{OUT}/06-real-model-bytes.png', dpi=200); plt.close(fig)
+    with open(f'{OUT}/06-real-model-bytes.csv','w',newline='') as f:
         csv.writer(f).writerows(csv_rows)
     print("figure6_final done")
 
@@ -633,8 +634,8 @@ def figure7():
              'absolute gap is not like-for-like; each arm\'s flatness is the robust part. Arms A and C horizontal '
              '(~0.7 / ~1.0 t/s); arm D rises 1.12 -> 2.85 t/s (2.5x).', ha='center', fontsize=7)
     fig.tight_layout(rect=[0,0.06,1,0.96])
-    fig.savefig(f'{OUT}/figure7_throughput_scaling.png', dpi=200); plt.close(fig)
-    with open(f'{OUT}/figure7_throughput_scaling.csv','w',newline='') as f:
+    fig.savefig(f'{OUT}/07-throughput-scaling.png', dpi=200); plt.close(fig)
+    with open(f'{OUT}/07-throughput-scaling.csv','w',newline='') as f:
         csv.writer(f).writerows(csv_rows)
     print("figure7 done")
 
@@ -667,9 +668,9 @@ def table1_final():
             out.append([ra,arm,cfg,f'{rb/1e9:.1f}',f'{rb/ob:.3f}' if ob else '-',dfx,f'{ts:.2f}',
                         f'{p99:.0f}' if p99 else '-',note])
         if ob: out.append([ra,'OPT','belady, declared seq, 65 passes',f'{ob/1e9:.1f}','1.000','-','-','-',''])
-    with open(f'{OUT}/table1_final_real_model.csv','w',newline='') as f:
+    with open(f'{OUT}/table-1-real-model-results.csv','w',newline='') as f:
         csv.writer(f).writerows(out)
-    with open(f'{OUT}/table1_final_real_model.md','w') as f:
+    with open(f'{OUT}/table-1-real-model-results.md','w') as f:
         f.write('# Table 1 (FINAL) — real model, equal budget\n\n')
         f.write('Qwen2.5-3B Q4_K_M, CPU, 64 tokens, n=3, `memory.max = B` (arm A) / `budget_bytes = B` '
                 '(+128 MiB `memory.max`, pager arms). read/OPT uses `wp2_opt` over the declared sequence '
@@ -711,10 +712,10 @@ def table2_final():
         ('T-1..T-7', 'PASS with --eager-reconcile, after every Phase 2 code change and at session end'),
         ('disk free', q("df -h /root | awk 'NR==2{print $4}'")),
     ]
-    with open(f'{OUT}/table2_final_environment.csv','w',newline='') as f:
+    with open(f'{OUT}/table-2-environment.csv','w',newline='') as f:
         w=csv.writer(f); w.writerow(['parameter','value'])
         for k,v in env: w.writerow([k,v])
-    with open(f'{OUT}/table2_final_environment.md','w') as f:
+    with open(f'{OUT}/table-2-environment.md','w') as f:
         f.write('# Table 2 (FINAL) — environment and configuration\n\n| parameter | value |\n|---|---|\n')
         for k,v in env: f.write(f'| {k} | {v} |\n')
     print("table2_final done")

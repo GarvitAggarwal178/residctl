@@ -11,14 +11,14 @@ run once per ratio, not duplicated per compute level. `drop_caches`
 before every arm A/B invocation. 158 CSV rows (150 baseline cells × 3
 reps + 7 benign resume-boundary extra reps, same class of artifact as
 Phases 2/3 — real, independent, non-error runs, kept, median used).
-Script: `src/run_phase4_sweep.sh`. Zero `DISCREPANCY`/`FAIL`/
+Script: `scripts/historical/run-phase4-sweep.sh`. Zero `DISCREPANCY`/`FAIL`/
 `RECONCILE FAILED` lines; every run `rc=0`.
 
 **Disclosed gap, backfilled rather than left unmeasured:** the main
 sweep script omitted `--fetch-trace` (an oversight, not a deliberate
 scope cut) — device-busy, concurrently-outstanding, and per-fetch timing
 were therefore unavailable from the main 150-run sweep. Backfilled with a
-**supplementary n=1 pass** (`src/run_phase4_fetchtrace_supp.sh`, 30 runs,
+**supplementary n=1 pass** (`scripts/historical/run-phase4-fetchtrace-supp.sh`, 30 runs,
 one rep per (ratio, arm, compute) cell for C/D/E only) capturing
 `--fetch-trace`. This supplementary data is used ONLY for device-busy/
 concurrently-outstanding/`pin_broken`/`infeasible` columns below — the
@@ -170,7 +170,7 @@ Phase 2's driver change and after Phase 3's chunk-size parameterisation"),
 Phase 4 introduces no new code path beyond what Phase 2's already-verified
 driver change and the pre-existing, already-tested `--chunk-size`
 parameterisation cover — T-1..T-7 remain clean from the Phase 2 re-run
-(`results/phase2_compute.md`), the most recent verified state.
+(`experiments/08-compute-phase.md`), the most recent verified state.
 
 ## What I did NOT test
 
@@ -189,7 +189,7 @@ parameterisation cover — T-1..T-7 remain clean from the Phase 2 re-run
 ## Final check
 
 - No number estimated, inferred, or copied from documentation — every
-  value is a direct read from `results/phase4_consolidated.csv` (median
+  value is a direct read from `results/data/synthetic-6arm-consolidated-sweep.csv` (median
   of n=3) or the supplementary n=1 `--fetch-trace` files, or `belady_main`'s
   own printed OPT output, computed via `scratch/analyze_phase4.py`.
 - No test was modified.

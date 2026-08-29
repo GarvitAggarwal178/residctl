@@ -23,9 +23,9 @@ llama.cpp, `build-real-model-integration.sh`).
 
 | script | produces |
 |---|---|
-| `run-declared-vs-learned-sweep.sh` | `data/declared-vs-learned-policy.csv` |
-| `run-policy-determinism-grid.sh` | `data/policy-determinism-grid.csv` |
-| `run-consumption-signal-sweep.sh` | `data/consumption-signal-comparison.csv`, `-determinism-grid.csv` |
+| `run-declared-vs-learned-sweep.sh` | `results/data/declared-vs-learned-policy.csv` |
+| `run-policy-determinism-grid.sh` | `results/data/policy-determinism-grid.csv` |
+| `run-consumption-signal-sweep.sh` | `results/data/consumption-signal-comparison.csv`, `-determinism-grid.csv` |
 | `run-policy-trace.sh` | `--policy-trace` captures for a determinism divergence |
 | `run-livelock-synthetic-recheck.sh` | the byte-identical re-check of the synthetic path after A-14 |
 
@@ -35,10 +35,10 @@ llama.cpp, `build-real-model-integration.sh`).
 |---|---|
 | `setup-llama-cpp.sh` / `build-real-model-integration.sh` | one-time setup / build of `wp2_gen` |
 | `run-real-model-smoke.sh` | a single quick generation, sanity |
-| `run-real-model-arms-sweep.sh` | `data/real-model-arms.csv` (WP2 grid) |
-| `run-real-model-equal-budget.sh` | `data/real-model-bytes-by-budget.csv` (arm A + the final-session grid) |
-| `run-real-model-opt.sh` | `data/real-model-opt-bound.csv` |
-| `run-livelock-real-model.sh` | `data/livelock-real-model-arms.csv` — arms C/D/E, all four A-14 fixes |
+| `run-real-model-arms-sweep.sh` | `results/data/real-model-arms.csv` (WP2 grid) |
+| `run-real-model-equal-budget.sh` | `results/data/real-model-bytes-by-budget.csv` (arm A + the final-session grid) |
+| `run-real-model-opt.sh` | `results/data/real-model-opt-bound.csv` |
+| `run-livelock-real-model.sh` | `results/data/livelock-real-model-arms.csv` — arms C/D/E, all four A-14 fixes |
 | `run-livelock-protect-on-probe.sh` | the decisive test: arm E, `protect_current on`, at the ratios it livelocked |
 | `run-livelock-arm-d-protect-on.sh` | the arm-D `protect_current` one-variable cell |
 | `run-signal-audit.sh` | the Phase 0 consumption-signal diagnostic |

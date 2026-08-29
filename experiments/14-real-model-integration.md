@@ -50,10 +50,10 @@ download" gate is corrected by the session-2 prompt).
 - sha256: `626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d`
 - 435 tensors, 36 transformer layers, GGUF v3, `general.alignment` 32.
 
-Tensor inventory: `results/overnight/wp2_tensor_inventory.txt`.
+Tensor inventory: `experiments/logs/overnight__wp2_tensor_inventory.txt`.
 
 **Build:** `llama.cpp` copied to `third_party/llama.cpp` (gitignored;
-`src/setup_wp2_llama.sh` + `src/wp2_llama_mmap.patch` reconstruct it),
+`scripts/setup-llama-cpp.sh` + `src/wp2_llama_mmap.patch` reconstruct it),
 built CPU-only (`GGML_CUDA=OFF GGML_NATIVE=ON`).
 
 **GATE:** the unmodified `llama-bench` runs the model — `qwen2 3B Q4_K_M`,
@@ -136,7 +136,7 @@ form.
   `inp_embd` / `result_norm` / `result_output` nodes for the non-layer
   chunks).
 
-**CORRECTNESS GATE: PASS** (`results/overnight/wp2_gate_log.txt`). 32
+**CORRECTNESS GATE: PASS** (`experiments/logs/overnight__wp2_gate_log.txt`). 32
 tokens, `RESIDCTL_CONFIG` on vs off:
 ```
 mmap:     13 2585 1657 4244 525 1052 304 279 11652 30 2014 8253 279 1372 315 4244 304 279 11652 330 785 3974 13876 38835 34208 916 279 15678 5562 323 1221 13598
@@ -148,7 +148,7 @@ Identical. Re-verified after the WP0 fix — still identical.
 
 ## PHASE 2.3 — Measurement
 
-`src/run_wp2_sweep.sh`. Arms A (mmap), C (`lru`), D
+`scripts/run-real-model-arms-sweep.sh`. Arms A (mmap), C (`lru`), D
 (`layer_order_declared`, prefetch off), E (`layer_order_declared`, prefetch
 on, depth 2, retention pinned). Budget ratios {0.25, 0.5, 0.75} of the
 2.10 GB weight region. 64 tokens, fixed prompt, greedy, **n=2** (reduced
@@ -236,7 +236,7 @@ victim, spin in `handle_absent()`'s bounded `ensure_budget` retry loop
 (200 × 2 ms), and generation crawls. This is a real interaction — prefetch
 retention and current-chunk protection are each individually sound but
 together over-constrain a very tight budget. Recorded in
-`results/overnight/BLOCKERS.md`; not chased further (WP2.md caps ambition).
+`/root/residctl-archive/session-summaries/overnight-blockers.md`; not chased further (WP2.md caps ambition).
 
 ---
 
@@ -318,8 +318,8 @@ model — its compute phase is too light.
 
 ## Final check
 
-- Every number is a direct read from `results/overnight/wp2_sweep.csv`
-  (median of n=2), `wp2_opt.csv` (`wp2_opt` over the declared sequence),
+- Every number is a direct read from `results/data/real-model-arms.csv`
+  (median of n=2), `results/data/real-model-arms-opt-bound.csv` (`wp2_opt` over the declared sequence),
   `wp2_gate_log.txt`, or `wp2_tensor_inventory.txt`. Nothing estimated
   except the per-layer compute time in Phase 2.4 (derived from the
   llama-bench baseline, method shown).
@@ -328,7 +328,7 @@ model — its compute phase is too light.
 - The 5 pre-registered expectations are each reported held / did not hold /
   partial with numbers; the failures (2 at r=0.25, 3, 5) are reported with
   the mechanism.
-- `wp2_sweep_before_fix.csv` retains the pre-WP0-fix data (arm D 217 GB at
+- `results/data/real-model-arms-before-wp0-fix.csv` retains the pre-WP0-fix data (arm D 217 GB at
   r=0.25) that motivated the fix.
 - No test was weakened; residctl T-1..T-7 pass after every code change this
   session.

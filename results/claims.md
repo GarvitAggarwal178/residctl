@@ -27,16 +27,16 @@ caller whose consumption signal is genuinely inexact.
 
 ### Claim 1: Kernel LRU degenerates to full-pass thrashing on a cyclic reference string.
 
-Evidence, synthetic: `campaign12_phaseD_paper_table.csv` — arm C, every one of
+Evidence, synthetic: `results/data/synthetic-consolidated-sweep.csv` — arm C, every one of
 the 20 cells: `absent_handled == touches`, miss rate exactly 1.000,
 `read_bytes` = the whole 2 GiB region every run. Back to item 7's smoke test
-(`lru` 40/40 faults). `figure2_miss_rate.csv`.
+(`lru` 40/40 faults). `results/figures/02-miss-rate-vs-optimal.csv`.
 
-Evidence, real model: `results/final/phase1_equal_budget.csv` — arm C on
+Evidence, real model: `results/data/real-model-bytes-by-budget.csv` — arm C on
 Qwen2.5-3B Q4_K_M reads **134–144 GB per 64 tokens at every budget ratio
 including 0.75**, `absent_handled` 2561–2817 vs 2304 layer transitions (miss
 rate ≥ 1.0 — a chunk evicted mid-scan re-faults), ~0.7–0.9 tokens/s regardless
-of budget. Byte-identical run to run. `figure6_llamacpp.csv`.
+of budget. Byte-identical run to run. `results/figures/06-real-model-bytes.csv`.
 
 Figure: Figure 2 (synthetic, flat at 1.000); Figure 6 (real model, arm C
 flat-high); Figure 1 (arm C flat at region size).
@@ -67,11 +67,11 @@ signal all-threads --protect-current off`): `phase2_sweep.csv` — arm D reads
 at all cells. Against arm C flat at the region size.
 
 Evidence, real model (`layer_order_declared`, `--protect-current off`, all four
-LIVELOCK FIX defects): `results/livelock/phase3_real_model.csv` — arm D
+LIVELOCK FIX defects): `results/data/livelock-real-model-arms.csv` — arm D
 `read_bytes` falls with budget: 125.0 → 98.5 → 78.9 → 59.7 → 41.9 GB at
 r = 0.25 … 0.75, vs arm C flat at 134–144 GB and arm A flat-ish at 83–129 GB.
 **D beats arm C by 13–69 % and arm A by 3–50 % at every ratio**
-(D/A = 0.97 / 0.89 / 0.71 / 0.57 / 0.50). `figure6_llamacpp.csv`. Deterministic
+(D/A = 0.97 / 0.89 / 0.71 / 0.57 / 0.50). `results/figures/06-real-model-bytes.csv`. Deterministic
 — all three reps byte-identical at every ratio.
 
 Figure: Figure 1 (synthetic), Figure 2, Figure 6 (real model, left panel).
@@ -87,7 +87,7 @@ one real model only.
 
 Superseded prior claims: (a0) the real-model arm-D column
 126.1 → 98.4 → 79.3 → 60.6 → 43.4 GB and "D/OPT 1.09–1.14" from
-`phase1_equal_budget.csv` (`protect_current` on, pre-LIVELOCK-FIX) — re-measured
+`results/data/real-model-bytes-by-budget.csv` (`protect_current` on, pre-LIVELOCK-FIX) — re-measured
 with all four defects fixed and `--protect-current off` (the A-14 default):
 125.0 → 98.5 → 78.9 → 59.7 → 41.9 GB, D/OPT 1.08–1.13. Within noise of the old
 column (the fixes barely move arm D; their value is the arm-E livelock fix and
@@ -105,7 +105,7 @@ deterministic at both compute levels with no 128 MiB regression.
 ### Claim 3: Eviction under `memory.swap.max = 0` is authoritative — the kernel enters reclaim and finds nothing eligible.
 
 Evidence: spike S3d vs S3e (`/root/spike/results/s3d_output.log`,
-`s3e_summary.txt`, `s3e_verify.txt`), `figure4_reclaim_authority.csv`.
+`s3e_summary.txt`, `s3e_verify.txt`), `results/figures/04-reclaim-authority.csv`.
 Under `swap.max=0`: `memory.events[high]=37` (the kernel *did* enter reclaim),
 `pgscan=0`, `pgsteal=0`, `memory.stat[shmem]` unchanged at 600 MiB. With swap
 available: `pgscan≈120,687`, `pgsteal≈60,141`, `high=512–515`, ~236 MiB of shmem
@@ -137,8 +137,8 @@ check on every run — T-5). `wp2_opt.c` for unequal chunk sizes
   **1.000** at 8 MiB, **1.00–1.08** at 128 MiB, both compute levels
   (`phase2_sweep.csv`).
 - `layer_order_declared` (real model, `--protect-current off`, all four LIVELOCK
-  FIX defects): D/OPT **1.08–1.13** at all five ratios (65-pass `phase1_opt.csv`,
-  `results/livelock/phase3_real_model.csv`, `figure6_llamacpp.csv`).
+  FIX defects): D/OPT **1.08–1.13** at all five ratios (65-pass `results/data/real-model-opt-bound.csv`,
+  `results/data/livelock-real-model-arms.csv`, `results/figures/06-real-model-bytes.csv`).
 
 Figure: Figures 1, 2 (OPT dashed reference), Figure 6.
 
@@ -159,7 +159,7 @@ policy with the exact signal is at OPT.
 
 ### Claim 5: Chunk size trades byte efficiency against wall-clock, optimising in opposite directions.
 
-Evidence: `figure3_chunk_size_tradeoff.csv` — Campaign 12 Phase B {4,8,16,32}
+Evidence: `results/figures/03-chunk-size-tradeoff.csv` — Campaign 12 Phase B {4,8,16,32}
 + Campaign 11 Phase 3 {32,64,128,256} MiB, arm D, compute=0. `read_bytes` has a
 shallow minimum near 8–16 MiB then climbs to 256 MiB; wall-clock has a valley
 near 16–32 MiB and is worst at 4 MiB.
@@ -183,11 +183,11 @@ sub-32 MiB range; Phase 3's own 32–256 MiB numbers stand.
 ### Claim 6: Prefetch trades bytes for latency, and only at a loose enough budget; it is a net loss at a tight budget.
 
 Evidence, synthetic (Campaign 12 Phase D, 128 MiB, learned;
-`figure5_prefetch_total_fetches.csv`): compute=0 — arm E's total fetches
+`results/figures/05-prefetch-total-fetches.csv`): compute=0 — arm E's total fetches
 (demand + prefetch) **exceed** arm D's at every ratio. compute=400000 — E ≈ D
 or below only at r ≥ 0.5.
 
-Evidence, real model at equal budget (`results/livelock/phase3_real_model.csv`,
+Evidence, real model at equal budget (`results/data/livelock-real-model-arms.csv`,
 all four LIVELOCK FIX defects, `--protect-current off`):
 
 - r ≥ 0.5: arm E reads **4–8 % more bytes** than arm D (84.9 vs 78.9, 62.9 vs
@@ -246,9 +246,9 @@ Evidence:
   everywhere the two are comparable.
 - **Real model, `--protect-current off`** (the A-14 default on both paths — the
   eval callback now fires the consumption signal pre-compute, LIVELOCK FIX
-  Defect 2): `results/livelock/phase3_real_model.csv` — D reads 13–69 % fewer
+  Defect 2): `results/data/livelock-real-model-arms.csv` — D reads 13–69 % fewer
   bytes than arm C and 3–50 % fewer than arm A at every ratio; D/OPT = 1.08–1.13,
-  deterministic (3/3 reps byte-identical). `figure6_llamacpp.csv`.
+  deterministic (3/3 reps byte-identical). `results/figures/06-real-model-bytes.csv`.
 - Campaign 13 Phase A's diagnosis of the **learned** chain's
   fault-dispatch-order dependence stands; the declared policy is the recommended
   informed policy.
@@ -278,7 +278,7 @@ session-2 framing that the heuristic is "unnecessary / redundant" — **restored
 by the LIVELOCK FIX (A-14): true on both paths now. The cleanup session's
 real-model revert to `protect_current on` was undone once Defects 2 and 4 made
 the real-model consumption signal accurate; on vs off then moves arm D by
-≤ 1.8 % (`phase3c_arm_d_protect_on.csv`). (d) This Claim body's earlier "real
+≤ 1.8 % (`results/data/livelock-arm-d-protect-on.csv`). (d) This Claim body's earlier "real
 model, `protect_current` on … D/OPT 1.09–1.14" — re-measured `--protect-current
 off` with the four fixes: 13–69 % fewer bytes than arm C, D/OPT 1.08–1.13.
 
@@ -292,7 +292,7 @@ Evidence: **WP2 (session 2)** + **the final session's Phase 1** + **the LIVELOCK
 FIX Phase 3 re-measurement** (equal budget, all four defects fixed,
 `--protect-current off`). `wp2_gate_log.txt` / `phase3_correctness_gate.txt`
 (correctness gate PASS — byte-identical tokens), `results/livelock/phase3_real_
-model.csv`, `phase1_opt.csv`. Qwen2.5-3B-Instruct Q4_K_M through the userfaultfd
+model.csv`, `results/data/real-model-opt-bound.csv`. Qwen2.5-3B-Instruct Q4_K_M through the userfaultfd
 pager, CPU-only.
 
 - **Kernel LRU (arm C)** thrashes on the real layer scan — 134–144 GB / 64
@@ -339,8 +339,8 @@ the flat-across-budget shape is unchanged. (e) "D/A = 0.98 / 0.89 / 0.71 / 0.58
 
 ### Claim 9: The kernel cannot convert additional memory into throughput on a cyclic layer scan; an application-authoritative pager can.
 
-Evidence: **LIVELOCK FIX Phase 3** (`results/livelock/phase3_real_model.csv`) for
-arms C/D/E; **Phase 1** (`phase1_equal_budget.csv`) for arm A (no pager,
+Evidence: **LIVELOCK FIX Phase 3** (`results/data/livelock-real-model-arms.csv`) for
+arms C/D/E; **Phase 1** (`results/data/real-model-bytes-by-budget.csv`) for arm A (no pager,
 unchanged). Figure 7. Real model, equal budget, `layer_order_declared`,
 `--protect-current off`, tokens/s (median of n=3) vs budget ratio
 r ∈ {0.25, 0.375, 0.5, 0.625, 0.75}:
@@ -384,10 +384,10 @@ Shapes unchanged.
 
 ### Claim 10: An arm-E failure at a tight budget looked like a mechanism interaction; it was two application bugs feeding each other, and fixing them fixed it.
 
-Evidence: **Cleanup Phase 1** (diagnosis: `phase1_deadlock_fix.md`,
+Evidence: **Cleanup Phase 1** (diagnosis: `experiments/17b-livelock-diagnosis.md`,
 `repro_decisive.log`) + **LIVELOCK FIX Phases 0–3** (fix:
-`results/livelock/phase0_cursor_diagnostic.md`, `phase1_fixes.md`,
-`phase3_real_model.md`, `phase3b_arm_e_protect_on.csv`).
+`experiments/18-signal-audit.md`, `experiments/19-livelock-fix.md`,
+`experiments/21-livelock-real-model.md`, `results/data/livelock-arm-e-protect-on.csv`).
 
 **The failure.** Real model, r ≤ 0.375, `layer_order_declared` +
 `--prefetch-retention pinned --prefetch-depth 2 --protect-current on`: a 420 s

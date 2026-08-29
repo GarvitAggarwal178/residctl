@@ -2,7 +2,7 @@
 
 **Chunk size chosen: 8 MiB**, per instruction ("use the size Phase B
 measured as best on `read_bytes` for arm D"). Phase B's own report
-(`results/campaign12_phaseB_chunk_floor.md`, expectation 1) found arm D's
+(`experiments/09d-chunk-size-floor.md`, expectation 1) found arm D's
 `read_bytes` floor is ratio-dependent — not a single clean minimum, and
 not monotonic to 4 MiB either (4 MiB loses to 8 MiB in 2 of 3 ratios
 tested) — so the fallback clause ("if Phase B's trend is monotonic to
@@ -24,8 +24,8 @@ concept in `baseline_main`), `drop_caches` before every invocation using
 Phase A's corrected pipe pattern, guard-equipped `baseline_main` active.
 `--fetch-trace` enabled on every C/D/E pager run (Phase 4 omitted this and
 had to backfill at n=1 — not repeated here). Script:
-`src/run_phaseD_sweep.sh` (main grid, excludes arm A's `random` mode from
-its automatic loop — see Process notes) + `src/run_phaseD_random_rep.sh`
+`scripts/historical/run-phaseD-sweep.sh` (main grid, excludes arm A's `random` mode from
+its automatic loop — see Process notes) + `scripts/historical/run-phaseD-random-rep.sh`
 (dedicated single-rep helper for `random` mode). 300 rows (2 chunk sizes ×
 5 arms-worth-of-cells × ... — precisely: 2 × [3 modes × 5 ratios + 5
 ratios (arm B) + 3 arms × 5 ratios × 2 computes] × n=3 = 300). Zero
@@ -51,7 +51,7 @@ killed — the result printed to a pipe with no live reader, never reaching
 the CSV. After this recurred twice in the first few resume cycles, `random`
 was pulled out of `run_phaseD_sweep.sh`'s automatic mode loop entirely
 (comment left in place explaining why) and handled instead via a
-dedicated single-rep helper, `src/run_phaseD_random_rep.sh`, invoked
+dedicated single-rep helper, `scripts/historical/run-phaseD-random-rep.sh`, invoked
 synchronously in the foreground once per `(chunk_size, ratio, rep)` —
 the same disclosed strategy Phase A used. Result: **30/30 random-mode
 reps captured** (unlike Phase A's partial 7/15 under a tighter timeout
@@ -317,7 +317,7 @@ remains the most recent verified state.
 ## Final check
 
 - No number estimated, inferred, or copied from documentation — every
-  value is a direct read from `results/campaign12_phaseD_paper_table.csv`
+  value is a direct read from `results/data/synthetic-consolidated-sweep.csv`
   (median of n=3) or a direct computation over retained
   `--fetch-trace`/reference-trace files (`belady_main`'s own printed
   output for OPT; `scratch/analyze_phaseD.py` for busy/concurrency

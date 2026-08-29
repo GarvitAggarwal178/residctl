@@ -10,7 +10,7 @@ Machine exclusive (own runs only; `pgrep cn-spike|iperf3|gate5` clean — the
 command string, not a real workload; the byte-identical baseline reproduction
 confirms exclusivity).
 
-Scripts: `src/livelock_phase2.sh`, `src/livelock_phase2_analyze.py`.
+Scripts: `scripts/run-livelock-synthetic-recheck.sh`, `tools/analyze-livelock-synthetic.py`.
 Data: `phase2_determinism.csv` (30 rows), `phase2_sweep.csv` (108 rows).
 Baseline: `results/final/phase2_{determinism,sweep,opt}.csv`.
 
@@ -41,7 +41,7 @@ protection off) — **met**.
 Every cell matches `phase2_sweep.csv` (`allthreads_off` / `allthreads_on`)
 exactly. `signal_mode=post` on all.
 
-**128 MiB D/OPT** (against `phase2_opt.csv`):
+**128 MiB D/OPT** (against `results/data/consumption-signal-opt-bound.csv`):
 
 | ratio | protect **off** (mine / baseline) | protect **on** (mine / baseline) |
 |---|---|---|

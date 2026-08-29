@@ -7,7 +7,7 @@ chunks respectively). Arms C, D, E and OPT (`belady_main`), 3 ratios
 --compute-ns-per-mib 400000`. Arms A and B at the same chunk sizes, using
 Phase A's repaired `drop_caches` pattern and guard-equipped `baseline_main`
 (single fixed `sequential` madvise mode for A, matching Phase 3's own
-disclosed simplification). Script: `src/run_phaseB_sweep.sh`.
+disclosed simplification). Script: `scripts/historical/run-phaseB-sweep.sh`.
 180 rows (4 chunk sizes × 3 ratios × 5 arms × 3 reps), zero `BASELINE
 FAILED`/`DISCREPANCY`/`RECONCILE FAILED` lines, zero non-`rc=0` rows, every
 cell has exactly 3 reps.
@@ -41,7 +41,7 @@ contamination caught in Phase A, which showed `rc=137`). Fixed two ways:
   any prior resume; the dedup correctly left it at 2 rows rather than
   fabricating a 3rd.
 - Added a `rep_done()` check inside `run_cell()`'s per-rep loop
-  (`src/run_phaseB_sweep.sh`), so a resume now skips individual completed
+  (`scripts/historical/run-phaseB-sweep.sh`), so a resume now skips individual completed
   reps instead of only skipping whole completed cells. The remaining 7 rows
   (the incomplete cell's 3rd rep, plus already-complete cells the old logic
   had not yet gotten around to re-running) were generated cleanly under the
@@ -68,8 +68,8 @@ handler overhead **per rep**, then taking the median across reps — never
 pooling raw timestamps across separate process invocations. Re-run: the
 outlier cell now reads `busy=0.743`, in line with its neighbors. This is a
 latent defect in the analysis method that Phase 3/4's own tighter,
-uninterrupted execution windows never exposed; `results/phase3_chunk_size.md`
-and `results/phase4_consolidated.md`'s device-busy/concurrently-outstanding
+uninterrupted execution windows never exposed; `experiments/09-chunk-size-sweep.md`
+and `experiments/09b-consolidated-6arm-sweep.md`'s device-busy/concurrently-outstanding
 numbers are very unlikely to be materially affected (those sweeps' reps ran
 seconds apart, not minutes), but this was not independently re-verified
 against their raw trace files and is disclosed here rather than assumed.
@@ -79,7 +79,7 @@ against their raw trace files and is disclosed here rather than assumed.
 `belady_main`'s unconditional cyclic-floor check
 (`n + (passes-1)*max(n-k,0)`) run at all 4 chunk sizes × 3 ratios = 12
 combinations, generated fresh (`--compute-ns-per-mib 0`, reference-trace
-content is compute-independent) via `src/run_phaseB_gate.sh`. The 4 MiB /
+content is compute-independent) via `scripts/historical/run-phaseB-gate.sh`. The 4 MiB /
 512-chunk case — well outside anything previously tested — was of specific
 concern per the campaign's instructions.
 
@@ -105,7 +105,7 @@ lookup, and reference-trace read/write path all handled 512 chunks and 2560
 references (5 passes × 512 chunks) with no error, no truncation, and no
 divergence from the cyclic-scan solver's own assertion.
 
-## 32 MiB reproduction check (against `results/phase3_chunk_size.csv`)
+## 32 MiB reproduction check (against `results/data/synthetic-chunk-size-sweep.csv`)
 
 Required by the campaign's instructions before interpreting anything else
 in this phase.
@@ -383,8 +383,8 @@ binaries — `test_correctness.c`, `test_storm.c`, `test_t6.c`, and
 their fixed harness config (comment: "§13 correctness runs use eager
 reconcile", item A-3), so running T-1..T-7 at all necessarily runs them
 under eager reconcile — there is no non-eager variant of this harness to
-have run instead. Re-ran both `src/run_correctness_harness.sh` (T-1
-through T-5) and `src/run_t6_t7.sh` (T-6, T-7) fresh after Phase B:
+have run instead. Re-ran both `scripts/run-correctness-harness.sh` (T-1
+through T-5) and `scripts/run-storm-t6-t7.sh` (T-6, T-7) fresh after Phase B:
 
 - **T-1** (full-region data integrity under 25% budget, all 3 policies):
   `mismatches=0` for `default`, `lru`, and `layer_order` — PASS.
@@ -408,7 +408,7 @@ through T-5) and `src/run_t6_t7.sh` (T-6, T-7) fresh after Phase B:
 ## Final check
 
 - No number estimated, inferred, or copied from documentation — every value
-  is a direct read from `results/campaign12_phaseB_chunk_floor.csv` (median
+  is a direct read from `results/data/synthetic-chunk-size-floor.csv` (median
   of n=3) or a direct computation over retained `--fetch-trace`/reference-
   trace files (`belady_main`'s own printed output for OPT).
 - No test was weakened to pass; the two defects found mid-phase (duplicate

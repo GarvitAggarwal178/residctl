@@ -103,7 +103,7 @@ independent of `--prefetch-depth`.
 
 **T-1..T-5 re-run.** All five pass unmodified, under the new async default
 (`test_correctness.c`/`test_storm.c` never set `--sync-handler`). Full
-log: `results/correctness_harness_log.txt`. Bonus, unplanned confirmation:
+log: `experiments/logs/correctness_harness_log.txt`. Bonus, unplanned confirmation:
 `test_pager.c`'s own barrier-release dedup test (item 2's "known gap,"
 never observed to fire across 5+ runs under the old handler) now shows
 `dedup_fetching=7` on the identical scenario under the new async default.
@@ -115,7 +115,7 @@ reported alongside per the spec, not gating).
 **T-7 (new).** No fault ever lost — **PASS**: all 8 storm threads joined
 well within the 120s internal watchdog after a 60s storm; the watchdog's
 `/proc/PID/task/*/wchan` dump code path never had to fire. Full log:
-`results/t6_t7_log.txt`.
+`experiments/logs/t6_t7_log.txt`.
 
 ## Task B — Prefetch admission
 
@@ -147,8 +147,8 @@ with normal run-to-run scheduling variance under the new architecture, not
 
 4 handler configs (`sync`, `async` at `--fetch-workers` 1/2/4) × 3 ratios ×
 n=3, V2 parameters (2 GiB region, 128 MiB chunks, 5 passes), arm D
-(`layer_order`, prefetch off). Raw data: `results/task_c_sweep1.csv`; full
-log: `results/task_c_sweep1_log.txt`. Device-busy fraction computed via
+(`layer_order`, prefetch off). Raw data: `results/data/historical/task-c-sweep1.csv`; full
+log: `experiments/logs/task_c_sweep1_log.txt`. Device-busy fraction computed via
 `--fetch-trace` and the union-of-read-intervals method
 (`scratch/analyze_sweep1_busy.py`), same as item 10b Task A.
 
@@ -181,8 +181,8 @@ overlap (arm E, Sweep 2/3), neither of which bare arm D exercises.
 
 All six arms, 3 ratios, n=3, async handler (default), `--fetch-workers 4`,
 `--prefetch-admission guarded`, `--prefetch-depth 2` (item 10b's best
-depth). V2 parameters. Raw data: `results/task_c_sweep2.csv`; full log:
-`results/task_c_sweep2_log.txt`.
+depth). V2 parameters. Raw data: `results/data/historical/task-c-sweep2.csv`; full log:
+`experiments/logs/task_c_sweep2_log.txt`.
 
 ### Primary metric: read_bytes (median of n=3, MB/touch, bytes/1e6/80)
 
@@ -255,8 +255,8 @@ Arm E only, `guarded` vs `always`, 3 ratios × n=3 × `--prefetch-depth` ∈
 {2,4}, async handler, `--fetch-workers 4`. `--fetch-trace` captured per
 run for the post-hoc hit-rate analysis (item 10b Task B's method: a
 prefetch is a "hit" if no later fetch event exists for that chunk_id
-before the run ends). Raw data: `results/task_c_sweep3.csv`; full log:
-`results/task_c_sweep3_log.txt`; hit-rate script:
+before the run ends). Raw data: `results/data/historical/task-c-sweep3.csv`; full log:
+`experiments/logs/task_c_sweep3_log.txt`; hit-rate script:
 `scratch/analyze_sweep3_hitrate.py`.
 
 ### Prefetch hit rate, declined count, read_bytes

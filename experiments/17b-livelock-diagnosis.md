@@ -182,7 +182,7 @@ all 8 storm threads joined within the 120 s watchdog, `mismatches=0`) PASS. The
 
 ### #3 — no regression on the shipping default → **REGRESSION FOUND; DEFAULT REVERTED**
 
-`phase1_verify.csv`, arm D, `--protect-current off` (the post-Phase-2 shipping
+`results/data/livelock-protect-off-regression.csv`, arm D, `--protect-current off` (the post-Phase-2 shipping
 default), n=3, byte-identical across reps:
 
 | ratio | protect **off** (this session) | Phase 1 protect **on** | Δ |
@@ -206,14 +206,14 @@ the exact signal; Phase 2 showed off ≤ on there). Set `protect_current=off` in
 the config to override. This also restores consistency with Figures 6–7 /
 Table 1, which were built from Phase 1's protect-on numbers.
 
-Re-verified after the revert (`phase1_reverify.csv`): arm D, default config, n=2
+Re-verified after the revert (`results/data/livelock-protect-off-regression-reverify.csv`): arm D, default config, n=2
 — reads **126.14 / 79.29 / 43.36 GB** with **2499 / 1614 / 871** demand faults,
-**byte-identical** to `results/final/phase1_equal_budget.csv`. Regression fully
+**byte-identical** to `results/data/real-model-bytes-by-budget.csv`. Regression fully
 resolved. `stat_fetching_timeout = 0`.
 
 ### #4 — arm E at r ≤ 0.375, `--protect-current off`
 
-`phase1_verify.csv`, arm E (prefetch on, depth 2, retention pinned),
+`results/data/livelock-protect-off-regression.csv`, arm E (prefetch on, depth 2, retention pinned),
 `--protect-current off`, n=3:
 
 | ratio | arm E, protect off | completes? | arm D, protect on (Phase 1) |
@@ -236,9 +236,9 @@ confirmed against the *stronger* (protect-on) arm-D baseline: **run arm D with
 - `src/pager.{c,h}`, `src/prefetch_pool.c`, `src/prefetch.c`, `src/region.{c,h}`,
   `src/replay_main.c`, `src/residctl_llama.c` — the fix.
 - `src/repro_deadlock.sh`, `src/repro_decisive.sh` — reproduction + the 420 s
-  counter trace (`results/cleanup/repro_decisive.log`).
+  counter trace (`experiments/logs/17b-livelock-diagnosis-repro-decisive.log`).
 - `src/cleanup_verify.sh`, `src/cleanup_p1_sweep.sh` — verification.
-- `results/cleanup/phase1_verify.csv` — verification sweep data.
+- `results/data/livelock-protect-off-regression.csv` — verification sweep data.
 
 ## Final check
 

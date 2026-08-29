@@ -11,7 +11,7 @@ item's use of it). **Disclosed simplification:** arm A used a single fixed
 `madvise` mode (`sequential`) rather than the full 3-mode sweep — Phase
 3's own instructions do not request that sweep (unlike Phase 4's explicit
 request), and the time-box is a hard constraint on an already large
-4-chunk-size × 3-ratio × 4-arm grid. Script: `src/run_phase3_sweep.sh`.
+4-chunk-size × 3-ratio × 4-arm grid. Script: `scripts/historical/run-phase3-sweep.sh`.
 144 runs, completed in a single background-task window; zero
 `DISCREPANCY`/`FAIL`/`RECONCILE FAILED` lines, zero timeouts, all `rc=0`.
 
@@ -108,7 +108,7 @@ at the floor.)
 `io_read_bytes_delta` (the primary cross-arm metric, §9) reads exactly 0
 in 11 of 12 cells, with wall-clock an implausible 0.035-0.046s for a
 supposed 2 GiB × 5-pass mmap workload. This is the same, already-
-documented signature item 10b's `DIAGNOSTIC_REPORT.md` first identified
+documented signature item 10b's `experiments/04-io-pipelining-diagnostic.md` first identified
 (arm A's V2 throughput exceeding even the spike's measured maximum
 `O_DIRECT` bandwidth) and Phase 1 of this campaign reproduced directly
 (buffered throughput exceeding the spike's own maximum by a wide margin):
@@ -268,7 +268,7 @@ change any mechanism or driver CODE, only the SWEEP's chosen
 at their own fixed 2 MiB chunk size, and by every prior harness sweep at
 128 MiB). No new code path was introduced by parameterising an existing
 argument. T-1..T-7 were re-run once already, after Phase 2's actual
-driver change (see `results/phase2_compute.md`), and remain the most
+driver change (see `experiments/08-compute-phase.md`), and remain the most
 recent verified state — re-running them again here would exercise
 identical code to that already-clean run, at the harness's own fixed
 16 MiB region regardless of this phase's chunk-size sweep. Not
@@ -278,7 +278,7 @@ skipped.
 ## Final check
 
 - No number estimated, inferred, or copied from documentation — every
-  value is a direct read from `results/phase3_chunk_size.csv` (median of
+  value is a direct read from `results/data/synthetic-chunk-size-sweep.csv` (median of
   n=3) or a direct computation over retained `--fetch-trace`/reference-
   trace files (`scratch/analyze_phase3.py`, `belady_main`'s own printed
   output).

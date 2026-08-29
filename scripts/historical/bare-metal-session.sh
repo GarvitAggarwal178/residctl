@@ -4,7 +4,7 @@
 # and the full 240-run sweep, unattended, writing one CSV. Designed to
 # be interrupted and resumed (per-rep resumability, same pattern this
 # project's every prior sweep script uses). Run from the residctl repo
-# root: bash src/bare_metal_session.sh
+# root: bash scripts/historical/bare-metal-session.sh
 set -u
 RESIDCTL="${RESIDCTL:-$HOME/residctl}"
 SPIKE="${SPIKE:-$HOME/spike}"

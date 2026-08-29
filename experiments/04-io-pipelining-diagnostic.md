@@ -1,6 +1,6 @@
 # Diagnostic Report — I/O pipelining, prefetch depth, dedup
 
-Item 10b. V2 (`results/HARNESS_REPORT_V2.md`) is accepted and unchanged; this
+Item 10b. V2 (`experiments/03-corrected-harness.md`) is accepted and unchanged; this
 is diagnosis on top of it, not a correction. Three independent tasks, run in
 the order given.
 
@@ -34,7 +34,7 @@ fetch: handler entry, read start/end, `UFFDIO_CONTINUE` end, handler exit,
 bytes), preallocated in-memory, flushed once at exit (never inside the
 handler). Ran arm D (`layer_order`, prefetch off) at all three V2 budget
 ratios, n=3, at V2's exact parameters (2 GiB region, 128 MiB chunks, 5
-passes). Full data: `results/task_a_log.txt`.
+passes). Full data: `experiments/logs/task_a_log.txt`.
 
 | Ratio | Read duration (median, ideal 52.2ms) | Effective BW (median) | Device-busy fraction | Inter-fetch dead time (median) | `UFFDIO_CONTINUE` (median, spike expects ~2.5ms) | Handler overhead (median) |
 |---|---|---|---|---|---|---|
@@ -87,7 +87,7 @@ single-threaded path, completely unchanged) and, for N>1, a fixed pool of N
 worker threads (`prefetch_pool.c`) — the one place multi-threading enters the
 pager; the fault handler itself stays single-threaded. Swept depth ∈
 {1,2,4,8} × 3 budget ratios × n=3 at V2 scale. Full data:
-`results/task_b_sweep.csv`, `results/task_b_log.txt`.
+`results/data/historical/task-b-sweep.csv`, `experiments/logs/task_b_log.txt`.
 
 **Three real concurrency bugs found and fixed while building this, not
 reasoned out in advance — each reproduced as an actual hang/incorrect-abort
@@ -326,7 +326,7 @@ redesigned to force this, per instructions.
 ## Final check
 
 No fabricated numbers: every value above is a direct read from
-`results/task_a_log.txt`, `results/task_b_sweep.csv`, `results/task_b_log.txt`,
+`experiments/logs/task_a_log.txt`, `results/data/historical/task-b-sweep.csv`, `experiments/logs/task_b_log.txt`,
 or a disclosed, straightforward computation over them (medians, percentiles,
 union-interval device-busy fractions, hit/waste correlation — all via the
 scripts used to produce the tables, not eyeballed). No test was weakened:

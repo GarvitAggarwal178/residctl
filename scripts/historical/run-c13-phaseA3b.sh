@@ -8,7 +8,7 @@ SRC=$RESIDCTL/src
 SCRATCH=$RESIDCTL/scratch
 MODEL=$SCRATCH/pattern_2g.bin
 CGROUP=/sys/fs/cgroup/residctl_c13a3b
-LOG=$RESIDCTL/results/campaign13_phaseA3b_trace_log.txt
+LOG=$RESIDCTL/experiments/logs/campaign13_phaseA3b_trace_log.txt
 > "$LOG"
 
 REGION_LEN=2147483648

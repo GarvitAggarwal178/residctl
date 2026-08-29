@@ -15,7 +15,7 @@ pass. The restructure is a separate session against this report.
 | `.git` | **8.3 MB** (`.git/objects` 8.1 MB) |
 | Tracked files | **310** |
 | Untracked files | **51,937** (≈ 51,900 are inside `third_party/llama.cpp/build/tools/ui/…/node_modules`) |
-| Largest tracked file | `results/final/phase1_equal_budget_log.txt` — 4.0 MB |
+| Largest tracked file | `experiments/logs/final__phase1_equal_budget_log.txt` — 4.0 MB |
 | Largest tracked class | `*_log.txt` run logs — ~13 MB across ~40 files |
 | Largest untracked | `scratch/pattern_2g.bin` 2.1 GB, `models/model.gguf` 2.1 GB, `third_party/llama.cpp/` 0.93 GB (0.76 GB of it is `build/`) |
 
@@ -50,7 +50,7 @@ Rolled up (`third_party/` counted as one line):
 ### The 16 initial UNKNOWNs, resolved
 
 - `.gitignore`, `results/.gitkeep` — repo hygiene (→ SPEC / keep).
-- `results/overnight/analyze_wp1_sweep.py`, `analyze_wp2.py` — session-2 analysis
+- `tools/analyze-wp1-sweep.py`, `analyze_wp2.py` — session-2 analysis
   TOOLs (one-off).
 - `results/overnight/{policy.c, residctl_llama.c, residctl_llama.h, test_policy.c,
   wp2_gen.cpp, wp2_opt.c, wp2_llama_mmap.patch, build_wp2.sh, setup_wp2_llama.sh,
@@ -64,30 +64,30 @@ Rolled up (`third_party/` counted as one line):
 
 ## Citation map summary
 
-`results/inventory/citation_map.csv` — every DATA / FIGURE / REPORT / DELIVERABLE
+`experiments/logs/inventory-citation-map.csv` — every DATA / FIGURE / REPORT / DELIVERABLE
 file × which `.md` cites it by basename or path. `orphans.txt` (69) and
 `load_bearing.txt` (61).
 
-- **Load-bearing: 61 files** (`load_bearing.txt`) — cited by `WRITEUP_PACKAGE.md`,
-  `CLAIMS.md`, `PROJECT_STATE.md`, or a final/cleanup-session report. **These
+- **Load-bearing: 61 files** (`load_bearing.txt`) — cited by `results/writeup-package.md`,
+  `results/claims.md`, `PROJECT_STATE.md`, or a final/cleanup-session report. **These
   must survive any restructure.** They include: everything under
   `results/final/` and the good `results/cleanup/` files; `results/overnight/`
-  `wp{1,2,3}*.md` + `wp1_sweep.csv` / `wp1_sweep_session1.csv` /
-  `wp1_determinism.csv` / `wp2_sweep.csv` / `wp2_opt.csv` / `figure{2..6}.csv` /
-  `table2_final_environment.csv`; the campaign reports cited in PROJECT_STATE §6
+  `wp{1,2,3}*.md` + `results/data/declared-vs-learned-policy.csv` / `results/data/declared-vs-learned-policy-session1.csv` /
+  `results/data/policy-determinism-grid.csv` / `results/data/real-model-arms.csv` / `results/data/real-model-arms-opt-bound.csv` / `figure{2..6}.csv` /
+  `results/figures/table-2-environment.csv`; the campaign reports cited in PROJECT_STATE §6
   (`campaign12_phaseD_paper_table.{md,csv}`, `campaign13_phase{A,B,C}_*.md`,
-  `phase2_compute.md`, `phase3_chunk_size.md`, `phase4_consolidated.md`); and
-  the six item-10 reports (`HARNESS_REPORT.md` + `_V2.md`, `ASYNC_REPORT.md`,
-  `CONCURRENCY_REPORT.md`, `DIAGNOSTIC_REPORT.md`, `LOOKAHEAD_REPORT.md`).
+  `experiments/08-compute-phase.md`, `experiments/09-chunk-size-sweep.md`, `experiments/09b-consolidated-6arm-sweep.md`); and
+  the six item-10 reports (`experiments/02-first-harness-superseded.md` + `_V2.md`, `experiments/05-async-handler.md`,
+  `experiments/06-concurrent-demand.md`, `experiments/04-io-pipelining-diagnostic.md`, `experiments/07-lookahead-window.md`).
 
 - **Orphans: 69 files** (`orphans.txt`), but the filename-only test has **two
   systematic false-negative classes** — corrected here:
   1. **Figures/tables cited as prose ("Figure 6", "Table 1") not by filename.**
      `figure1_bytes_per_work.{png,csv}`, `figure{2..7}_*.png`,
-     `figure7_throughput_scaling.csv`, `table1_final_real_model.{md,csv}`,
-     `table2_final_environment.md` are all in `orphans.txt` but are the
-     **deliverable figures** — reclassify **load-bearing**. (`phase4_figures.md`
-     and `wp3_figures.md` describe them; the reports reference "Figure N".)
+     `results/figures/07-throughput-scaling.csv`, `table1_final_real_model.{md,csv}`,
+     `results/figures/table-2-environment.md` are all in `orphans.txt` but are the
+     **deliverable figures** — reclassify **load-bearing**. (`experiments/17c-figure-refresh-notes.md`
+     and `experiments/14b-figure-generation-notes.md` describe them; the reports reference "Figure N".)
   2. **Raw `*_log.txt` cited as "the run log" not by name.**
      `wp1_sweep_log.txt`, `wp1_determinism_log.txt`, `wp2_sweep_log.txt`,
      `phase{2,3,4}_*_log.txt`, `campaign1{2,3}_*_log.txt`, `item{1..9}_test_log.txt`
@@ -95,22 +95,22 @@ file × which `.md` cites it by basename or path. `orphans.txt` (69) and
   - **Genuine orphans (safe to archive):** all `*.cfg` per-run config snapshots
     (~22: `phase1_*.cfg`, `phase3_*.cfg`, `wp2_sweep_*.cfg`, `wp2_gate.cfg`);
     all `*_console.txt` and `*_supervisor.log` from the final/cleanup sessions
-    (~10); `results/cleanup/repro_deadlock.log` (superseded by
+    (~10); `experiments/logs/17b-livelock-diagnosis-repro-deadlock.log` (superseded by
     `repro_decisive.log`, which is load-bearing); `wp2_gate_tokens_{mmap,
-    residctl}.txt` (the gate's raw output — the verdict is in `wp2_llamacpp.md`).
+    residctl}.txt` (the gate's raw output — the verdict is in `experiments/14-real-model-integration.md`).
   - **DATA_DEAD (superseded, keep only as audit trail):**
     `table1_main_results.{md,csv}` + `table2_environment.{md,csv}` (the synthetic
     tables, superseded by `table1_final_real_model` / `table2_final_environment`);
-    `wp1_sweep_opt_session1.csv` (session-1, superseded by `wp1_sweep_opt.csv` —
-    note `wp1_sweep_session1.csv` IS still cited, session-1 data preserved on
+    `results/data/declared-vs-learned-opt-bound-session1.csv` (session-1, superseded by `results/data/declared-vs-learned-opt-bound.csv` —
+    note `results/data/declared-vs-learned-policy-session1.csv` IS still cited, session-1 data preserved on
     purpose); `results/overnight/*.{c,h,cpp}` source snapshots.
 
-### Dangling citations in `WRITEUP_PACKAGE.md` — **NONE**
+### Dangling citations in `results/writeup-package.md` — **NONE**
 
-Every one of the 12 file references in `WRITEUP_PACKAGE.md` §1 resolves to a file
+Every one of the 12 file references in `results/writeup-package.md` §1 resolves to a file
 on disk (`inventory/scripts/inventory_citemap.sh` output, all `OK`). The one
-thing worth noting: `WRITEUP_PACKAGE.md` references `phase2_sweep.csv` /
-`phase2_opt.csv` which resolve to `results/final/phase2_sweep.csv` — correct, but
+thing worth noting: `results/writeup-package.md` references `phase2_sweep.csv` /
+`results/data/consumption-signal-opt-bound.csv` which resolve to `results/data/consumption-signal-comparison.csv` — correct, but
 there is also a `results/overnight/` layer with similarly-named files; the
 restructure must not merge the two namespaces.
 
@@ -128,7 +128,7 @@ history rewrite is warranted** — `models/` was gitignored from the start.
 `third_party/`. Size **926 MB** (757 MB `build/` incl. a Svelte UI
 `node_modules`; 93 MB source clone; 75 MB `third_party/llama.cpp/models/` vocab
 GGUFs). **No nested `.git`.** Reconstructable via
-`src/setup_wp2_llama.sh` + `src/wp2_llama_mmap.patch` + a CMake build.
+`scripts/setup-llama-cpp.sh` + `src/wp2_llama_mmap.patch` + a CMake build.
 
 **3. Are compiled binaries / `.o` / build dirs tracked?** **NO.** BUILD bucket =
 0 tracked. The `.gitignore` explicitly lists every test binary, `wp2_gen`,
@@ -162,8 +162,8 @@ diverged from `src/`. → the `results/overnight/` code snapshots should be
 deleted or archived (they exist in the `pre-restructure` tag regardless).
 
 **7. Near-duplicate reports.** One clear supersession pair kept on purpose:
-`HARNESS_REPORT.md` (item 10 V1, marked SUPERSEDED in place) vs
-`HARNESS_REPORT_V2.md`. Superseded table pairs: `table1_main_results` →
+`experiments/02-first-harness-superseded.md` (item 10 V1, marked SUPERSEDED in place) vs
+`experiments/03-corrected-harness.md`. Superseded table pairs: `table1_main_results` →
 `table1_final_real_model`; `table2_environment` → `table2_final_environment`.
 The other five item-10 reports (`ASYNC`/`CONCURRENCY`/`DIAGNOSTIC`/`LOOKAHEAD`
 + the two harness ones) are distinct items, not duplicates.
@@ -182,7 +182,7 @@ is neither: delete and rebuild.
 README.md                        NEW — what this is, the headline result (Fig 7), how to build+run
 docs/
   SPEC.md                        = MECHANISM_SPEC.md
-  RELATED_WORK.md                = results/cleanup/RELATED_WORK.md
+  docs/04-related-work.md                = docs/04-related-work.md
   PROJECT_STATE.md               (moved from results/)
   HISTORY.md                     NEW or = CLAUDE.md — the campaign-by-campaign log
 src/
@@ -190,19 +190,19 @@ src/
   test_*.c  run_correctness_harness.sh  run_t6_t7.sh   the T-1..T-7 harness
   build_wp2.sh setup_wp2_llama.sh                       llama.cpp integration glue
 tools/
-  make_figures.py                = results/overnight/make_wp3.py
+  make_figures.py                = tools/make_figures.py
 scripts/
   run_final_phase{1,2,3}*.sh  run_wp{1,2}_*.sh  cleanup_p1_sweep.sh   the reproducible sweeps
 results/
   FINDINGS.md                    NEW — consolidation of the 8 campaign reports (judgement call 3)
-  CLAIMS.md
-  WRITEUP_PACKAGE.md
+  results/claims.md
+  results/writeup-package.md
   FINAL_SUMMARY.md  CLEANUP_SUMMARY.md  OVERNIGHT_SUMMARY.md  BLOCKERS.md
   figures/                       the 7 final PNGs + their CSVs + table1_final/table2_final
   data/                          ONLY load-bearing CSVs (~25): phase1_equal_budget, phase1_opt,
                                  phase2_{determinism,sweep,opt}, phase3_arm_e, wp1_sweep(+session1),
                                  wp1_determinism, wp2_sweep, wp2_opt, figure{2..6}.csv,
-                                 campaign12_phaseD_paper_table.csv, campaign13_phase{A2,B,C}_*.csv
+                                 results/data/synthetic-consolidated-sweep.csv, campaign13_phase{A2,B,C}_*.csv
   reports/                       the per-phase/session .md reports (final/, cleanup/, overnight/, item-10)
 ```
 
@@ -224,7 +224,7 @@ results/
 | `*.cfg`, `*_console.txt`, `*_supervisor.log` | ~35 | 0.5 MB | genuine orphans — per-run scratch that leaked into `results/` |
 | `results/overnight/*.{c,h,cpp,sh,py,patch}` code snapshots | 16 | 0.3 MB | dup / stale copies of `src/` (Q6) |
 | superseded tables `table1_main_results.*`, `table2_environment.*` | 4 | 0.1 MB | superseded by the `_final` versions |
-| `wp1_sweep_opt_session1.csv`, other DATA_DEAD | ~5 | 0.1 MB | back only superseded numbers (PROJECT_STATE §6) |
+| `results/data/declared-vs-learned-opt-bound-session1.csv`, other DATA_DEAD | ~5 | 0.1 MB | back only superseded numbers (PROJECT_STATE §6) |
 | the ~40 one-off campaign sweep scripts (`run_task_*`, `run_phase*`, `run_c13_*`, `run_item*`, `run_phaseB/D_*`) | ~40 | 0.15 MB | reproducibility evidence for closed campaigns (judgement call 2) |
 
 ### REGENERABLE (delete; not archived)
@@ -242,10 +242,10 @@ results/
 (clarity)?** *Keep:* the superseded-numbers discipline (a `Superseded prior
 claims` field on every claim; a whole PROJECT_STATE §6) is explicitly part of
 this project's contribution — the reports it points at should be reachable from
-the same repo. *Archive:* six item-10 reports + `HARNESS_REPORT.md` (V1) +
-`phase2_compute.md` + `phase3_chunk_size.md` + `phase4_consolidated.md` + the
+the same repo. *Archive:* six item-10 reports + `experiments/02-first-harness-superseded.md` (V1) +
+`experiments/08-compute-phase.md` + `experiments/09-chunk-size-sweep.md` + `experiments/09b-consolidated-6arm-sweep.md` + the
 Campaign 12/13 reports is ~20 files a new reader will not open, and the numbers
-that still matter are re-stated in `PROJECT_STATE.md` / `CLAIMS.md`.
+that still matter are re-stated in `PROJECT_STATE.md` / `results/claims.md`.
 *Leaning:* keep, under `results/reports/`, because they are load-bearing per the
 citation map.
 
@@ -258,26 +258,26 @@ every number. *Archive the 40:* nobody re-runs Campaign 12 Phase B.
 
 **3. Consolidate the 8 campaign reports into one `FINDINGS.md`, or keep them
 individually?** *Consolidate:* a reader wants one results document, not eight
-chronological ones; `WRITEUP_PACKAGE.md` §2 already has the narrative order.
+chronological ones; `results/writeup-package.md` §2 already has the narrative order.
 *Keep separate:* each is a self-contained pre-registered experiment with its own
 "expectations vs measured" table; merging loses the provenance.
 *Leaning:* write `FINDINGS.md` as the front door, keep the eight under
 `results/reports/` as appendices.
 
 **4. Does `DATA_DEAD` follow its report, or archive separately?** e.g.
-`table1_main_results.csv` — with `wp3_figures.md` (which still references it) or
+`results/figures/historical/table-1-synthetic-main-results.csv` — with `experiments/14b-figure-generation-notes.md` (which still references it) or
 in `archive/superseded/`? *Leaning:* archive separately with a one-line
 `README` mapping each dead file to the live one that replaced it, so the repo
 `data/` directory contains only current numbers.
 
 **5. `results/overnight/` source snapshots (16 files, 7 exact dups of `src/`):
 delete or archive?** They are in the `pre-restructure` git tag regardless.
-*Leaning:* delete — a stale `results/overnight/policy.c` next to the live
+*Leaning:* delete — a stale `/root/residctl-archive/source-snapshots/overnight-policy.c` next to the live
 `src/policy.c` is an active hazard (someone reads the wrong one).
 
-**6. Session-1 data (`wp1_sweep_session1.csv`, `wp1_sweep_opt_session1.csv`).**
-`wp1_sweep_session1.csv` **is** cited (the WP0-fix supersession); its `_opt`
-sibling is not. *Leaning:* keep `wp1_sweep_session1.csv` in `data/`, archive the
+**6. Session-1 data (`results/data/declared-vs-learned-policy-session1.csv`, `results/data/declared-vs-learned-opt-bound-session1.csv`).**
+`results/data/declared-vs-learned-policy-session1.csv` **is** cited (the WP0-fix supersession); its `_opt`
+sibling is not. *Leaning:* keep `results/data/declared-vs-learned-policy-session1.csv` in `data/`, archive the
 `_opt` one.
 
 **7. The `.gitignore` `!`-allowlist for `results/*.csv`.** ~30 explicit
@@ -292,6 +292,6 @@ restructure is the moment to simplify it.
 ## What I could not classify
 
 Nothing. All 16 initial `UNKNOWN` files were identified on inspection (see the
-bucket summary). Every tracked file has a bucket in `classification.csv`; the
+bucket summary). Every tracked file has a bucket in `experiments/logs/inventory-classification.csv`; the
 ~52,000 `third_party/` files are rolled into one `THIRD_PARTY` line by design
 (the spec's "anything under it" rule).

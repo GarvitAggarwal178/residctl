@@ -6,7 +6,7 @@ item runs them. Nothing from item 10c is retracted — T-6's
 `dedup_fetching=14494` still stands as proof the async handler works; this
 item makes that result measurable on the benchmark arms rather than only in
 the correctness harness. Full background: `CLAUDE.md`'s "ITEM 10c" and
-"ITEM 10d" notes, `docs/MECHANISM_SPEC.md` Amendments A-8/A-9.
+"ITEM 10d" notes, `docs/design-history.md` Amendments A-8/A-9.
 
 ## VERDICT
 
@@ -107,8 +107,8 @@ Arm D (`layer_order`, prefetch off — the only concurrency present is
 genuine demand from the driver itself), V2 parameters (2 GiB region, 128
 MiB chunks, 5 passes), 3 budget ratios × n=3 × `--driver-threads`
 {1,2,4,8} × handler {`--sync-handler`, async `--fetch-workers 4`} — 72
-runs. Raw data: `results/task_d_sweep_b.csv`; full log:
-`results/task_d_sweep_b_log.txt`. Device-busy fraction via `--fetch-trace`
+runs. Raw data: `results/data/historical/task-d-sweep-b.csv`; full log:
+`experiments/logs/task_d_sweep_b_log.txt`. Device-busy fraction via `--fetch-trace`
 and the union-of-read-intervals method (item 10b/10c's method, unchanged);
 median dispatch latency (entry to enqueue) via the two new `--fetch-trace`
 fields (`t_dispatch_entry_ns`/`t_dispatch_enqueue_ns`) added this item,
@@ -264,8 +264,8 @@ smoke test that happened not to exercise it.
 
 **Sweep.** Arm E, `--prefetch-retention` {none, pinned} × 3 ratios ×
 `--prefetch-depth` {2,4} × n=3, async handler, `--fetch-workers 4`,
-`--driver-threads 8` — 36 runs. Raw data: `results/task_d_sweep_c.csv`;
-full log: `results/task_d_sweep_c_log.txt`; hit-rate script:
+`--driver-threads 8` — 36 runs. Raw data: `results/data/historical/task-d-sweep-c.csv`;
+full log: `experiments/logs/task_d_sweep_c_log.txt`; hit-rate script:
 `scratch/analyze_sweep_c_hitrate.py` (same "hit if no later fetch for that
 chunk_id" post-hoc method item 10b/10c used).
 
@@ -398,7 +398,7 @@ completed before any correctness run was treated as final).
 ## Final check
 
 No fabricated numbers: every value in this report is either a direct read
-from `results/task_d_sweep_b.csv` / `results/task_d_sweep_c.csv` (raw data
+from `results/data/historical/task-d-sweep-b.csv` / `results/data/historical/task-d-sweep-c.csv` (raw data
 from real runs, machine exclusivity checked before/after both sweeps) or a
 disclosed, straightforward computation over it (median, the reused
 hit-rate script, `objdump` disassembly actually inspected, not assumed).

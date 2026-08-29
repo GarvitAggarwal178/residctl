@@ -171,7 +171,7 @@ different from what this project has measured throughout.
 
 Additionally, per this campaign's own Correctness section: **re-run
 T-1..T-7 after the build**, exactly as every phase in this project does
-(`src/run_correctness_harness.sh` then `src/run_t6_t7.sh`, both already
+(`scripts/run-correctness-harness.sh` then `scripts/run-storm-t6-t7.sh`, both already
 in the repo). All must PASS before the sweep begins.
 
 ## 4. WSL2 numbers to compare against
@@ -261,10 +261,14 @@ session**: `bash bare_metal_session.sh`.
 # and the full 240-run sweep, unattended, writing one CSV. Designed to
 # be interrupted and resumed (per-rep resumability, same pattern this
 # project's every prior sweep script uses).
+# NOTE: this embedded script predates the 2026-08 restructure. The sweep
+# scripts it calls are now under scripts/ (run-correctness-harness.sh,
+# run-storm-t6-t7.sh); data lands in results/data/. Adjust before running.
 set -u
 RESIDCTL="${RESIDCTL:-$HOME/residctl}"
 SPIKE="${SPIKE:-$HOME/spike}"
 SRC="$RESIDCTL/src"
+SCRIPTS="$RESIDCTL/scripts"
 RESULTS="$RESIDCTL/results"
 SCRATCH="$RESIDCTL/scratch"
 MODEL="$SCRATCH/pattern_2g.bin"
@@ -289,8 +293,8 @@ echo "=== Step 3: S0-S3 pre-flight ==="
 echo "S0-S3 passed -- see $SPIKE/results/ for full logs. Proceeding."
 
 echo "=== Step 4: T-1..T-7 correctness harness ==="
-bash "$SRC/run_correctness_harness.sh" || { echo "T-1..T-5 FAILED -- stop and report"; exit 1; }
-bash "$SRC/run_t6_t7.sh" || { echo "T-6/T-7 FAILED -- stop and report"; exit 1; }
+bash "$SCRIPTS/run-correctness-harness.sh" || { echo "T-1..T-5 FAILED -- stop and report"; exit 1; }
+bash "$SCRIPTS/run-storm-t6-t7.sh" || { echo "T-6/T-7 FAILED -- stop and report"; exit 1; }
 grep -q "RESULT: PASS" "$RESULTS/correctness_harness_log.txt" || { echo "T-1..T-5 did not PASS"; exit 1; }
 grep -q "RESULT: PASS" "$RESULTS/t6_t7_log.txt" || { echo "T-6/T-7 did not PASS"; exit 1; }
 echo "T-1..T-7 all PASS. Proceeding to sweep."
@@ -435,7 +439,7 @@ log "=== bare-metal sweep complete, results in $CSV ==="
 
 Save both scripts (`bare_metal_env_baseline.sh` and
 `bare_metal_session.sh`) in `$RESIDCTL/src/` before the session; the run
-command is then just `bash src/bare_metal_session.sh` from the repo root.
+command is then just `bash scripts/historical/bare-metal-session.sh` from the repo root.
 If interrupted (background-task cap, terminal closed, etc.), re-running
 the same command resumes from the last completed rep — every cell is
 gated by `rep_done()` before it runs, matching every resumable sweep
@@ -445,7 +449,7 @@ script this project has used since Campaign 12.
 
 - No number in this plan was estimated for the bare-metal machine itself
   — every WSL2 comparison number is a direct citation from
-  `results/campaign13_phaseC_claims.md` and `spike/results/SPIKE_REPORT.md`,
+  `experiments/12c-claims-rederivation.md` and `spike/results/SPIKE_REPORT.md`,
   and every environment value in §4's WSL2 table was read live from this
   machine, not recalled from memory.
 - The sweep was not run; per instruction, this phase produces the plan

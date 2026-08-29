@@ -2,7 +2,7 @@
 
 Corrected re-run of build-order item 10 (§11), following an external review
 that found three defects invalidating every number in V1
-(`results/HARNESS_REPORT.md`, now marked SUPERSEDED). Full account of the
+(`experiments/02-first-harness-superseded.md`, now marked SUPERSEDED). Full account of the
 defects and fixes: `CLAUDE.md`'s "ITEM 10 CORRECTION" note.
 
 ## VERDICT
@@ -45,7 +45,7 @@ metric actually being compared.
 
 ## Fixes applied
 
-- **A-1** (`docs/MECHANISM_SPEC.md` §5, §9; `src/trace.h`, `src/trace.c`,
+- **A-1** (`docs/design-history.md` §5, §9; `src/trace.h`, `src/trace.c`,
   `src/replay.h`, `src/replay.c`, `src/belady_main.c`): every trace file
   now carries an 8-byte header naming its kind. `TRACE_TYPE_REFERENCE` is
   written by the **workload** (`replay_cyclic()`'s new `ref_trace`
@@ -54,22 +54,22 @@ metric actually being compared.
   for metrics/dedup/prefetch accounting, never for the solver.
   `belady_main.c`'s `load_reference_string()` (`src/belady_main.c:44-72`)
   reads the header and **aborts** if handed a fault trace. Verified: item
-  9's regression test (`src/run_item9_tests.sh`) includes a negative test
+  9's regression test (`scripts/historical/run-item9-tests.sh`) includes a negative test
   that a fault-trace file causes `SIGABRT`.
-- **A-2** (`docs/MECHANISM_SPEC.md` §10; `src/belady_main.c:141-177`): the
+- **A-2** (`docs/design-history.md` §10; `src/belady_main.c:141-177`): the
   approximate `(1-r)*W` sanity check — which item 9 had already found rests
   on a flawed derivation (see `CLAUDE.md`'s item 9 note) — is replaced by
   the exact, provable floor `n + (passes-1)*max(n-k,0)`, detected via
   `detect_cyclic_scan()` and checked **unconditionally on every solver
   run**, not just self-test.
-- **A-3** (`docs/MECHANISM_SPEC.md` §7/I-7; `src/budget.c:92-118`;
+- **A-3** (`docs/design-history.md` §7/I-7; `src/budget.c:92-118`;
   `src/region.h`, `src/region.c`): `reconcile()` now runs on every eviction
   (unconditionally — I-7's safety property is unchanged) and otherwise
   every `reconcile_interval` fetches (default 16, was every single fetch).
   `region_config_t.reconcile_interval=1` / `--eager-reconcile` in the CLI
   binaries restores the old per-fetch behavior; `test_correctness.c` and
   `test_storm.c` set it explicitly for the §13 harness.
-- **A-4** (`docs/MECHANISM_SPEC.md` §11; `src/replay.c:41-51`,
+- **A-4** (`docs/design-history.md` §11; `src/replay.c:41-51`,
   `src/baseline_main.c`): every reference now reads every 4096-byte page of
   the chunk, accumulated into a `volatile` sink (`g_replay_sink` /
   `g_sink`), identically across all arms. **Verified via `objdump`**, not
@@ -117,7 +117,7 @@ exactly this class of bug.
   matched; all three cyclic-floor checks `OK`; reference/fault header
   identification both `OK`.
 
-All five passed. Full log: `results/correctness_harness_log.txt`.
+All five passed. Full log: `experiments/logs/correctness_harness_log.txt`.
 
 ## Machine exclusivity and resource headroom
 
@@ -147,8 +147,8 @@ never-before-touched 2 GiB position-derived pattern file
 (`scratch/pattern_2g.bin`), 128 MiB chunks. `memory.max = budget_bytes +
 64 MiB`, identical across every arm at a given ratio.
 `sync; echo 3 > /proc/sys/vm/drop_caches` ran before every arm A/B
-invocation. Raw data: `results/harness_v2_sweep.csv`; full log:
-`results/item10_v2_harness_log.txt`.
+invocation. Raw data: `results/data/harness-v2-sweep.csv`; full log:
+`experiments/logs/item10_v2_harness_log.txt`.
 
 ### Primary metric: read_bytes (median of n=3, MiB/touch)
 
@@ -264,7 +264,7 @@ test, not editorialized further here.
 
 **Did not fire.** No `E_INFEASIBLE` result and no OOM kill occurred in any
 of the 72 data-row runs across all three ratios (`infeasible` column is 0
-throughout; no `censored=1` rows in `harness_v2_sweep.csv`). The
+throughout; no `censored=1` rows in `results/data/harness-v2-sweep.csv`). The
 pre-registered rule (record as a censored point, not discard, not retune
 the budget to avoid it) was never exercised at these ratios and this scale
 — worth stating plainly as a limitation of this specific sweep, not a claim
@@ -304,7 +304,7 @@ that infeasibility can't happen at a tighter ratio.
 ## Final check
 
 No fabricated numbers: every value in this report is either a direct read
-from `results/harness_v2_sweep.csv` (raw data from real runs, machine
+from `results/data/harness-v2-sweep.csv` (raw data from real runs, machine
 exclusivity confirmed before and after) or a straightforward, disclosed
 computation over it (median, min/max, MiB conversion). No test was weakened
 to pass — the correctness harness ran with the *stricter* eager-reconcile

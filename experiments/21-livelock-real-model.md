@@ -8,14 +8,14 @@ for a clean one-variable comparison against the pre-fix protect-on baseline.
 Machine exclusive (own runs; `pgrep cn-spike|iperf3|gate5` clean; load returned
 to ~0.5 after).
 
-Scripts: `src/livelock_phase3.sh`, `src/livelock_phase3_analyze.py`,
-`src/livelock_phase3b.sh`, `src/livelock_phase3c.sh`. Data:
-`phase3_real_model.csv` (45 rows, 3 arms × 5 ratios × 3 reps),
-`phase3b_arm_e_protect_on.csv`, `phase3c_arm_d_protect_on.csv`,
+Scripts: `scripts/run-livelock-real-model.sh`, `tools/analyze-livelock-real-model.py`,
+`scripts/run-livelock-protect-on-probe.sh`, `scripts/run-livelock-arm-d-protect-on.sh`. Data:
+`results/data/livelock-real-model-arms.csv` (45 rows, 3 arms × 5 ratios × 3 reps),
+`results/data/livelock-arm-e-protect-on.csv`, `results/data/livelock-arm-d-protect-on.csv`,
 `phase3_correctness_gate.txt`, per-ratio `phase3_*_policy.trace`.
 
 Arm A is unchanged by these fixes — reused from
-`results/final/phase1_equal_budget.csv`.
+`results/data/real-model-bytes-by-budget.csv`.
 
 ---
 
@@ -32,10 +32,10 @@ Defect 2's pre-compute notify is compute-equivalent.
 
 ---
 
-## The grid (median of n=3; decimal GB; `X/OPT` = read ÷ 65-pass `phase1_opt.csv`)
+## The grid (median of n=3; decimal GB; `X/OPT` = read ÷ 65-pass `results/data/real-model-opt-bound.csv`)
 
 Main grid: `--protect-current off` (the new A-14 default). Arm A is unchanged
-and stays in `phase1_equal_budget.csv` (129.1 / 110.4 / 111.3 / 105.1 / 83.3 GB;
+and stays in `results/data/real-model-bytes-by-budget.csv` (129.1 / 110.4 / 111.3 / 105.1 / 83.3 GB;
 0.65 / 0.79 / 0.62 / 0.64 / 0.75 tok/s).
 
 | r | arm | reps rc | read (GB) | demand faults | prefetches | declined | tok/s | X/OPT |
@@ -154,7 +154,7 @@ the byte-efficiency choice anywhere.
 | 0.75  | 1.095 | 1.132 | improved |
 
 Small but consistent. New range **1.08–1.13** (was 1.09–1.14). All D/OPT here
-use the canonical 65-pass `phase1_opt.csv` (prompt scan + 64 decode scans),
+use the canonical 65-pass `results/data/real-model-opt-bound.csv` (prompt scan + 64 decode scans),
 matching Table 1 and Figure 6.
 
 ---

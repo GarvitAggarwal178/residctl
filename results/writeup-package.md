@@ -9,16 +9,16 @@ reference for the writeup. Every number below traces to a named cell.
 
 | quantity | value | source |
 |---|---|---|
-| Byte reduction, app-authoritative vs kernel LRU (arm D vs arm C), real model | **13–69 %** (r=0.25 → 0.75: D 125.0 vs C 144.4; D 41.9 vs C 134.5 GB) | `results/livelock/phase3_real_model.csv` / Table 1 (FINAL) |
-| Byte reduction, arm D vs kernel mmap (arm A), real model, equal budget | **3–50 %** (D/A = 0.97 / 0.89 / 0.71 / 0.57 / 0.50 at r = 0.25 … 0.75) | `phase3_real_model.csv` (D) + `phase1_equal_budget.csv` (A) |
-| Distance from offline optimum, arm D, real model | **D/OPT = 1.08–1.13** at all 5 ratios (65-pass OPT), deterministic | `phase3_real_model.csv` + `phase1_opt.csv` |
-| Distance from optimum, arm D, synthetic, final policy config | **D/OPT = 1.00** at 8 MiB (256 chunks), **1.00–1.08** at 128 MiB (16 chunks), both compute levels, deterministic — `--consumption-signal all-threads --protect-current off`. The real model is also `--protect-current off` (LIVELOCK FIX A-14) — its eval-callback signal now fires pre-compute | `phase2_sweep.csv`, `phase2_opt.csv` |
-| Throughput scaling, arm D, real model | **1.12 → 2.85 tokens/s** (2.5×, monotone) as budget goes r=0.25 → 0.75; kernel arms flat (arm A 0.6–0.8, arm C ~1.0 t/s) at every budget | `phase3_real_model.csv` (C/D) + `phase1_equal_budget.csv` (A) / Figure 7 |
-| Kernel LRU miss rate (arm C), real model | **~1.00 at every budget ratio including 0.75** (`absent_handled` 2561–2817 vs 2304 layer transitions); reads 134–144 GB every run | `phase3_real_model.csv` |
-| Reclaim-authority counters (`memory.swap.max = 0`) | `pgscan = pgsteal = 0`, `memory.events[high] = 37`; with swap: `pgscan ≈ 120,687`, `pgsteal ≈ 60,141`, ~236 MiB shmem reclaimed | spike S3d / S3e, `figure4_reclaim_authority.csv` |
+| Byte reduction, app-authoritative vs kernel LRU (arm D vs arm C), real model | **13–69 %** (r=0.25 → 0.75: D 125.0 vs C 144.4; D 41.9 vs C 134.5 GB) | `results/data/livelock-real-model-arms.csv` / Table 1 (FINAL) |
+| Byte reduction, arm D vs kernel mmap (arm A), real model, equal budget | **3–50 %** (D/A = 0.97 / 0.89 / 0.71 / 0.57 / 0.50 at r = 0.25 … 0.75) | `results/data/livelock-real-model-arms.csv` (D) + `results/data/real-model-bytes-by-budget.csv` (A) |
+| Distance from offline optimum, arm D, real model | **D/OPT = 1.08–1.13** at all 5 ratios (65-pass OPT), deterministic | `results/data/livelock-real-model-arms.csv` + `results/data/real-model-opt-bound.csv` |
+| Distance from optimum, arm D, synthetic, final policy config | **D/OPT = 1.00** at 8 MiB (256 chunks), **1.00–1.08** at 128 MiB (16 chunks), both compute levels, deterministic — `--consumption-signal all-threads --protect-current off`. The real model is also `--protect-current off` (LIVELOCK FIX A-14) — its eval-callback signal now fires pre-compute | `phase2_sweep.csv`, `results/data/consumption-signal-opt-bound.csv` |
+| Throughput scaling, arm D, real model | **1.12 → 2.85 tokens/s** (2.5×, monotone) as budget goes r=0.25 → 0.75; kernel arms flat (arm A 0.6–0.8, arm C ~1.0 t/s) at every budget | `results/data/livelock-real-model-arms.csv` (C/D) + `results/data/real-model-bytes-by-budget.csv` (A) / Figure 7 |
+| Kernel LRU miss rate (arm C), real model | **~1.00 at every budget ratio including 0.75** (`absent_handled` 2561–2817 vs 2304 layer transitions); reads 134–144 GB every run | `results/data/livelock-real-model-arms.csv` |
+| Reclaim-authority counters (`memory.swap.max = 0`) | `pgscan = pgsteal = 0`, `memory.events[high] = 37`; with swap: `pgscan ≈ 120,687`, `pgsteal ≈ 60,141`, ~236 MiB shmem reclaimed | spike S3d / S3e, `results/figures/04-reclaim-authority.csv` |
 | Correctness | byte-identical token sequences, `--load-mode mmap` vs `residctl`, 32 tokens; T-1..T-7 PASS after every code change (incl. the LIVELOCK FIX); a startup audit aborts if any declared chunk gets zero consumption signals in the first 2 passes | `wp2_gate_log.txt`, `phase3_correctness_gate.txt`, `correctness_harness_log.txt`, `t6_t7_log.txt` |
-| Model | Qwen2.5-3B-Instruct Q4_K_M, 2,104,932,768 B, sha256 `626b4a66…62d`, CPU-only | `table2_final_environment.csv` |
-| Per-layer compute (measured) | ~51,000 ns/MiB (≈ 2.1 ms/layer at the 13.2 t/s baseline) | `wp2_llamacpp.md` §2.4 |
+| Model | Qwen2.5-3B-Instruct Q4_K_M, 2,104,932,768 B, sha256 `626b4a66…62d`, CPU-only | `results/figures/table-2-environment.csv` |
+| Per-layer compute (measured) | ~51,000 ns/MiB (≈ 2.1 ms/layer at the 13.2 t/s baseline) | `experiments/14-real-model-integration.md` §2.4 |
 
 ---
 
@@ -83,7 +83,7 @@ For someone writing at 2 a.m. From PROJECT_STATE §6 + this session.
 | Campaign 11 Phase 3/4 **arm A/B `read_bytes = 0`** | guest-side `drop_caches` redirect bug | Campaign 12 Phase A re-run |
 | "**Arm D is 1.07–1.78× OPT**" as a property of the informed policy | true only for `layer_order_learned` and compute=400000; declared is 1.00–1.13 | regime-specific: learned vs declared, compute level |
 | "**Declared order is worse than the learned hedge under a compute phase**" (session-1 WP1) | reversed by the WP0 fix, then by Phase 2's exact signal | Phase 2 (synthetic, `all-threads` signal): declared is deterministic and ≤ learned everywhere |
-| "**The protect-current heuristic is load-bearing on the real model; off ⇒ arm D +67–78 %**" (cleanup session) | that regression was a Defect-2 (post-compute consumption signal) + Defect-4 (`token_embd` never signalled) artifact — the cursor lagged a full layer so protect-off had nothing shielding the in-use chunk | LIVELOCK FIX: `--protect-current off` on both paths (A-14); with the fixes, on vs off moves arm D by ≤ 1.8 % (`phase3c_arm_d_protect_on.csv`) |
+| "**The protect-current heuristic is load-bearing on the real model; off ⇒ arm D +67–78 %**" (cleanup session) | that regression was a Defect-2 (post-compute consumption signal) + Defect-4 (`token_embd` never signalled) artifact — the cursor lagged a full layer so protect-off had nothing shielding the in-use chunk | LIVELOCK FIX: `--protect-current off` on both paths (A-14); with the fixes, on vs off moves arm D by ≤ 1.8 % (`results/data/livelock-arm-d-protect-on.csv`) |
 | "**Arm E beats arm D on bytes under a compute phase**" (synthetic, Campaign 11/13) | does not transfer — real compute ~51 k ns/MiB, ~30× lighter than the synthetic "heavy" setting | real model: E never beats D on bytes |
 | "**Arm D ≈ arm A at r=0.25**" (WP2) | WP2 gave arm A a 256 MiB `memory.max` margin | Phase 1 equal budget: D beats A at every ratio |
 | WP2's "**arm E collapsed — retention × current-chunk protection over-constrain the budget**"; Phase 3's "**hard deadlock / orphaned `FETCHING` slot**"; the cleanup session's "**a livelock from two correct mechanisms — recorded, not fixed; mitigate with `protect_current on`**" | all superseded — source review found the cause: an off-by-one distance origin (`lo_declared_dist` scanned `d = 1..seq_len`) + a post-compute consumption signal. Both fixed | LIVELOCK FIX / Claim 10: arm E completes at every ratio, `protect_current` on **or** off (Phase 3b); run arm D at r ≤ 0.375 for bytes |
@@ -129,14 +129,14 @@ For someone writing at 2 a.m. From PROJECT_STATE §6 + this session.
   margin for llama's non-weight memory, which the kernel arm absorbs within B).
   Residual asymmetry ~50 MiB, favouring the pager arms, disclosed.
 - **Environment.** One shared WSL2 VM, cgroup v2, `memory.swap.max = 0`,
-  ext4-on-VHDX, THP `madvise`. Full table: `table2_final_environment.csv`.
+  ext4-on-VHDX, THP `madvise`. Full table: `results/figures/table-2-environment.csv`.
 
 ---
 
 ## 5. Limitations section (bullets, ordered by how much a reviewer cares)
 
 1. **One shared WSL2 VM; no bare-metal comparison anywhere in the project.**
-   A readiness plan exists (`BARE_METAL_PLAN.md`) but was never run. The
+   A readiness plan exists (`docs/bare-metal-plan.md`) but was never run. The
    Windows VHDX host cache is unreachable by guest `drop_caches` — real-model
    arm A here is fault-stall-bound (920–1310 MiB/s, below the 3396 MiB/s
    O_DIRECT ceiling) so it did not bite, but 7–11/20 synthetic arm-A/B cells in

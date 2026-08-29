@@ -1,13 +1,13 @@
 # Campaign 13 Phase B — Replace the Prefetch Hit-Rate Metric
 
 Analysis only, no new runs. Script: `scratch/analyze_c13_phaseB.py`. Uses
-`results/phase2_compute.csv` (Campaign 11 Phase 2, arm E depth=2/pinned —
+`results/data/synthetic-compute-phase-sweep.csv` (Campaign 11 Phase 2, arm E depth=2/pinned —
 the exact config Phase 2's own D-vs-E comparison and Campaign 12 Phase C's
-audit used), `results/phase4_consolidated.csv` (Campaign 11 Phase 4),
-`results/campaign12_phaseD_paper_table.csv` (Campaign 12 Phase D), and,
+audit used), `results/data/synthetic-6arm-consolidated-sweep.csv` (Campaign 11 Phase 4),
+`results/data/synthetic-consolidated-sweep.csv` (Campaign 12 Phase D), and,
 for point 3, the raw sweep CSVs and retained `--fetch-trace` binaries for
-items 10b (`task_b_sweep.csv`), 10c Sweep 3 (`task_c_sweep3.csv`), 10d
-Task C (`task_d_sweep_c.csv`), and 10e Sweep C (`task_e_sweep_c.csv`) —
+items 10b (`results/data/historical/task-b-sweep.csv`), 10c Sweep 3 (`results/data/historical/task-c-sweep3.csv`), 10d
+Task C (`results/data/historical/task-d-sweep-c.csv`), and 10e Sweep C (`results/data/historical/task-e-sweep-c.csv`) —
 all four still have their fetch-trace files on disk.
 
 **A real defect was caught and fixed while building this analysis,
@@ -178,7 +178,7 @@ Recomputed hit rate (original per-prefetch formula, fixed to the correct
 per-rep methodology above) **and** total fetches, for all four items
 using their own surviving `--fetch-trace` files.
 
-### item 10b (depth sweep, `task_b_sweep.csv`)
+### item 10b (depth sweep, `results/data/historical/task-b-sweep.csv`)
 
 | Depth | Ratio | Demand | Prefetches | Total fetches | Hit rate |
 |---|---|---|---|---|---|
@@ -204,7 +204,7 @@ total fetches — total fetches keep rising with depth throughout the
 tested range, with no sign of a plateau, while the rate metric stayed
 flat and made the mechanism look saturated.**
 
-### item 10c Sweep 3 (admission guarded vs. always, `task_c_sweep3.csv`)
+### item 10c Sweep 3 (admission guarded vs. always, `results/data/historical/task-c-sweep3.csv`)
 
 | Admission | Depth | Ratio | Demand | Prefetches | Total fetches | Hit rate |
 |---|---|---|---|---|---|---|
@@ -230,7 +230,7 @@ drew from hit rate is unaffected by this repair (both modes were
 genuinely indistinguishable, on both metrics) — but the ceiling itself,
 again, is not visible in total fetches.**
 
-### item 10d Task C (retention, `task_d_sweep_c.csv`)
+### item 10d Task C (retention, `results/data/historical/task-d-sweep-c.csv`)
 
 | Retention | Depth | Ratio | Demand | Prefetches | Total fetches | Hit rate |
 |---|---|---|---|---|---|---|
@@ -260,7 +260,7 @@ issues more, fetches more in total) even where `pinned`'s hit *rate* is
 better. The rate improvement and the volume increase point in opposite
 directions on the same underlying data.
 
-### item 10e Sweep C (retention generalization, `task_e_sweep_c.csv`)
+### item 10e Sweep C (retention generalization, `results/data/historical/task-e-sweep-c.csv`)
 
 | Retention | Depth | Ratio | Demand | Prefetches | Total fetches | Hit rate |
 |---|---|---|---|---|---|---|

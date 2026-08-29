@@ -6,13 +6,19 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 `/root/spike/results/SPIKE_REPORT.md`, `SPIKE_ADDENDUM.md`,
 `SPIKE_ADDENDUM2.md`). This project answers "build the thing."
 
+**This is the agent working file. The readable project narrative is
+[`docs/project-log.md`](docs/project-log.md); the results are
+[`results/findings.md`](results/findings.md).** Notes below the "Build order"
+section predate the 2026-08 restructure and use pre-restructure paths.
+
 ## Source of truth
 
-- **`docs/MECHANISM_SPEC.md`** — the implementation contract. Every invariant
-  (I-1..I-10), every measured constraint (§2), the fixed build order (§12), and
-  the correctness harness (§13) live there. Code that violates an invariant is
-  wrong even if it runs and even if it's faster. Read it before touching src/.
-- **`/root/spike/results/`** — where every number in MECHANISM_SPEC §2 came
+- **`docs/02-design.md`** — the implementation contract as it stands now:
+  invariants I-1..I-10, the measured constants, the architecture, the policies,
+  T-1..T-7. Code that violates an invariant is wrong even if it runs and even if
+  it's faster. Read it before touching `src/`. The 14 amendments that got it
+  there are in `docs/design-history.md`.
+- **`/root/spike/results/`** — where every number in `docs/02-design.md` §2 came
   from. Do not re-derive them; if a number is needed that isn't there, measure
   it and record where.
 
@@ -44,7 +50,7 @@ at `/root/spike/`. That spike answered "can this work at all" (yes — see
 | 7 | `lru` and `layer_order` policies (§8) | 2h | done |
 | 8 | Prefetch (§6.3) | 1h | done (inline, not a separate thread -- see note) |
 | 9 | Belady solver (§10) | 2h | done (spec's own sanity formula turned out wrong -- see note) |
-| 10 | Harness, arms, sweep (§11) | 3h | V1 SUPERSEDED (3 defects, see note below) -- corrected, see results/HARNESS_REPORT_V2.md |
+| 10 | Harness, arms, sweep (§11) | 3h | V1 SUPERSEDED (3 defects, see note below) -- corrected, see experiments/03-corrected-harness.md |
 | 11 | llama.cpp integration (separate spec, stretch) | 7h | out of scope for now |
 
 The replay driver (item 6) comes before any engine integration so there is
@@ -86,9 +92,9 @@ backed by much stronger negative evidence and is being accepted as a known,
 understood limitation for v1 rather than chased further.
 
 **CAMPAIGN 11 — five-phase closing session. Reports:
-`results/phase0_analysis.md`, `results/phase1_platform_io.md`,
-`results/phase2_compute.md`, `results/phase3_chunk_size.md`,
-`results/phase4_consolidated.md`, and `results/PROJECT_STATE.md` (the
+`experiments/07b-existing-data-analysis.md`, `experiments/07c-platform-io-microbenchmark.md`,
+`experiments/08-compute-phase.md`, `experiments/09-chunk-size-sweep.md`,
+`experiments/09b-consolidated-6arm-sweep.md`, and `results/PROJECT_STATE.md` (the
 consolidated reference document — headline results, open questions,
 limitations, spec amendments A-1..A-11, and a superseded-results list,
 all in one place). Explicit brief: run every phase, decide nothing,
@@ -141,7 +147,7 @@ questions, limitations, spec-amendment index, and superseded-results
 table.
 
 **ITEM 10e — lookahead window driver + retention regime boundary. Full
-report: `results/LOOKAHEAD_REPORT.md`.** Task A fixes a spec defect
+report: `experiments/07-lookahead-window.md`.** Task A fixes a spec defect
 introduced in item 10d (A-8's hard barrier made async's throughput benefit
 untestable by construction — item 10d's own report diagnosed this
 correctly but didn't yet have the fix). Task B follows up item 10d's Task
@@ -171,7 +177,7 @@ atomic sink-add (`lock add`) both survive `-O2`.
 
 **Task B — sync vs async with overlap actually possible.** Arm D, V2
 scale, 3 ratios × n=3 × `--lookahead-window` {0,1,2} × `--driver-threads`
-{1,8} × handler {sync, async}, 108 runs, `results/task_e_sweep_b.csv`. Of
+{1,8} × handler {sync, async}, 108 runs, `results/data/historical/task-e-sweep-b.csv`. Of
 6 pre-registered expectations: **1 and 5 held; 6 held after investigation
 of an apparent violation; 3 held trivially; 2 and 4 did not hold as
 intended.** Expectation 1 (W=0 regression) holds exactly at all 12
@@ -222,7 +228,7 @@ further mechanism when the device ceiling looks genuinely hard).
 **Task C — retention regime boundary, five-ratio sweep
 (0.25/0.375/0.5/0.625/0.75), arm E, `--prefetch-retention` {none,pinned} ×
 depth {2,4}, n=3, async, `--fetch-workers 4`, `--driver-threads 8`,
-`--lookahead-window 1`, 75 runs, `results/task_e_sweep_c.csv`.** Of 4
+`--lookahead-window 1`, 75 runs, `results/data/historical/task-e-sweep-c.csv`.** Of 4
 pre-registered expectations: **3 held (9/10 cells, one exact tie); 1
 held with a depth-dependent boundary rather than one project-wide `r_c`;
 4 mostly held with one small exception; 2 did NOT hold — a genuine
@@ -301,7 +307,7 @@ mechanism); 183 sweep runs plus the gate's 3 runs, zero hangs, zero
 `DISCREPANCY`/`FAIL`/`RECONCILE FAILED` lines.
 
 **ITEM 10d — concurrent demand workload + prefetch target retention. Full
-report: `results/CONCURRENCY_REPORT.md`.** Item 10c produced two null
+report: `experiments/06-concurrent-demand.md`.** Item 10c produced two null
 results, both correctly explained, and both explanations pointed at a
 specific unrun experiment. This item runs them. Nothing from item 10c is
 retracted — T-6's `dedup_fetching=14494` still stands as proof the async
@@ -329,7 +335,7 @@ bookkeeping, never the sink/bytes/trace.
 **Task B (no spec amendment needed — uses A-8's driver) — sync vs async
 under real concurrency.** Arm D (`layer_order`, prefetch off), V2 scale, 3
 ratios × n=3 × `--driver-threads` {1,2,4,8} × handler {sync, async
-`--fetch-workers 4`}, 72 runs, `results/task_d_sweep_b.csv`. Of 5
+`--fetch-workers 4`}, 72 runs, `results/data/historical/task-d-sweep-b.csv`. Of 5
 pre-registered expectations: **1, 2, and 5 held; 3 and 4 did not.**
 `stat_dedup_fetching` is exactly 0 at `--driver-threads 1` in both handler
 modes and under `--sync-handler` at every thread count, and rises steeply
@@ -388,7 +394,7 @@ pin-break override under contention, not just a smoke test.
 
 **Sweep C:** arm E, `--prefetch-retention` {none,pinned} × 3 ratios ×
 depth {2,4} × n=3, `--driver-threads 8`, `--fetch-workers 4`, 36 runs,
-`results/task_d_sweep_c.csv`. Of 4 pre-registered expectations: **3
+`results/data/historical/task-d-sweep-c.csv`. Of 4 pre-registered expectations: **3
 held; 1 partially held; 2 and 4 did not.** Hit rate rose under `pinned`
 relative to `none` at **12/12** (ratio, depth) reps compared directly
 within this sweep (e.g. r=0.75/d4: 0.32→0.46; r=0.5/d2: 0.11→0.27), and
@@ -414,11 +420,11 @@ time, unlike item 10c's Sweep 2/3); machine exclusivity checked clean
 before and after both.
 
 **ITEM 10c Task A — async dispatch-only handler (in progress; Task B/C and
-`results/ASYNC_REPORT.md` not yet done as of this entry).** Direct
+`experiments/05-async-handler.md` not yet done as of this entry).** Direct
 consequence of item 10b Task C's finding: `dedup_fetching` wasn't just
 empirically zero, it was *structurally* unreachable under the synchronous
 handler, which is a spec defect, not a coverage gap. Spec amendments A-5
-(§5, `docs/MECHANISM_SPEC.md`) and A-7 (§4 step 10) applied: the handler
+(§5, `docs/design-history.md`) and A-7 (§4 step 10) applied: the handler
 thread now only dispatches (lookup, lock, state-machine decision, enqueue);
 `prefetch_pool.c` (item 10b Task B's prefetch-only pool) is generalized into
 a single shared fetch pool for BOTH demand and speculative fetches, with
@@ -476,7 +482,7 @@ confirmations of the old zero). Two NEW tests per the item 10c spec:
   watchdog, 0 mismatches, `dedup_fetching=13987`.
 
 Both scripts run via `run_t6_t7.sh`, same `fresh_cgroup`/`cleanup` pattern as
-the rest of the correctness harness. Full log: `results/t6_t7_log.txt`.
+the rest of the correctness harness. Full log: `experiments/logs/t6_t7_log.txt`.
 
 **ITEM 10c Task B — prefetch admission rule (A-6).** `policy_t` gained
 `next_use_distance(region, chunk)` (§8): `layer_order`'s
@@ -514,7 +520,7 @@ scenario under the new async default — a second, independent confirmation
 one storm test it was built against.
 
 **ITEM 10c Task C — three re-run sweeps. Full report:
-`results/ASYNC_REPORT.md`.** Sweep 1 (arm D, sync vs async at
+`experiments/05-async-handler.md`.** Sweep 1 (arm D, sync vs async at
 `--fetch-workers` 1/2/4): reproduced item 10b's device-busy numbers exactly
 under `--sync-handler` (0.831/0.826/0.859 vs item 10b's 0.82-0.86 band);
 device-busy did NOT rise above that band at any worker count, explained
@@ -547,12 +553,12 @@ delayed catching it by one check), waited out properly via `pgrep -f`, and
 that one cell was redone cleanly after removing the contaminated rows.
 
 T-1 through T-7 all re-run clean under every configuration exercised in
-this phase. `results/ASYNC_REPORT.md` has the full sensitivity tables,
+this phase. `experiments/05-async-handler.md` has the full sensitivity tables,
 mechanism writeups, and final check.
 
 **ITEM 10b — I/O pipelining diagnostic, prefetch depth, dedup instrumentation
 (diagnosis on top of accepted V2, not a correction).** Full report:
-`results/DIAGNOSTIC_REPORT.md`.
+`experiments/04-io-pipelining-diagnostic.md`.
 - **Task A**: added `--fetch-trace` (per-fetch timing, in-memory,
   flushed once at exit). Arm D is **bandwidth-limited, not
   serialization-limited**: device-busy fraction 0.82-0.86, per-fetch
@@ -609,9 +615,9 @@ mechanism writeups, and final check.
   -- reported as a finding about T-3's coverage, T-3 left unmodified, per
   instructions.
 
-**ITEM 10 CORRECTION (supersedes the note below and `results/HARNESS_REPORT.md`,
+**ITEM 10 CORRECTION (supersedes the note below and `experiments/02-first-harness-superseded.md`,
 which is marked SUPERSEDED in place, not deleted). Full account in
-`results/HARNESS_REPORT_V2.md`.** V1's two "methodology bugs" below were
+`experiments/03-corrected-harness.md`.** V1's two "methodology bugs" below were
 real but incomplete -- an external review of V1 found three further,
 deeper defects that made every V1 number void:
 
@@ -649,7 +655,7 @@ deeper defects that made every V1 number void:
    `pager.c`/`prefetch.c`) as an independent cross-check -- a discrepancy
    beyond one chunk is reported, not silently resolved by picking one.
 
-**Spec amendments applied to `docs/MECHANISM_SPEC.md`:**
+**Spec amendments applied to `docs/design-history.md`:**
 - **A-1** (§5, §9): reference trace is workload-authored, never the
   handler's; header distinguishes the two; solver aborts on a fault trace.
 - **A-2** (§10): replaced the approximate `(1-r)*W` sanity check --
@@ -679,7 +685,7 @@ Left in as a reminder that this specific confusion is easy to reintroduce.
 ---
 
 **Item 10 V2 results (the corrected, valid sweep).** Full report:
-`results/HARNESS_REPORT_V2.md`. Realistic scale (2 GiB region, 128 MiB
+`experiments/03-corrected-harness.md`. Realistic scale (2 GiB region, 128 MiB
 chunks, 16 chunks, 5 passes), 3 budget ratios (0.25/0.5/0.75), n=3 reps/cell,
 fresh 2 GiB pattern file, `drop_caches` before every A/B run, machine
 exclusivity and resource headroom checked before/after. Headline results:
@@ -727,7 +733,7 @@ fixed while building the original harness:
    invalid per Defect 1 above -- the comparison logic was sound, the inputs
    weren't.)
 
-**Read `results/HARNESS_REPORT.md` before drawing any conclusion from this
+**Read `experiments/02-first-harness-superseded.md` before drawing any conclusion from this
 data, especially the "what NOT to conclude" section** -- the wall-clock
 comparison at this test's scale (16 MiB region, 2 MiB chunks, chosen for
 fast iteration all session, not for realistic LLM weight sizes) makes the

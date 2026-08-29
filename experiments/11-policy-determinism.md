@@ -2,7 +2,7 @@
 
 ## The observation and the hypothesis, restated precisely
 
-`campaign12_phaseD_paper_table.md` recorded that at 128 MiB / r=0.5 /
+`experiments/10-consolidated-sweep.md` recorded that at 128 MiB / r=0.5 /
 `--compute-ns-per-mib 400000`, arm D read the entire region
 (`read_bytes=10,737,418,240`), byte-identical to arm C's always-fetch-
 everything `lru` baseline. At r=0.5 with 16 chunks, `layer_order` holds 8;
@@ -48,7 +48,7 @@ input. Tested directly below.
 
 ## A.1 — Reproduce and characterize, n=10
 
-Script: `src/run_c13_phaseA1.sh`. Exact cell: arm D, 128 MiB chunks,
+Script: `scripts/historical/run-c13-phaseA1.sh`. Exact cell: arm D, 128 MiB chunks,
 r=0.5, `--compute-ns-per-mib 400000`, async, `--fetch-workers 4
 --driver-threads 8 --lookahead-window 1`, n=10. Every rep reported
 individually, `rc=0` on all 10, clean machine exclusivity before/after.
@@ -83,7 +83,7 @@ number**, per instruction.
 
 ## A.2 — Determinism sweep
 
-Script: `src/run_c13_phaseA2.sh`. Arm D, n=5, r=0.5, at each of the 6
+Script: `scripts/historical/run-c13-phaseA2.sh`. Arm D, n=5, r=0.5, at each of the 6
 cells. All `rc=0`, clean exclusivity.
 
 | Cell | Threads | Window | Compute | Chunk | `absent_handled` (5 reps) | Deterministic? |
@@ -234,7 +234,7 @@ further).
 
 ## A.4 — Scope check
 
-Scanned every arm D cell in `campaign12_phaseD_paper_table.csv` against
+Scanned every arm D cell in `results/data/synthetic-consolidated-sweep.csv` against
 arm C at the same `(chunk_size, ratio, compute)`.
 
 | Chunk | Ratio | Compute | C `read_bytes` | D `read_bytes` | D/C |
@@ -307,12 +307,12 @@ built in but unused).
 ## Final check
 
 - No number estimated or inferred — every value is a direct read from
-  `results/campaign13_phaseA1_reproduce.csv`,
-  `results/campaign13_phaseA2_determinism.csv`, direct computation over
+  `results/data/policy-determinism-reproduction.csv`,
+  `results/data/policy-determinism-6cell.csv`, direct computation over
   retained `--policy-trace`/reference-trace binary files
   (`scratch/analyze_c13_policytrace.py`,
   `scratch/analyze_c13_antioptimal.py`), or a direct scan of
-  `results/campaign12_phaseD_paper_table.csv`
+  `results/data/synthetic-consolidated-sweep.csv`
   (`scratch/phaseA_scope_check.py`).
 - No test was weakened; T-1..T-7 were re-run in full after the
   instrumentation change and all pass.

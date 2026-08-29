@@ -9,7 +9,7 @@
 > doing comparable work (~250x byte-count gap); (3) the sensitivity table
 > led with fault counts instead of §9's specified primary metric
 > (`read_bytes`), which is what let arm E appear to beat OPT. See
-> `results/HARNESS_REPORT_V2.md` for the corrected re-run and
+> `experiments/03-corrected-harness.md` for the corrected re-run and
 > `CLAUDE.md`'s "ITEM 10 CORRECTION" note for the full account of what was
 > wrong and what changed. This file is kept for the historical record, not
 > deleted, but nothing below should be treated as a valid measurement.
@@ -30,7 +30,7 @@ absolute performance at realistic LLM weight sizes.
 
 ## Machine exclusivity
 
-Checked before and after (see `results/item10_harness_log.txt`). Clean both
+Checked before and after (see `experiments/logs/item10_harness_log.txt`). Clean both
 times: load average ~0.00-0.03, no `cn-spike` workload running, only the
 sweep's own processes and normal system daemons visible.
 
@@ -72,7 +72,7 @@ sweep's own processes and normal system daemons visible.
 All "misses" below are genuine consumer-demand fetches (`absent_handled`
 for pager arms; `stat_absent_handled` — prefetched fills are tracked
 separately and are not misses). Full raw data:
-`results/harness_sweep.csv`; full run log: `results/item10_harness_log.txt`.
+`results/data/harness-v1-sweep-superseded.csv`; full run log: `experiments/logs/item10_harness_log.txt`.
 
 ### Fault counts (lower is better), by budget ratio
 

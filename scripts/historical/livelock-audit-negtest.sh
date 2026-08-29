@@ -6,7 +6,7 @@ set -u
 SRC=/root/residctl/src
 CG=/sys/fs/cgroup/residctl_livelock_p0   # must match cgroup= in phase0_armD.cfg
 MODEL=/root/residctl/models/model.gguf
-CFG=/root/residctl/results/livelock/phase0_armD.cfg
+CFG=/root/residctl//root/residctl-archive/run-configs/results__livelock__phase0_armD.cfg
 
 cd "$SRC"
 cp wp2_gen.cpp /tmp/wp2_gen_keep.cpp

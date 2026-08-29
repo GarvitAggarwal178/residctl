@@ -120,7 +120,7 @@ counter-productive.
 **Resolved (Phase 3c / A-14).** `residctl_llama.c`'s `protect_current` default
 flips to **off** — both paths now default off. Phase 3c measured arm D with
 `--protect-current on` and all four fixes: on vs off moves arm D by ≤ 1.8 % at
-every ratio (`results/livelock/phase3c_arm_d_protect_on.csv`). The cleanup
+every ratio (`results/data/livelock-arm-d-protect-on.csv`). The cleanup
 session's "off ⇒ arm D +67–78 %" — the sole reason it was `on` — was an artifact
 of the two bugs this session fixes (post-compute notify + the unsignalled
 `token_embd`). `--protect-current` and its unit tests stay for a caller whose

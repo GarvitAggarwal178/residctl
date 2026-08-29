@@ -4,7 +4,7 @@ Standalone microbenchmark (`src/bench_concurrent_read.c`, no pager, no
 uffd, no cgroup), asking directly: can concurrent `O_DIRECT` reads
 overlap on this filesystem at all? Each thread reads a distinct,
 non-overlapping, block-aligned range of `scratch/pattern_2g.bin`.
-`drop_caches` before every trial. Grid and script: `src/run_phase1_sweep.sh`.
+`drop_caches` before every trial. Grid and script: `scripts/historical/run-phase1-sweep.sh`.
 
 **Grid note, disclosed rather than silently padded:** the campaign's own
 text states "64 configurations × 5 = 320 short runs," but the four listed
@@ -93,7 +93,7 @@ which case held (as instructed):**
   exceed even the spike's own measured maximum `O_DIRECT` bandwidth
   (3396 MiB/s, `MECHANISM_SPEC.md` §2) and the spike's own buffered-read
   measurement (128 ms median for 150 MiB ≈ 1172 MiB/s). This is the same
-  signature item 10b's `DIAGNOSTIC_REPORT.md` already identified for arm
+  signature item 10b's `experiments/04-io-pipelining-diagnostic.md` already identified for arm
   A's V2 throughput (4785 MiB/s) — consistent with the buffered path being
   served by the Windows VHDX host cache, which guest-side `drop_caches`
   cannot reach (an explicitly accepted, not-to-be-defeated limitation per
@@ -111,14 +111,14 @@ which case held (as instructed):**
 
 Not applicable — this phase's binary reads a file and reports throughput;
 no pager, no invariants (I-1..I-10) apply. Every trial exited rc=0 (160/160,
-confirmed in `results/phase1_platform_io_log.txt`); no read errors, no
+confirmed in `experiments/logs/phase1_platform_io_log.txt`); no read errors, no
 EOF-before-expected-bytes aborts.
 
 ## Final check
 
 - No number estimated, inferred, or copied from documentation — every
   value in both tables is a direct read from
-  `results/phase1_platform_io.csv` (median of n=5 real runs) or a
+  `results/data/platform-io-microbenchmark.csv` (median of n=5 real runs) or a
   disclosed arithmetic derivation (implied per-thread = aggregate ÷
   threads).
 - No test modified (no existing test touched this phase).

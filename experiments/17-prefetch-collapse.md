@@ -103,14 +103,14 @@ protect-on deadlock is a real bug that the writeup should name, not paper over.
 
 ## Files
 
-- `results/final/phase3_arm_e.csv` — 16 rows (5 configs × 3 reps + 1 traced).
-- `results/final/phase3_log.txt` — full log incl. the 4 SIGDUMP + wchan captures.
-- `src/run_final_phase3.sh`, `src/phase3_supervisor.sh`.
+- `results/data/prefetch-collapse-fallback-configs.csv` — 16 rows (5 configs × 3 reps + 1 traced).
+- `experiments/logs/final__phase3_log.txt` — full log incl. the 4 SIGDUMP + wchan captures.
+- `scripts/run-prefetch-collapse-probe.sh`, `scripts/historical/phase3-supervisor.sh`.
 
 ## Final check
 
 - No number estimated: every value is a measured median of 3 runs from
-  `phase3_arm_e.csv`; the hang-state counters are direct SIGUSR1 dumps.
+  `results/data/prefetch-collapse-fallback-configs.csv`; the hang-state counters are direct SIGUSR1 dumps.
 - A hang is reported as a hang (rc = 124), with its mechanism, not smoothed over.
 - The pre-decided mitigation was applied; no new mechanism designed. The
   newly-found deadlock is recorded and explicitly left unfixed.

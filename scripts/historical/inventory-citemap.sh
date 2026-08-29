@@ -52,7 +52,7 @@ echo
 
 # --- Step 3 cross-check: every source cell in WRITEUP_PACKAGE.md §1 must resolve ---
 echo "=== WRITEUP_PACKAGE.md source-cell resolution (dangling = BAD) ==="
-grep -oE '`[a-zA-Z0-9_./-]+\.(csv|md|txt|log|png)`' results/final/WRITEUP_PACKAGE.md | tr -d '`' | sort -u | while read -r ref; do
+grep -oE '`[a-zA-Z0-9_./-]+\.(csv|md|txt|log|png)`' results/writeup-package.md | tr -d '`' | sort -u | while read -r ref; do
   found=$(git ls-files | grep -E "(^|/)$(basename "$ref")$" | head -1)
   if [ -n "$found" ]; then echo "  OK   $ref -> $found"; else echo "  DANGLING  $ref"; fi
 done

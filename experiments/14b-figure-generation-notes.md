@@ -6,7 +6,7 @@ a CSV of the numbers behind it, in `results/overnight/figures/`.
 
 **Session-2 refresh:** every figure and table was regenerated. Figures 1–2
 now use the WP1 §1.4 data **re-swept with the WP0 consumption-signal fix**
-(session-1 data is `wp1_sweep_session1.csv`) — with the fix, `layer_order_declared`
+(session-1 data is `results/data/declared-vs-learned-policy-session1.csv`) — with the fix, `layer_order_declared`
 reads exactly OPT at 8 MiB (both compute levels) and D/OPT = 1.09–1.15 at
 128 MiB. Figure 6 is new (WP2's real model). Figures 3–5 are unchanged
 (Campaign 11/12 + spike data).
@@ -22,12 +22,12 @@ files.
 
 | # | File | What it shows | Data source | Notes |
 |---|---|---|---|---|
-| 1 | `figure1_bytes_per_work.{png,csv}` | Bytes read per touch (MiB) vs budget ratio, one panel per chunk size {8, 128} MiB; arms A, C, D, E + OPT (dashed). **Central figure.** | Arms A/C: Campaign 12 Phase D (`campaign12_phaseD_paper_table.csv`, Phase A repaired baseline). Arms D/E: **WP1 declared-order** (`wp1_sweep.csv`, `layer_order_declared`, compute=0). OPT: `wp1_sweep_opt.csv` + Campaign 12 Phase D OPT table for r∈{0.375,0.625}. | compute=0. D/E have 3 points (WP1 grid r∈{0.25,0.5,0.75}); A/C/OPT have 5. **Arm D sits exactly on OPT** (WP1: declared order = Belady at compute=0). Arm A line is hidden behind arm C (near-identical bytes). Arm A points exceeding 3396 MiB/s (host-cache contaminated) marked with a red **X** — 8MiB/r=0.75 and 128MiB/r∈{0.25,0.375,0.5,0.625}. The five non-deterministic arm D cells are all compute=400000 and therefore absent from this compute=0 figure; a compute=400000 companion would show the declared arm D leaving the OPT line and crossing arm C at low ratios (see Table 1, flag `dX`). |
+| 1 | `figure1_bytes_per_work.{png,csv}` | Bytes read per touch (MiB) vs budget ratio, one panel per chunk size {8, 128} MiB; arms A, C, D, E + OPT (dashed). **Central figure.** | Arms A/C: Campaign 12 Phase D (`results/data/synthetic-consolidated-sweep.csv`, Phase A repaired baseline). Arms D/E: **WP1 declared-order** (`results/data/declared-vs-learned-policy.csv`, `layer_order_declared`, compute=0). OPT: `results/data/declared-vs-learned-opt-bound.csv` + Campaign 12 Phase D OPT table for r∈{0.375,0.625}. | compute=0. D/E have 3 points (WP1 grid r∈{0.25,0.5,0.75}); A/C/OPT have 5. **Arm D sits exactly on OPT** (WP1: declared order = Belady at compute=0). Arm A line is hidden behind arm C (near-identical bytes). Arm A points exceeding 3396 MiB/s (host-cache contaminated) marked with a red **X** — 8MiB/r=0.75 and 128MiB/r∈{0.25,0.375,0.5,0.625}. The five non-deterministic arm D cells are all compute=400000 and therefore absent from this compute=0 figure; a compute=400000 companion would show the declared arm D leaving the OPT line and crossing arm C at low ratios (see Table 1, flag `dX`). |
 | 2 | `figure2_miss_rate.{png,csv}` | Demand faults / total references vs budget ratio; lines C, D, E, OPT; one panel per chunk size. | Arm C: Campaign 12 Phase D. Arms D/E: WP1 declared (compute=0). OPT: cyclic floor / `belady_main`. | The clearest single picture of the thesis: **C flat at 1.000** (full-pass thrashing), **D exactly on OPT**, E below the OPT *demand-fault* line (its prefetches are excluded from the demand count; E's total fetches still ≥ OPT). |
-| 3 | `figure3_chunk_size_tradeoff.{png,csv}` | Chunk size {4,8,16,32,64,128,256} MiB (log x); left y = read_bytes, right y = wall-clock; arm D, one line per ratio. | Campaign 12 Phase B {4,8,16,32} MiB + Campaign 11 Phase 3 {32,64,128,256} MiB (`campaign12_phaseB_chunk_floor.csv`, `phase3_chunk_size.csv`). `layer_order_learned`, compute=0. | Bytes minimise near 8–16 MiB then climb to 256 MiB; wall-clock has a valley near 16–32 MiB and is worst at 4 MiB — **the two optimise in opposite directions**. The 32 MiB overlap point between the two sweeps did **not** agree exactly (Phase B read 3–7% more bytes and ran ~10% slower); the two came from different scripts under different machine load. Stated on the figure. |
+| 3 | `figure3_chunk_size_tradeoff.{png,csv}` | Chunk size {4,8,16,32,64,128,256} MiB (log x); left y = read_bytes, right y = wall-clock; arm D, one line per ratio. | Campaign 12 Phase B {4,8,16,32} MiB + Campaign 11 Phase 3 {32,64,128,256} MiB (`results/data/synthetic-chunk-size-floor.csv`, `results/data/synthetic-chunk-size-sweep.csv`). `layer_order_learned`, compute=0. | Bytes minimise near 8–16 MiB then climb to 256 MiB; wall-clock has a valley near 16–32 MiB and is worst at 4 MiB — **the two optimise in opposite directions**. The 32 MiB overlap point between the two sweeps did **not** agree exactly (Phase B read 3–7% more bytes and ran ~10% slower); the two came from different scripts under different machine load. Stated on the figure. |
 | 4 | `figure4_reclaim_authority.{png,csv}` | Three bars: pgscan, pgsteal, shmem reclaimed — `memory.swap.max=0` vs swap available. | Spike S3d (`s3d_output.log`) and S3e (`s3e_summary.txt`, `s3e_verify.txt`, 3 runs). | Under `swap.max=0`: `memory.events[high]=37` (kernel entered reclaim), `pgscan=pgsteal=0`, shmem unchanged. With swap: `pgscan≈120,687`, `pgsteal≈60,141`, `high=512–515`, ~236 MiB shmem reclaimed. **The project's strongest single causal result** — previously only prose in the spike addendum. |
 | 5 | `figure5_prefetch_total_fetches.{png,csv}` | Total fetches (demand + prefetch), arm D vs E, 5 ratio groups, one panel per compute {0, 400000}. 128 MiB. | Campaign 12 Phase D (`layer_order_learned`). | compute=0: E's total fetches **exceed** D's at every ratio (prefetch costs volume). compute=400000: E ≈ D or below only at r ≥ 0.5. Caption states hit rate (used through Campaign 12) was found in Campaign 13 Phase B to be a denominator artifact; total fetches replaced it. |
-| 6 | `figure6_llamacpp.{png,csv}` | llama.cpp real-model version of Figure 1: bytes read (64 tokens) and generation throughput vs budget ratio; arms A/C/D/E + OPT. Qwen2.5-3B Q4_K_M. | `wp2_sweep.csv`, `wp2_opt.csv`. `layer_order_declared` with the WP0 fix. | **PRODUCED** (session 2 — the model was acquired, BLOCKER 1 resolved). Arm C (kernel LRU) flat-high at every budget; arm D reads 24–51% fewer bytes than the kernel at r ≥ 0.5, D/OPT = 1.09–1.14. Right panel: A/C throughput is flat ~1 t/s regardless of budget, D/E climb 1→3 t/s — the kernel cannot turn extra budget into throughput on a layer scan, the app-authoritative policy can. Arm E collapsed at r=0.25 (absent from that x-point). |
+| 6 | `figure6_llamacpp.{png,csv}` | llama.cpp real-model version of Figure 1: bytes read (64 tokens) and generation throughput vs budget ratio; arms A/C/D/E + OPT. Qwen2.5-3B Q4_K_M. | `results/data/real-model-arms.csv`, `results/data/real-model-arms-opt-bound.csv`. `layer_order_declared` with the WP0 fix. | **PRODUCED** (session 2 — the model was acquired, BLOCKER 1 resolved). Arm C (kernel LRU) flat-high at every budget; arm D reads 24–51% fewer bytes than the kernel at r ≥ 0.5, D/OPT = 1.09–1.14. Right panel: A/C throughput is flat ~1 t/s regardless of budget, D/E climb 1→3 t/s — the kernel cannot turn extra budget into throughput on a layer scan, the app-authoritative policy can. Arm E collapsed at r=0.25 (absent from that x-point). |
 
 ---
 
@@ -49,7 +49,7 @@ declared-order policy.
 
 ## The claims file
 
-`results/overnight/CLAIMS.md` — 8 claims, each with evidence (file, table,
+`results/claims.md` — 8 claims, each with evidence (file, table,
 cell), the figure that shows it, strength (strong / qualified /
 preliminary), caveats a reviewer would raise with the honest answer, and
 superseded prior claims. Claims 7 (declared > inferred order) and 8 (real
@@ -61,13 +61,13 @@ model) are explicitly gated on WP1 (completed) and WP2 (not run — Claim 8
 ## What could not be produced, and why
 
 - **Figure 6** (llama.cpp real workload) — WP2 not run, `models/model.gguf`
-  absent. `results/overnight/BLOCKERS.md` BLOCKER 1.
+  absent. `/root/residctl-archive/session-summaries/overnight-blockers.md` BLOCKER 1.
 - **Declared-order arm D/E at r ∈ {0.375, 0.625}** in Figures 1–2 — the
   WP1 §1.4 grid is {0.25, 0.5, 0.75} (as WP1.md specifies). The Phase D
   learned-policy numbers at those ratios are in Table 1.
 - **A compute=400000 panel for Figures 1–2** — the WP3.md figure spec is
   one compute level; the compute=400000 story (declared order's
-  non-deterministic regression) is in `wp1_declared_order.md` §1.4 and
+  non-deterministic regression) is in `experiments/13-declared-access-order.md` §1.4 and
   Table 1 (flag `dX`), not re-plotted.
 
 ---

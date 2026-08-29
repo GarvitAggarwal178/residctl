@@ -9,7 +9,7 @@ Run on **unmodified** code at commit `4ba98bf`. Real model
 r = 0.5 (B = 1003 MiB, `memory.max` = B + 128 MiB), `-n 8`, `--fetch-trace` /
 `--policy-trace` via the config's `reftrace=` / `policytrace=` keys.
 
-Scripts: `src/livelock_phase0.sh`, `src/livelock_phase0_analyze.py`.
+Scripts: `scripts/run-signal-audit.sh`, `tools/analyze-signal-audit.py`.
 Artifacts: `phase0_console.txt`, `phase0_inventory.txt`, `phase0_reftrace.bin`
 (312 records), `phase0_policytrace.bin` (209 records), `phase0_node_names.txt`,
 `phase0_node_evidence.txt` (+ `wp2_gen_dbg.cpp` / `build_dbg.sh` / `dbg_nodes.sh`
@@ -122,7 +122,7 @@ so the declared cursor never advances to it and `lo_declared_dist()` treats it
 as far-future. Under the current `d = 1..seq_len` loop it is assigned the
 maximum distance → top eviction victim → re-fetched every token. This is a
 concrete component of the "re-reads the two large non-layer chunks every token"
-mechanism recorded in `results/cleanup/phase1_deadlock_fix.md`.
+mechanism recorded in `experiments/17b-livelock-diagnosis.md`.
 
 **Correction to that earlier characterisation:** only `token_embd` lacks a
 signal. `output` (chunk 1) *does* get one (`result_output` matches). Both were
@@ -245,7 +245,7 @@ behaves correctly: `false` → 1, `timeout` kill → 124, `python3 sys.exit(7)` 
 which is how a livelock is detected. Any such logic MUST live in an on-disk
 script, never in an inline command. The existing `run_final_phase*.sh` and this
 session's `livelock_phase0.sh` are on-disk and safe. Also logged in
-`results/livelock/BLOCKERS.md`.
+`/root/residctl-archive/session-summaries/livelock-blockers.md`.
 
 ---
 

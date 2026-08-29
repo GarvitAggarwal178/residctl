@@ -8,7 +8,7 @@
 # Then arms C/D/E x r{0.25,0.375,0.5,0.625,0.75}, n=3, 64 tokens, fixed prompt,
 # greedy. Equal budget exactly as final-session Phase 1: budget_bytes = B +
 # uniform 128 MiB memory.max margin for the pager arms. --protect-current off.
-# Arm A is unchanged by these fixes -> reuse results/final/phase1_equal_budget.csv.
+# Arm A is unchanged by these fixes -> reuse results/data/real-model-bytes-by-budget.csv.
 #
 # Arm E at r=0.25 is the run most likely to livelock. A SIGUSR1 + policy-trace
 # watchdog is wired from the start so expectation 1's evidence is captured

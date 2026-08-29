@@ -120,7 +120,7 @@ for cs in $CHUNK_SIZES; do
         # background-task window boundary, losing completed-but-uncaptured
         # runs on kill (parent killed, child orphaned under its own
         # `timeout 220`, result never reaches the CSV). Handled separately,
-        # synchronously, via src/run_phaseD_random_rep.sh -- same disclosed
+        # synchronously, via scripts/historical/run-phaseD-random-rep.sh -- same disclosed
         # approach as Phase A.
         for mode in normal sequential; do
             for rep in 1 2 3; do

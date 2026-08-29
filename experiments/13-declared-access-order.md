@@ -33,8 +33,8 @@
 > Session 1's "`layer_order_declared` reads exactly OPT at every compute=0
 > cell (D/OPT = 1.000)" is **superseded** — with the fix protecting 2 extra
 > chunks, D/OPT at compute=0 is slightly above 1.0. §1.4 was **re-swept**
-> this session; see `wp1_sweep.csv` (session-1 data preserved as
-> `wp1_sweep_session1.csv`). The re-sweep results and updated §1.4 table
+> this session; see `results/data/declared-vs-learned-policy.csv` (session-1 data preserved as
+> `results/data/declared-vs-learned-policy-session1.csv`). The re-sweep results and updated §1.4 table
 > follow the session-1 write-up below.
 >
 > Everything else in this report (§1.1 interface, §1.2 rename + gate, §1.5
@@ -137,7 +137,7 @@ the first touch) with `[0, 1, …, n_chunks-1]`.
 - `test_correctness.c`, `test_prefetch.c`, `test_storm.c`, `test_t6.c`,
   `test_t7.c` updated to the new symbol name.
 
-**Verification gate — `src/run_wp1_gate.sh` — PASS.**
+**Verification gate — `scripts/run-learned-policy-gate.sh` — PASS.**
 `--policy layer_order_learned` at 128 MiB / r=0.5 / compute=0 /
 `--driver-threads 8 --lookahead-window 1`, 3/3 reps:
 
@@ -153,7 +153,7 @@ valid.
 
 ## 1.3 — Determinism check
 
-`src/run_wp1_determinism.sh` — `layer_order_declared` at Campaign 13
+`scripts/run-policy-determinism-grid.sh` — `layer_order_declared` at Campaign 13
 Phase A's A.2 grid, n=5, r=0.5. `absent_handled` per rep:
 
 | Cell | Threads | Window | Compute | Chunk | `absent_handled` (5 reps) | Deterministic? | learned (C13-A.2) |
@@ -177,7 +177,7 @@ Campaign 13 Phase A isolated for the learned policy. At cell 5 the declared
 policy is also **worse on volume** than the learned policy (79–90 vs
 70–77) and **exceeds arm C's 80** in 3 of 5 reps.
 
-### `--policy-trace` divergence (`src/run_wp1_policytrace.sh`)
+### `--policy-trace` divergence (`scripts/run-policy-trace.sh`)
 
 Serial cell-1 capture: 40 evictions, a clean staircase
 (`7,8,9,…,14, 6,7,8,…` — evict the chunk most recently consumed, exactly
@@ -212,7 +212,7 @@ faulters is still not fully ordered. Not fixed further, per §1.3.
 
 ## 1.4 — Learned vs declared sweep
 
-`src/run_wp1_sweep.sh` / `scratch/analyze_wp1_sweep.py`. Arms C, D (both
+`scripts/run-declared-vs-learned-sweep.sh` / `scratch/analyze_wp1_sweep.py`. Arms C, D (both
 policies), E (both policies), OPT. Grid: chunk {8 MiB, 128 MiB} × ratio
 {0.25, 0.5, 0.75} × `--compute-ns-per-mib` {0, 400000}, n=3. Fixed:
 async, `--fetch-workers 4 --driver-threads 8 --lookahead-window 1
@@ -251,7 +251,7 @@ Only 128MiB/r=0.75 stays a marginal declared win.
 
 Total fetches (demand + prefetch), demand faults, wall-clock, and the full
 per-cell E-arm numbers are in `scratch/analyze_wp1_sweep.py`'s output and
-`results/overnight/wp1_sweep.csv`.
+`results/data/declared-vs-learned-policy.csv`.
 
 ### Arm E — declared vs learned
 
@@ -325,7 +325,7 @@ table at the shared ratios.
   by 52–63%. Mechanism as in §1.3: confident eviction of a just-consumed
   chunk that a lagging driver thread still needs. This is the same failure
   class Campaign 13 Phase A found for the learned policy
-  (`campaign13_phaseA1_reproduce.csv` rep 6: learned exceeded arm C by
+  (`results/data/policy-determinism-reproduction.csv` rep 6: learned exceeded arm C by
   3.8%), but larger in magnitude for declared because declared never has
   an `UNKNOWN`-distance hedge.
 - **Arm E declared reads more than E learned at 128MiB/r=0.25 and r=0.5,
@@ -345,7 +345,7 @@ binary per A-3). T-1 now covers 4 policies (`default`, `lru`,
 `layer_order_learned` and `layer_order_declared` with `pager_notify_access`
 firing per reference.
 
-**All PASS** — see `results/overnight/wp1_correctness_harness_log.txt` and
+**All PASS** — see `experiments/logs/overnight__wp1_correctness_harness_log.txt` and
 `wp1_t6_t7_log.txt`:
 T-1 (0 mismatches, all 4 policies), T-2 (0 mismatches, 999 evictions),
 T-3 (0 mismatches, 60 s storm), T-4 (exact `memory.stat[shmem]` match,
@@ -382,8 +382,8 @@ T-6 (`dedup_fetching > 0`), T-7 (all 8 storm threads joined within the
 ## §1.4 — re-swept with the WP0 fix (session 2)
 
 `run_wp1_sweep.sh` re-run after commit `8c15d8b`. Session-1 data preserved
-as `wp1_sweep_session1.csv`. Full table:
-`results/overnight/wp1_sweep_analysis_after_fix.txt`.
+as `results/data/declared-vs-learned-policy-session1.csv`. Full table:
+`experiments/logs/overnight__wp1_sweep_analysis_after_fix.txt`.
 
 ### Arm D — declared vs learned, D/OPT (median of n=3)
 
@@ -444,12 +444,12 @@ improvement over `layer_order_learned` at realistic chunk counts.
 ## Final check
 
 - Every number is a direct read from
-  `results/overnight/wp1_gate_log.txt`,
-  `results/overnight/wp1_determinism.csv`,
-  `results/overnight/wp1_sweep.csv` / `wp1_sweep_opt.csv` (median of n=3
+  `experiments/logs/overnight__wp1_gate_log.txt`,
+  `results/data/policy-determinism-grid.csv`,
+  `results/data/declared-vs-learned-policy.csv` / `results/data/declared-vs-learned-opt-bound.csv` (median of n=3
   via `scratch/analyze_wp1_sweep.py`), or a direct computation over the
   retained `--policy-trace` / reference-trace binaries
-  (`src/run_wp1_policytrace.sh`). Nothing estimated or inferred.
+  (`scripts/run-policy-trace.sh`). Nothing estimated or inferred.
 - No test was weakened. T-1..T-7 re-run in full; all pass.
 - The verification gate was an exact-match check, reported with the
   numbers.

@@ -10,16 +10,16 @@ grids.
 
 ### 1. `drop_caches` invocation, file:line
 
-**`src/run_phase3_sweep.sh:70`**:
+**`scripts/historical/run-phase3-sweep.sh:70`**:
 ```sh
 drop_caches() { sync; echo 3 > /proc/sys/vm/drop_caches 2>&1 >> "$LOG"; }
 ```
-Called at `src/run_phase3_sweep.sh:127`, immediately before every arm A
+Called at `scripts/historical/run-phase3-sweep.sh:127`, immediately before every arm A
 `run_row` call. Present, invoked every time. Exit status never checked
 (no `$?` inspection anywhere in the script).
 
-**`src/run_phase4_sweep.sh:69`**, identical definition. Called at
-`src/run_phase4_sweep.sh:125` (arm A) and `:138` (arm B). Same: present,
+**`scripts/historical/run-phase4-sweep.sh:69`**, identical definition. Called at
+`scripts/historical/run-phase4-sweep.sh:125` (arm A) and `:138` (arm B). Same: present,
 invoked, exit status never checked.
 
 So **the call is not absent** (rules out option (a)) — it runs before
@@ -27,7 +27,7 @@ every single arm A/B invocation in both phases.
 
 ### 2. Comparison against V2's script
 
-**`src/run_item10_v2_harness.sh:69`**:
+**`scripts/historical/run-item10-v2-harness.sh:69`**:
 ```sh
 drop_caches() { sync; echo 3 > /proc/sys/vm/drop_caches 2>&1 | tee -a "$LOG"; }
 ```
@@ -120,8 +120,8 @@ everything), returning exit code 1 rather than reporting a silent zero.
 
 ## Re-run
 
-Both re-run scripts (`src/run_phase3_AB_rerun.sh`,
-`src/run_phase4_AB_rerun.sh`) use the corrected (piped) `drop_caches`
+Both re-run scripts (`scripts/historical/run-phase3-AB-rerun.sh`,
+`scripts/historical/run-phase4-AB-rerun.sh`) use the corrected (piped) `drop_caches`
 pattern and the guard-equipped `baseline_main`. Phase 3's grid kept the
 single fixed `sequential` mode, as Phase 3 originally did (noted, not
 changed). Phase 4's grid used the full 3-mode sweep + arm B, as Phase 4
@@ -137,7 +137,7 @@ CSV row written, because the orchestrating shell that would have written
 it was already gone). Diagnosed by direct process inspection
 (`ps`/`ELAPSED`), not guessed. Fixed by running `MADV_RANDOM`'s 15 reps
 individually in the foreground with a widened 220s timeout
-(`src/run_one_random_rep.sh`), rather than end-to-end inside the
+(`scripts/historical/run-one-random-rep.sh`), rather than end-to-end inside the
 harness's backgrounded orchestrator. **Separately, a real self-inflicted
 contamination was caught and corrected**: an early resume accidentally
 launched a second, duplicate orchestrator instance concurrently with the
@@ -233,8 +233,8 @@ by the §13 harness.
 
 - No number estimated, inferred, or copied from documentation — every
   bandwidth value is a direct computation (`io_read_bytes_delta / wall_ns`)
-  over real re-run data in `results/campaign12_phaseA_phase3_AB.csv` and
-  `results/campaign12_phaseA_phase4_AB.csv`; the `drop_caches` diagnosis
+  over real re-run data in `results/data/baseline-io-repair-phase3-grid.csv` and
+  `results/data/baseline-io-repair-phase4-grid.csv`; the `drop_caches` diagnosis
   is from direct `free -m` measurements and direct source inspection with
   file:line citations, not inferred.
 - No test was weakened — the new guard makes `baseline_main` MORE strict

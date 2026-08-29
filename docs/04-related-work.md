@@ -109,7 +109,7 @@ interface allows and just outside what it was built for.
 Naming these is what makes §5 credible.
 
 ---
-*≈ 900 words. Sources: the citations named in `docs/overnight/final session.md`
-§3, `docs/MECHANISM_SPEC.md`, and this project's own measured results
-(`CLAIMS.md`, `phase1_equal_budget.md`, `phase2_consumption_signal.md`,
-`phase1_deadlock_fix.md`, spike S3d/S3e). No new literature search.*
+*≈ 900 words. Sources: the citations named in `/root/residctl-archive/session-prompts/final-session.md`
+§3, `docs/design-history.md`, and this project's own measured results
+(`results/claims.md`, `experiments/15-equal-budget-baseline.md`, `experiments/16-consumption-signal.md`,
+`experiments/17b-livelock-diagnosis.md`, spike S3d/S3e). No new literature search.*

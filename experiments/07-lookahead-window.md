@@ -9,7 +9,7 @@ hold." Nothing in item 10d is retracted — its Task A verification gate,
 its `dedup_fetching` scaling, and its retention numbers all stand as
 measurements of the barrier-driven driver they were taken under. Full
 background: `CLAUDE.md`'s "ITEM 10d" and "ITEM 10e" notes,
-`docs/MECHANISM_SPEC.md` Amendments A-10/A-11.
+`docs/design-history.md` Amendments A-10/A-11.
 
 ## VERDICT
 
@@ -97,7 +97,7 @@ pattern.
 Arm D (`layer_order`, prefetch off), V2 parameters, 3 ratios × n=3 ×
 `--lookahead-window` {0,1,2} × `--driver-threads` {1,8} × handler {sync,
 async `--fetch-workers 4`} — 108 runs. Raw data:
-`results/task_e_sweep_b.csv`; full log: `results/task_e_sweep_b_log.txt`.
+`results/data/historical/task-e-sweep-b.csv`; full log: `experiments/logs/task_e_sweep_b_log.txt`.
 Device-busy and dispatch latency via `--fetch-trace`, same methods as
 item 10d; **median concurrently-outstanding fetches** is new this item —
 for each fetch's read interval `[rstart,rend]`, count how many fetches
@@ -143,7 +143,7 @@ and threads=8, sync and async) — not just the subset shown above.
 
 1. **W=0 reproduces item 10d exactly in both handler modes: HELD.**
    Checked at all 12 (ratio, threads, handler) combinations against
-   `results/task_d_sweep_b.csv` — `pager_bytes_fetched`, `absent_handled`,
+   `results/data/historical/task-d-sweep-b.csv` — `pager_bytes_fetched`, `absent_handled`,
    `evictions` matched exactly in all 12.
 2. **Concurrently-outstanding fetches under async rises with W (~1.0 at
    W=0, approaching 2 at W=1, approaching 3 at W=2): DID NOT HOLD, at
@@ -209,7 +209,7 @@ Arm E, `--prefetch-retention` {none,pinned} × `--prefetch-depth` {2,4},
 n=3, async, `--fetch-workers 4`, `--driver-threads 8`,
 `--lookahead-window 1`, FIVE budget ratios (0.25/0.375/0.5/0.625/0.75) —
 75 runs (60 arm-E cells + 15 arm-D reference reps). Raw data:
-`results/task_e_sweep_c.csv`; full log: `results/task_e_sweep_c_log.txt`;
+`results/data/historical/task-e-sweep-c.csv`; full log: `experiments/logs/task_e_sweep_c_log.txt`;
 hit-rate script: `scratch/analyze_sweep_e_c_hitrate.py` (same "hit if no
 later fetch for that chunk_id" method items 10b/10c/10d used).
 
@@ -350,7 +350,7 @@ elsewhere in the same or a later item, not by the fix that found them.
 ## Final check
 
 No fabricated numbers: every value in this report is either a direct read
-from `results/task_e_sweep_b.csv` / `results/task_e_sweep_c.csv` / the
+from `results/data/historical/task-e-sweep-b.csv` / `results/data/historical/task-e-sweep-c.csv` / the
 Task A gate's own printed output (raw data from real runs, machine
 exclusivity checked before/after each phase) or a disclosed,
 straightforward computation over it (median, the reused hit-rate method,

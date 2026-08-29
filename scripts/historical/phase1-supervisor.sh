@@ -2,7 +2,7 @@
 # Self-healing supervisor for the Phase 1 sweep: if the sweep script is not
 # running and the CSV is incomplete, clean orphans and relaunch (the sweep
 # resumes from its CSV row count). Exits when the CSV has all 60 data rows.
-CSV=/root/residctl/results/final/phase1_equal_budget.csv
+CSV=/root/residctl/results/data/real-model-bytes-by-budget.csv
 CG=/sys/fs/cgroup/residctl_final_p1
 TARGET=61   # header + 60 data rows
 
@@ -17,7 +17,7 @@ while :; do
             for p in $(cat "$CG/cgroup.procs" 2>/dev/null); do kill -9 "$p" 2>/dev/null; done
             sleep 1; rmdir "$CG" 2>/dev/null
         fi
-        cd /root/residctl && setsid bash src/run_final_phase1.sh >> results/final/phase1_console.txt 2>&1 < /dev/null &
+        cd /root/residctl && setsid bash scripts/run-real-model-equal-budget.sh >> /root/residctl-archive/process-logs/results__final__phase1_console.txt 2>&1 < /dev/null &
         disown
         sleep 5
     else

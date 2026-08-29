@@ -15,13 +15,13 @@ bucket() {
         results/inventory/*)              echo REPORT;;   # this pass's own output
         *.o|*/build/*|src/wp2_obj/*)       echo BUILD;;
         src/Makefile|src/*.c|src/*.h|src/*.cpp|src/*.patch) echo SOURCE;;
-        src/run_correctness_harness.sh|src/run_t6_t7.sh|src/run_item*_tests.sh) echo TEST;;
+        scripts/run-correctness-harness.sh|scripts/run-storm-t6-t7.sh|src/run_item*_tests.sh) echo TEST;;
         src/test_*)                       echo TEST;;
         src/*.sh)                         echo SWEEP_SCRIPT;;
         src/gen_pattern|src/belady_main|src/replay_main|src/baseline_main|src/bench_concurrent_read|src/wp2_gen|src/wp2_opt) echo BUILD;;
         src/*)                            echo BUILD;;    # remaining compiled test binaries
         docs/*|CLAUDE.md)                 echo SPEC;;
-        results/PROJECT_STATE.md|results/overnight/CLAIMS.md|results/final/WRITEUP_PACKAGE.md|results/overnight/figures/table*_final*|results/overnight/figures/table1_main_results.*|results/overnight/figures/table2_environment.*) echo DELIVERABLE;;
+        results/PROJECT_STATE.md|results/claims.md|results/writeup-package.md|results/overnight/figures/table*_final*|results/overnight/figures/table1_main_results.*|results/overnight/figures/table2_environment.*) echo DELIVERABLE;;
         results/overnight/figures/*)      echo FIGURE;;
         results/**/*.md|results/*.md)      echo REPORT;;
         results/**/make_wp3.py|scratch/make_wp3.py) echo TOOL;;
@@ -54,7 +54,7 @@ awk -F, 'NR>1{c[$2]++; b[$2]+=$3; if($4=="yes")t[$2]++}
 
 echo
 echo "=== Step 4 bloat/hygiene ==="
-echo "Q1 GGUF in HEAD?  $(git ls-files | grep -c '\.gguf$') tracked; in history? $(grep -c 'gguf' results/inventory/raw/git_history_size.txt) blobs"
+echo "Q1 GGUF in HEAD?  $(git ls-files | grep -c '\.gguf$') tracked; in history? $(grep -c 'gguf' experiments/logs/inventory-raw-git-size.txt) blobs"
 echo "Q2 llama.cpp: tracked=$(git ls-files | grep -c '^third_party/') files; size=$(du -sh third_party 2>/dev/null | cut -f1); nested .git? $([ -e third_party/llama.cpp/.git ] && echo YES || echo no)"
 echo "Q3 tracked binaries/.o: $(git ls-files | grep -Ec '\.o$|^src/(test_|wp2_gen$|wp2_opt$|replay_main$|belady_main$|baseline_main$|gen_pattern$|bench_)')"
 echo "Q4 scratch/ tracked: $(git ls-files | grep -c '^scratch/')"

@@ -64,7 +64,7 @@ fetch windows, and they clearly do.
 
 ## 0.2 Lookahead window wall-clock effect
 
-`results/task_e_sweep_b.csv`, arm D, `layer_order` policy — every cell
+`results/data/historical/task-e-sweep-b.csv`, arm D, `layer_order` policy — every cell
 Sweep B actually ran (unlike the Task A gate, whose dramatic 5.177s→
 3.379s→3.227s observation was run under `policy=default`, NOT
 `layer_order` — see below, this is a genuine confound, not a
@@ -89,7 +89,7 @@ gate used), wall-clock is roughly flat-to-slightly-worse (sync:
 gate's 38% drop.
 
 **Root cause of the discrepancy: a policy confound, not a measurement
-error.** `src/run_task_e_gate.sh` (item 10e's own Task A verification
+error.** `scripts/historical/run-task-e-gate.sh` (item 10e's own Task A verification
 gate script) invoked `replay_main` with policy argument `default`
 (`region_t.policy == NULL`, the lowest-region-off FIFO fallback selector
 in `budget.c`'s `default_select_victim()`), not `layer_order`. Every cell
@@ -166,7 +166,7 @@ noted for completeness since it touches the same code family.
 - No number in this phase was estimated, inferred, or copied from
   documentation — 0.1's table is a direct re-computation over retained
   binary trace files; 0.2's table is a direct read of
-  `results/task_e_sweep_b.csv`; 0.3's line numbers were read from the
+  `results/data/historical/task-e-sweep-b.csv`; 0.3's line numbers were read from the
   current source files in this same session, not recalled from memory of
   writing them.
 - No test was modified.

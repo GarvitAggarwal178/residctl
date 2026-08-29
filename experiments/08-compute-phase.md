@@ -7,7 +7,7 @@ the compute window real transformer inference spends on a layer's weights
 before the next layer is needed, which is exactly the interval prefetch
 exists to fill. Implementation: `src/replay.c` (`replay_calibrate_compute()`,
 `compute_busy()`, `compute_unit()`), wired into both `replay_cyclic()` and
-`replay_cyclic_mt()`. Script: `src/run_phase2_sweep.sh`.
+`replay_cyclic_mt()`. Script: `scripts/historical/run-phase2-sweep.sh`.
 
 ## Machine exclusivity
 
@@ -106,13 +106,13 @@ nominal 0/100000/400000 labels.
 Arm D and arm E, 3 ratios × n=3(+), async, `--fetch-workers 4
 --driver-threads 8 --lookahead-window 1`, `--prefetch-depth` {1,2,4} ×
 `--prefetch-retention` {none,pinned} for arm E, `--compute-ns-per-mib`
-{0, 100000, 400000} — 189 planned runs. Raw data: `results/phase2_compute.csv`
+{0, 100000, 400000} — 189 planned runs. Raw data: `results/data/synthetic-compute-phase-sweep.csv`
 (191 data rows: a resume-boundary artifact gave cell (ratio=0.25, E,
 depth=4, retention=none, compute=0) 4 reps instead of 3 — all 4 are
 genuine, independently-executed, non-error runs with real, differing
 measured values, not literal duplicates; kept in the raw CSV, median used
 for that cell same as every other). Full log:
-`results/phase2_compute_log.txt`. Zero `DISCREPANCY`, `FAIL`, or
+`experiments/logs/phase2_compute_log.txt`. Zero `DISCREPANCY`, `FAIL`, or
 `RECONCILE FAILED` lines across the whole sweep; every run `rc=0`, no
 timeouts.
 
@@ -236,8 +236,8 @@ over). All PASS: T-1 (0 mismatches, all 3 policies), T-2 (0 mismatches,
 999 evictions), T-3 (0 mismatches, no hang), T-4 (exact
 `memory.stat[shmem]` match), T-5 (belady selftest, 300/300 + exact floor
 checks), T-6 (`dedup_fetching=13557>0`), T-7 (all 8 threads joined inside
-the 120s watchdog). Full logs: `results/correctness_harness_log.txt`,
-`results/t6_t7_log.txt` (both overwritten with this item's run, per the
+the 120s watchdog). Full logs: `experiments/logs/correctness_harness_log.txt`,
+`experiments/logs/t6_t7_log.txt` (both overwritten with this item's run, per the
 project's established convention of the harness logs reflecting the most
 recent verified state).
 
@@ -273,11 +273,11 @@ recent verified state).
 ## Final check
 
 - No number estimated, inferred, or copied from documentation — every
-  value in every table is a direct read from `results/phase2_compute.csv`
+  value in every table is a direct read from `results/data/synthetic-compute-phase-sweep.csv`
   (median of n=3, or n=4 for the one disclosed extra-rep cell) or a
   direct computation over retained `--fetch-trace` binary files
   (`scratch/analyze_phase2.py`), or a value cross-checked against
-  `results/task_e_sweep_b.csv`'s own recorded numbers.
+  `results/data/historical/task-e-sweep-b.csv`'s own recorded numbers.
 - No test was modified. The correctness harness's binaries were rebuilt
   (they were stale, not edited) before re-running, and the harness itself
   caught the staleness rather than silently passing on old code.

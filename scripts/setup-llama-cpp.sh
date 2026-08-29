@@ -20,4 +20,4 @@ cmake -S "$LC" -B "$LC/build" -DGGML_CUDA=OFF -DGGML_NATIVE=ON -DLLAMA_CURL=OFF 
       -DCMAKE_BUILD_TYPE=Release -DLLAMA_BUILD_TESTS=OFF
 cmake --build "$LC/build" -j"$(nproc)" --target llama llama-bench
 
-echo "third_party/llama.cpp ready. Now run src/build_wp2.sh"
+echo "third_party/llama.cpp ready. Now run scripts/build-real-model-integration.sh"

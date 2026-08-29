@@ -152,16 +152,16 @@ holding across the two new ratios. E/OPT = 1.23 / 1.19 / 1.17 / 1.21.
 
 ## Files
 
-- `results/final/phase1_equal_budget.csv` — every rep, every cell.
-- `results/final/phase1_opt.csv` — OPT at 65 and 64 passes, both floor-checked.
-- `results/final/phase1_equal_budget_log.txt` — full run log.
+- `results/data/real-model-bytes-by-budget.csv` — every rep, every cell.
+- `results/data/real-model-opt-bound.csv` — OPT at 65 and 64 passes, both floor-checked.
+- `experiments/logs/final__phase1_equal_budget_log.txt` — full run log.
 - `results/final/phase1_reftrace_r{0.25,…,0.75}.bin` — declared reference traces.
-- `src/run_final_phase1.sh`, `src/run_final_phase1_opt.sh` — the sweep + OPT.
+- `scripts/run-real-model-equal-budget.sh`, `scripts/run-real-model-opt.sh` — the sweep + OPT.
 
 ## Final check
 
 - No number estimated or inferred: every value is a median of 3 measured runs
-  from `phase1_equal_budget.csv`, or a `wp2_opt` output. Arm A's achieved
+  from `results/data/real-model-bytes-by-budget.csv`, or a `wp2_opt` output. Arm A's achieved
   bandwidth is `io_gen_bytes / wall_s` (method stated).
 - No test weakened.
 - Every pre-registered expectation checked against measured values; the two that

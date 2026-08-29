@@ -1,19 +1,19 @@
 # Campaign 12 Phase C — Prefetch Hit-Rate Metric Audit
 
-Analysis only, no new runs. Uses `results/phase2_compute.csv` (arm E,
+Analysis only, no new runs. Uses `results/data/synthetic-compute-phase-sweep.csv` (arm E,
 `--prefetch-depth 2 --prefetch-retention pinned`, the exact configuration
 Phase 2's Table 1 used for its D-vs-E byte comparison, n=3) and its
-retained `--fetch-trace` binary files, plus `results/phase4_consolidated.csv`
+retained `--fetch-trace` binary files, plus `results/data/synthetic-6arm-consolidated-sweep.csv`
 and its n=1 supplementary `--fetch-trace` files
 (`scratch/phase4supp_E_c{compute}_r{ratio}.fetchtrace`, already disclosed
-in `results/phase4_consolidated.md` as a backfill at n=1, not blended into
+in `experiments/09b-consolidated-6arm-sweep.md` as a backfill at n=1, not blended into
 Phase 4's n=3 medians). Script: `scratch/analyze_phaseC.py`.
 
 ## Why this audit
 
 Phase 2 found the prefetch hit rate **fell** with heavier compute in 14 of
 18 series, while arm E's `read_bytes` **improved** enough to beat arm D at
-r=0.5 and r=0.75 (`results/phase2_compute.md`, expectations 2 and 4). The
+r=0.5 and r=0.75 (`experiments/08-compute-phase.md`, expectations 2 and 4). The
 hit rate is a post-hoc proxy (a prefetch counts as a hit if no later fetch
 event exists for that `chunk_id` before the run ends — a chunk prefetched
 twice scores one miss and one hit regardless of whether either fetch was
@@ -29,7 +29,7 @@ reducing total waste even at a worse per-prefetch hit rate.
 
 Before trusting the `--fetch-trace` binary breakdown, checked it against
 the CSV's own accounting, summed across n=3 reps (matching
-`phase2_compute.md`'s own Table 2 convention for "n prefetches" — verified
+`experiments/08-compute-phase.md`'s own Table 2 convention for "n prefetches" — verified
 directly: `37+36+38=111` reproduces its `0.25/depth=2/pinned/compute=0`
 cell exactly). Trace-derived prefetch counts matched the CSV's
 `prefetches` sum **exactly** at all 9 (ratio, compute) Phase 2 cells
@@ -122,7 +122,7 @@ resolved here. No alternative mechanism is proposed.**
 ## Final check
 
 - No number estimated or inferred — every value is a direct sum/read from
-  `results/phase2_compute.csv` and `results/phase4_consolidated.csv`, or a
+  `results/data/synthetic-compute-phase-sweep.csv` and `results/data/synthetic-6arm-consolidated-sweep.csv`, or a
   direct computation over retained `--fetch-trace` binary files
   (`scratch/analyze_phaseC.py`), cross-validated against the CSV's own
   `prefetches` field (exact match at all 9 Phase 2 cells).
