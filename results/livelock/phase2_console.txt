@@ -1,0 +1,146 @@
+=== fresh start 2026-08-29T09:44:06Z ===
+=== machine exclusivity (before) ===
+ 09:44:06 up 11:57,  1 user,  load average: 0.11, 0.16, 0.13
+WARNING other workload
+det cell1 rep1 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell1 rep2 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell1 rep3 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell1 rep4 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell1 rep5 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell2 rep1 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell2 rep2 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell2 rep3 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell2 rep4 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell2 rep5 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell3 rep1 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell3 rep2 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell3 rep3 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell3 rep4 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell3 rep5 rc=0 absent_handled=48 evictions=40 pbf=6442450944 signal_mode=post
+det cell4 rep1 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell4 rep2 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell4 rep3 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell4 rep4 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell4 rep5 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell5 rep1 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell5 rep2 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell5 rep3 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell5 rep4 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell5 rep5 rc=0 absent_handled=50 evictions=42 pbf=6710886400 signal_mode=post
+det cell6 rep1 rc=0 absent_handled=768 evictions=640 pbf=6442450944 signal_mode=post
+det cell6 rep2 rc=0 absent_handled=768 evictions=640 pbf=6442450944 signal_mode=post
+det cell6 rep3 rc=0 absent_handled=768 evictions=640 pbf=6442450944 signal_mode=post
+det cell6 rep4 rc=0 absent_handled=768 evictions=640 pbf=6442450944 signal_mode=post
+det cell6 rep5 rc=0 absent_handled=768 evictions=640 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.25 c=0 rep1 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.25 c=0 rep2 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.25 c=0 rep3 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.25 c=400000 rep1 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.25 c=400000 rep2 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.25 c=400000 rep3 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.5 c=0 rep1 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.5 c=0 rep2 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.5 c=0 rep3 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.5 c=400000 rep1 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.5 c=400000 rep2 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.5 c=400000 rep3 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.75 c=0 rep1 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.75 c=0 rep2 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.75 c=0 rep3 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.75 c=400000 rep1 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.75 c=400000 rep2 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=8388608 r=0.75 c=400000 rep3 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.25 c=0 rep1 rc=0 absent_handled=70 pbf=9395240960 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.25 c=0 rep2 rc=0 absent_handled=70 pbf=9395240960 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.25 c=0 rep3 rc=0 absent_handled=70 pbf=9395240960 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.25 c=400000 rep1 rc=0 absent_handled=70 pbf=9395240960 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.25 c=400000 rep2 rc=0 absent_handled=70 pbf=9395240960 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.25 c=400000 rep3 rc=0 absent_handled=70 pbf=9395240960 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.5 c=0 rep1 rc=0 absent_handled=50 pbf=6710886400 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.5 c=0 rep2 rc=0 absent_handled=50 pbf=6710886400 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.5 c=0 rep3 rc=0 absent_handled=50 pbf=6710886400 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.5 c=400000 rep1 rc=0 absent_handled=50 pbf=6710886400 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.5 c=400000 rep2 rc=0 absent_handled=50 pbf=6710886400 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.5 c=400000 rep3 rc=0 absent_handled=50 pbf=6710886400 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.75 c=0 rep1 rc=0 absent_handled=32 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.75 c=0 rep2 rc=0 absent_handled=32 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.75 c=0 rep3 rc=0 absent_handled=32 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.75 c=400000 rep1 rc=0 absent_handled=32 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.75 c=400000 rep2 rc=0 absent_handled=32 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=off cs=134217728 r=0.75 c=400000 rep3 rc=0 absent_handled=32 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.25 c=0 rep1 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.25 c=0 rep2 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.25 c=0 rep3 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.25 c=400000 rep1 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.25 c=400000 rep2 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.25 c=400000 rep3 rc=0 absent_handled=1024 pbf=8589934592 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.5 c=0 rep1 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.5 c=0 rep2 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.5 c=0 rep3 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.5 c=400000 rep1 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.5 c=400000 rep2 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.5 c=400000 rep3 rc=0 absent_handled=768 pbf=6442450944 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.75 c=0 rep1 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.75 c=0 rep2 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.75 c=0 rep3 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.75 c=400000 rep1 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.75 c=400000 rep2 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=on cs=8388608 r=0.75 c=400000 rep3 rc=0 absent_handled=512 pbf=4294967296 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.25 c=0 rep1 rc=0 absent_handled=80 pbf=10737418240 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.25 c=0 rep2 rc=0 absent_handled=80 pbf=10737418240 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.25 c=0 rep3 rc=0 absent_handled=80 pbf=10737418240 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.25 c=400000 rep1 rc=0 absent_handled=80 pbf=10737418240 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.25 c=400000 rep2 rc=0 absent_handled=80 pbf=10737418240 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.25 c=400000 rep3 rc=0 absent_handled=80 pbf=10737418240 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.5 c=0 rep1 rc=0 absent_handled=56 pbf=7516192768 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.5 c=0 rep2 rc=0 absent_handled=56 pbf=7516192768 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.5 c=0 rep3 rc=0 absent_handled=56 pbf=7516192768 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.5 c=400000 rep1 rc=0 absent_handled=56 pbf=7516192768 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.5 c=400000 rep2 rc=0 absent_handled=56 pbf=7516192768 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.5 c=400000 rep3 rc=0 absent_handled=56 pbf=7516192768 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.75 c=0 rep1 rc=0 absent_handled=36 pbf=4831838208 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.75 c=0 rep2 rc=0 absent_handled=36 pbf=4831838208 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.75 c=0 rep3 rc=0 absent_handled=36 pbf=4831838208 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.75 c=400000 rep1 rc=0 absent_handled=36 pbf=4831838208 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.75 c=400000 rep2 rc=0 absent_handled=36 pbf=4831838208 signal_mode=post
+sw layer_order_declared protect=on cs=134217728 r=0.75 c=400000 rep3 rc=0 absent_handled=36 pbf=4831838208 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.25 c=0 rep1 rc=0 absent_handled=1093 pbf=9168748544 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.25 c=0 rep2 rc=0 absent_handled=1089 pbf=9135194112 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.25 c=0 rep3 rc=0 absent_handled=1090 pbf=9143582720 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.25 c=400000 rep1 rc=0 absent_handled=1400 pbf=11744051200 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.25 c=400000 rep2 rc=0 absent_handled=1364 pbf=11442061312 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.25 c=400000 rep3 rc=0 absent_handled=1372 pbf=11509170176 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.5 c=0 rep1 rc=0 absent_handled=901 pbf=7558135808 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.5 c=0 rep2 rc=0 absent_handled=897 pbf=7524581376 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.5 c=0 rep3 rc=0 absent_handled=897 pbf=7524581376 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.5 c=400000 rep1 rc=0 absent_handled=1083 pbf=9084862464 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.5 c=400000 rep2 rc=0 absent_handled=1089 pbf=9135194112 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.5 c=400000 rep3 rc=0 absent_handled=1090 pbf=9143582720 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.75 c=0 rep1 rc=0 absent_handled=641 pbf=5377097728 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.75 c=0 rep2 rc=0 absent_handled=641 pbf=5377097728 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.75 c=0 rep3 rc=0 absent_handled=643 pbf=5393874944 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.75 c=400000 rep1 rc=0 absent_handled=664 pbf=5570035712 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.75 c=400000 rep2 rc=0 absent_handled=673 pbf=5645533184 signal_mode=post
+sw layer_order_learned protect=off cs=8388608 r=0.75 c=400000 rep3 rc=0 absent_handled=685 pbf=5746196480 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.25 c=0 rep1 rc=0 absent_handled=69 pbf=9261023232 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.25 c=0 rep2 rc=0 absent_handled=69 pbf=9261023232 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.25 c=0 rep3 rc=0 absent_handled=69 pbf=9261023232 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.25 c=400000 rep1 rc=0 absent_handled=100 pbf=13421772800 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.25 c=400000 rep2 rc=0 absent_handled=102 pbf=13690208256 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.25 c=400000 rep3 rc=0 absent_handled=100 pbf=13421772800 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.5 c=0 rep1 rc=0 absent_handled=57 pbf=7650410496 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.5 c=0 rep2 rc=0 absent_handled=57 pbf=7650410496 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.5 c=0 rep3 rc=0 absent_handled=57 pbf=7650410496 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.5 c=400000 rep1 rc=0 absent_handled=79 pbf=10603200512 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.5 c=400000 rep2 rc=0 absent_handled=76 pbf=10200547328 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.5 c=400000 rep3 rc=0 absent_handled=69 pbf=9261023232 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.75 c=0 rep1 rc=0 absent_handled=41 pbf=5502926848 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.75 c=0 rep2 rc=0 absent_handled=41 pbf=5502926848 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.75 c=0 rep3 rc=0 absent_handled=41 pbf=5502926848 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.75 c=400000 rep1 rc=0 absent_handled=56 pbf=7516192768 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.75 c=400000 rep2 rc=0 absent_handled=56 pbf=7516192768 signal_mode=post
+sw layer_order_learned protect=off cs=134217728 r=0.75 c=400000 rep3 rc=0 absent_handled=55 pbf=7381975040 signal_mode=post
+
+=== machine exclusivity (after) ===
+ 09:56:58 up 12:09,  1 user,  load average: 1.73, 1.10, 0.70
+=== Phase 2 complete 2026-08-29T09:56:58Z: /root/residctl/results/livelock/phase2_determinism.csv / /root/residctl/results/livelock/phase2_sweep.csv ===
