@@ -100,6 +100,18 @@ static void load_config(void) {
 #define GRP_OUTNORM (-3)     // output_norm.weight
 #define GRP_OTHER   (-4)     // rope_freqs etc.
 
+// Human-readable label for a chunk group code (layer N or GRP_*). Buffer is
+// static -- one caller at a time (diagnostic / abort paths only).
+static const char *chunk_group_label(int64_t gc) {
+    static char lb[32];
+    if (gc >= 0)                 { snprintf(lb, sizeof lb, "L%lld", (long long)gc); return lb; }
+    if (gc == GRP_HEADER)  return "header";
+    if (gc == GRP_EMBD)    return "token_embd";
+    if (gc == GRP_OUTPUT)  return "output";
+    if (gc == GRP_OUTNORM) return "output_norm";
+    return "other";
+}
+
 typedef struct {
     char     name[128];
     uint64_t file_off;
@@ -262,6 +274,13 @@ static pthread_t    g_pager_thread;
 static volatile sig_atomic_t g_stop;
 static int          g_started;
 static uint64_t     g_notify_seq;
+// LIVELOCK FIX Phase 0b: per-chunk consumption-signal count + a one-shot audit.
+// A node-name mismatch in wp2_gen.cpp:eval_cb() (as found in Phase 0 for
+// token_embd) leaves a chunk the workload really consumes with zero signals,
+// so the declared policy ranks it far-future and thrashes it -- silently.
+// After two full declared passes we assert every declared chunk got a signal.
+static uint32_t    *g_chunk_notify_count;
+static int          g_notify_audit_done;
 static fetch_trace_t  *g_fetchtrace;   // FINAL SESSION Phase 3
 static policy_trace_t *g_policytrace;  // FINAL SESSION Phase 3
 
@@ -345,6 +364,8 @@ void *residctl_llama_mmap(int llama_fd, size_t file_size) {
 
     region_startup(&g_r, &cfg, &g_manifest);
 
+    g_chunk_notify_count = calloc(g_r.n_chunks, sizeof(uint32_t)); // Phase 0b audit
+
     if      (!strcmp(g_policy_name, "lru"))
         g_policy = policy_lru_create();
     else if (!strcmp(g_policy_name, "layer_order_learned"))
@@ -397,12 +418,42 @@ void *residctl_llama_mmap(int llama_fd, size_t file_size) {
     return g_r.map_a;
 }
 
+// LIVELOCK FIX Phase 0b: one-shot audit -- after >= 2 full declared passes,
+// every chunk in the declared sequence must have received at least one
+// consumption signal. A zero means eval_cb()'s node-name match for that
+// chunk's role is broken (the Phase 0 finding for token_embd). Abort loudly
+// with the chunk id AND its role label rather than degrade to silent thrash.
+static void notify_audit_maybe(void) {
+    if (g_notify_audit_done || !g_chunk_notify_count || g_declared_len == 0) return;
+    if (g_notify_seq < (uint64_t)g_declared_len * 2) return;
+    g_notify_audit_done = 1;
+    uint32_t missing = 0;
+    for (uint32_t i = 0; i < g_declared_len; i++) {
+        uint32_t ci = g_declared_seq[i];
+        if (ci >= g_r.n_chunks || g_chunk_notify_count[ci] != 0) continue;
+        missing++;
+        fprintf(stderr,
+            "residctl_llama: FATAL -- declared chunk %u (%s) received 0 consumption signals "
+            "after %llu notifies (>= 2 full declared passes). The workload consumes this chunk "
+            "but wp2_gen.cpp:eval_cb() never signals it (node-name mismatch) -- the declared "
+            "policy would treat it as far-future and thrash it. Aborting rather than measuring "
+            "a silently-degraded run.\n",
+            ci, chunk_group_label(g_chunk_group[ci]), (unsigned long long)g_notify_seq);
+    }
+    if (missing) abort();
+    fprintf(stderr, "residctl_llama: consumption-signal audit OK -- all %u declared chunks "
+            "signalled within 2 passes (%llu notifies)\n",
+            g_declared_len, (unsigned long long)g_notify_seq);
+}
+
 static void notify_chunk(uint32_t c) {
     if (c == 0xFFFFFFFFu || c >= g_r.n_chunks) return;
     pager_notify_access(&g_r, &g_r.chunks[c]);
     g_notify_seq++;
+    if (g_chunk_notify_count) g_chunk_notify_count[c]++;
     if (g_reftrace)
         trace_record(g_reftrace, g_notify_seq, c, TRACE_NA, TRACE_NA);
+    notify_audit_maybe();
 }
 
 void residctl_llama_notify_layer(int layer) {
@@ -439,15 +490,7 @@ void residctl_llama_write_inventory(const char *path) {
     }
     fprintf(f, "\n## chunk table (idx, region_off, len, group)\n");
     for (uint32_t c = 0; c < g_n_specs; c++) {
-        const char *g;
-        char lb[16];
-        int64_t gc = g_chunk_group[c];
-        if (gc >= 0) { snprintf(lb, sizeof lb, "L%lld", (long long)gc); g = lb; }
-        else if (gc == GRP_HEADER)  g = "header";
-        else if (gc == GRP_EMBD)    g = "token_embd";
-        else if (gc == GRP_OUTPUT)  g = "output";
-        else if (gc == GRP_OUTNORM) g = "output_norm";
-        else                        g = "other";
+        const char *g = chunk_group_label(g_chunk_group[c]);
         fprintf(f, "%3u  off=%12llu  len=%11llu  %s\n", c,
                 (unsigned long long)g_specs[c].region_off, (unsigned long long)g_specs[c].len, g);
     }

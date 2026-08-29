@@ -57,7 +57,14 @@ static bool eval_cb(struct ggml_tensor * t, bool ask, void * ud) {
             st->transitions++;
             residctl_llama_notify_layer(layer);
         }
-    } else if (!strcmp(nm, "inp_embd")) {
+    } else if (!strcmp(nm, "inp_embd") || !strcmp(nm, "embd")) {
+        // LIVELOCK FIX Phase 0b (4th defect): the token-embedding node is
+        // "inp_embd" in some llama.cpp versions and "embd" in this one (the
+        // ggml_get_rows(token_embd, inp_tokens) result; "inp_embd" is only
+        // cb()'d onto the vector-embedding input leaf, which the eval callback
+        // never visits on the token path). Match both, or token_embd.weight
+        // gets no consumption signal and the declared policy thrashes it.
+        // Verified: results/livelock/phase0_cursor_diagnostic.md.
         st->last_layer = -1;
         residctl_llama_notify_role(0);
     } else if (!strcmp(nm, "result_norm")) {

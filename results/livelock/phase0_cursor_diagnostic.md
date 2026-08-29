@@ -247,6 +247,47 @@ script, never in an inline command. The existing `run_final_phase*.sh` and this
 session's `livelock_phase0.sh` are on-disk and safe. Also logged in
 `results/livelock/BLOCKERS.md`.
 
+---
+
+## Phase 0b — RESOLVED (fourth fix + audit)
+
+User authorised option (a). Applied:
+
+1. **`wp2_gen.cpp:eval_cb()`** — role-0 match is now
+   `!strcmp(nm, "inp_embd") || !strcmp(nm, "embd")`. Callback-pass timing
+   unchanged for now (still the `eval`/post pass); Defect 2 moves it to the
+   `ask`/pre pass in Phase 1.
+
+2. **`residctl_llama.c`** — a one-shot **consumption-signal audit**. Per-chunk
+   notify counters (`g_chunk_notify_count`); after `g_notify_seq >=
+   2 × g_declared_len` (two full declared passes), every chunk in
+   `g_declared_seq` with a zero count is printed by **id and role label** and
+   the process `abort()`s: *"declared chunk N (token_embd) received 0
+   consumption signals … Aborting rather than measuring a silently-degraded
+   run."* A silent name mismatch can no longer degrade to unnoticed thrash.
+   The `token_embd`/`output`/`output_norm`/`L%d` label logic is factored into
+   `chunk_group_label()`, shared with `residctl_llama_write_inventory()`.
+
+**Re-run of the Phase 0 diagnostic (`livelock_phase0.sh`, same config):**
+
+| check | before 0b | after 0b |
+|---|---|---|
+| notified refs / 8 tokens | 312 (= 8 × 39) | **320 (= 8 × 40)** |
+| declared chunks with 0 signals | `2 (token_embd)` | **none** |
+| notified order vs declared | order OK, mapping incomplete | **complete, in declared order, once/token** |
+| cursor: wraps / non-wrap jumps (8 tokens) | 7 / 0 | 7 / 0 |
+| startup audit | n/a | `audit OK -- all 40 declared chunks signalled within 2 passes (80 notifies)` |
+| GATE verdict | FAIL | **PASS** |
+
+**Audit negative test** (`audit_negtest.sh` — temporarily reverts the `embd`
+match, rebuilds, runs, restores): wp2_gen exits 134 (SIGABRT) with
+`FATAL -- declared chunk 2 (token_embd) received 0 consumption signals`. The
+assertion bites; it is not a no-op.
+
+Proceeding to Phase 1 (Defects 1–3).
+
+---
+
 ## Machine state
 
 Load average 0.00 → 0.66 (own run) → settled. No foreign workload before or
