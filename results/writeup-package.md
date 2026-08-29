@@ -3,6 +3,12 @@
 The project stops measuring after this session. This file is the single
 reference for the writeup. Every number below traces to a named cell.
 
+> **Status: frozen at the LIVELOCK FIX session.** This is an assembly kit for an
+> external writeup, not a living document. Where it overlaps with
+> [`findings.md`](findings.md), [`claims.md`](claims.md), and
+> [`superseded.md`](superseded.md), those are authoritative — they are what gets
+> maintained. If a number here disagrees with them, they win.
+
 ---
 
 ## 1. The abstract's numbers (with source cell)

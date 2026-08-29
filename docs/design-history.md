@@ -13,6 +13,11 @@ and a deep-dive on the last decision (consumption-signal timing).
 The original `MECHANISM_SPEC.md` was written against the feasibility spike.
 Fourteen amendments followed, each forced by a measurement.
 
+Section numbers in the older experiment records (`MECHANISM_SPEC.md §5`, `§10`,
+`§11`, `§13`, …) refer to that archived spec, not to any section of this file or
+of `02-design.md`. The table below is the current, authoritative home for the
+amendment reasoning.
+
 | # | area | what changed | why | experiment |
 |---|---|---|---|---|
 | **A-1** | trace / OPT | the reference trace is workload-authored (`TRACE_TYPE_REFERENCE`), never the handler's fault trace; the header distinguishes them; the solver aborts on a fault trace | V1's OPT values fell *below* the provable cyclic floor — the handler's own trace is circular input to Belady | [`02`](../experiments/02-first-harness-superseded.md), [`03`](../experiments/03-corrected-harness.md) |
@@ -30,9 +35,11 @@ Fourteen amendments followed, each forced by a measurement.
 | **A-13** | handler | every `CHUNK_FETCHING → ABSENT` drop path pairs the transition with `UFFDIO_WAKE` (`pager_abandon_fetch()`, 4 sites); a FETCHING-state watchdog in the never-blocking dispatch loop (`--fetching-timeout-ms`, default 30 000, `stat_fetching_timeout`) reclaims a genuinely orphaned slot via `trylock` | the 7th concurrency-class issue — a deduped faulter left blocked forever when a drop path forgot the wake | [`17b`](../experiments/17b-livelock-diagnosis.md) |
 | **A-14** | policy / integration | four application-side fixes, no pager-mechanism change: (1) `lo_declared_dist()` scan origin is **signal-mode-aware** (`d` starts at 0 pre-consumption, 1 post); (2) the eval callback fires on the **pre-compute** pass and matches the `"embd"` graph node; (3) a startup audit aborts if any declared chunk gets zero consumption signals in the first two decode passes; (4) a declined prefetch backs off 100 ms per chunk. **Default change:** `residctl_llama.c` `protect_current` → **off** (both paths now off) | the arm-E "livelock" (mislabelled three times — over-constrained budget → hard deadlock → livelock from two correct mechanisms) was really an off-by-one distance origin fed by a cursor that lagged a full layer, with `token_embd` unsignalled | [`18`](../experiments/18-signal-audit.md), [`19`](../experiments/19-livelock-fix.md), [`20`](../experiments/20-livelock-synthetic-recheck.md), [`21`](../experiments/21-livelock-real-model.md) |
 
-The original `MECHANISM_SPEC.md` build order and cut ladder are preserved in the
-archived spec (`/root/residctl-archive/` is not on GitHub; the spike report it
-was built from lives in `/root/spike/results/`).
+The original `MECHANISM_SPEC.md` in full — build order, cut ladder, and the
+long-form argument for each amendment — is archived verbatim at
+`/root/residctl-archive/rewritten-sources/MECHANISM_SPEC.md` (the archive is not
+on GitHub; see `MANIFEST.csv` there for the sha256). The spike report it was
+built from lives in `/root/spike/results/`.
 
 ---
 

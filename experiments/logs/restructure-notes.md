@@ -2,7 +2,9 @@
 
 2026-08. Renamed every file by content, rewrote the synthesis documents,
 archived process noise out of git. Safety tag `pre-restructure` was pushed
-before the inventory pass. 18 commits, `86aa892` … (this file).
+before the inventory pass. ~20 checkpoint commits from `86aa892`, plus a
+follow-up pass that archived two source documents that had been removed without
+being copied first (see "Archived", below).
 
 ## What moved where
 
@@ -28,8 +30,8 @@ New: `README.md`, `docs/01-problem.md`, `docs/03-methodology.md`,
 
 ## Archived (not on GitHub) — `/root/residctl-archive/`
 
-54 files, sha256-verified against `MANIFEST.csv`, then `git rm`'d. Process noise
-only:
+56 files, sha256-verified against `MANIFEST.csv`, then `git rm`'d. Process noise,
+plus the two rewritten-from source documents kept verbatim:
 
 | category | count | substance preserved in |
 |---|---|---|
@@ -39,6 +41,15 @@ only:
 | `session-summaries/` — wrap-ups + blocker trackers | 9 | `project-log.md`, `05-limitations.md`, `superseded.md` |
 | `source-snapshots/` — `src/` copies committed into `results/overnight/` | 12 | `src/` is authoritative |
 | `census/` — the 6.8 MB raw all-files inventory | 1 | not load-bearing |
+| `rewritten-sources/` — `MECHANISM_SPEC.md`, `PROJECT_STATE.md` full text | 2 | rewritten into `docs/02-design.md` + `design-history.md` / split into `findings.md` + `superseded.md` + `05-limitations.md` — but the long-form amendment arguments only survive in full here |
+
+The `rewritten-sources/` pair was added in a follow-up pass: the first restructure
+run `git rm`'d both after their successors were committed, without first copying
+them to the archive (the spec's "copy + hash-verify before delete" rule). They
+were recovered from `git show <commit>~1:<path>` — byte-identical to what was
+removed — archived, and added to `MANIFEST.csv` (integrity re-check: 56/56).
+`docs/design-history.md` now states where the full spec lives and that older
+`MECHANISM_SPEC.md §N` section citations resolve against it.
 
 ## Verification — all seven checks
 
@@ -49,7 +60,7 @@ only:
 | 3 | no dangling citations | **PASS** for `results/claims.md` + `results/findings.md` (`experiments/logs/restructure/check_refs.py`); 14 residual warnings, all in frozen experiment records or forward-refs to this file |
 | 4 | fresh-clone test (`git clone /root/residctl /tmp/clone-test`) | **PASS** — `make` succeeds, `docs/06-reproduce.md` present, no tracked file > 5 MB (the 6.8 MB census file was archived to fix this), 331 files / ~14 MB |
 | 5 | read-the-README test | **PASS** — from `README.md` alone a reader gets: what residctl is, the headline (kernel flat / pager 2.5×, LRU ~100 % miss, D/OPT 1.08–1.13, byte-identical gate), the reading order, and where the evidence is |
-| 6 | archive integrity | **PASS** — 54/54 files match their Phase 2 sha256 |
+| 6 | archive integrity | **PASS** — 56/56 files match their recorded sha256 (54 from Phase 2 + the 2 rewritten-sources added in the follow-up pass) |
 | 7 | repo size | tracked content 13.9 MB (was ~5 MB pre-restructure + the reports that stayed); `.git` 12 MB; working tree 5.0 GB is entirely untracked regenerables (model, pattern files, `third_party/llama.cpp/`), absent from any clone |
 
 ## Deviations from the restructure spec
